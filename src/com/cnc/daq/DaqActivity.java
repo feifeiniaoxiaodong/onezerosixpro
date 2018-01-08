@@ -48,8 +48,7 @@ public class DaqActivity extends Activity implements View.OnClickListener{
 		
 		mHandler=new MsgDealHandler(DaqActivity.this);//创建Handler
 		
-		startDaqService();	//开启服务
-		
+		startDaqService();	//开启服务	
 	}
 	
 	
