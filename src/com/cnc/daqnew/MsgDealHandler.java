@@ -116,7 +116,7 @@ public class MsgDealHandler extends Handler {
          	DataRun dataRun = (DataRun)msg.obj;
          	count = msg.arg1;
          	showRunInfo(count, dataRun);  
-         	//下面这一条是测试代码
+         	
          	DBService.getInstanceDBService().saveRunData(dataRun);//直接存入数据库
             break; 
          case HandleMsgTypeMcro.MSG_TEST://测试信息

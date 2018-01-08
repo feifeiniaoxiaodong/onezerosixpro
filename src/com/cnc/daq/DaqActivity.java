@@ -26,7 +26,7 @@ import android.widget.Toast;
 public class DaqActivity extends Activity implements View.OnClickListener{
 	private final static String TAG="DaqActivity...";
 	
-	Handler  mHandler=null;
+	private static Handler  mHandler=null;
 	private  DataService.DataDealBinder  dataDealBinder =null;//绑定Service的Binder
 	private  DataService  dataService=null;  //数据管理服务
 	TextView tvDelayTime=null;
@@ -50,8 +50,6 @@ public class DaqActivity extends Activity implements View.OnClickListener{
 		
 		startDaqService();	//开启服务	
 	}
-	
-	
 	
 	@Override
 	public void onClick(View v) {
@@ -163,6 +161,9 @@ public class DaqActivity extends Activity implements View.OnClickListener{
     	dataDealBinder.stopService();   	
     }
     
+    public static Handler getmHandler() {
+		return mHandler;
+	}
    
 
 }

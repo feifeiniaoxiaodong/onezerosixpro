@@ -30,7 +30,7 @@ import com.cnc.utils.RegLock;
  * @author wei
  *
  */
-public class DataCollectThread implements Runnable{
+public class HzDataCollectThread implements Runnable{
 	
 	private final String TAG="DataCollectThread...";
 	public int Client = -1;	   //连接状态标识， -1标识未连接
@@ -52,7 +52,7 @@ public class DataCollectThread implements Runnable{
         System.loadLibrary("hzHncAPI");  
     }*/
 
-	public DataCollectThread(Handler handler,String pathcnc) {
+	public HzDataCollectThread(Handler handler,String pathcnc) {
 		this.daqActivityHandler=handler;	
 		this.pathcnc=pathcnc;
 	}
@@ -175,7 +175,6 @@ public class DataCollectThread implements Runnable{
 		}
 	}//end daq()函数
 	
-
 	/**
 	 * 获取properties文件中值
 	 * @param key

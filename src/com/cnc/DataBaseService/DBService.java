@@ -39,7 +39,7 @@ public class DBService{
 //					dbService=new DBService(MyApplication.getContext());
 //				}				
 //			}			
-//		}
+//}
 		return dbService;		
 	}
 	

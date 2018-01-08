@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 
 import com.cnc.DataBaseService.DBService;
 import com.cnc.daq.DaqData;
-import com.example.wei.gsknetclient_studio.Caijixinxi;
+import com.example.wei.gsknetclient_studio.GSKDataCollectThread;
 
 
 
@@ -26,7 +26,7 @@ public class DataService extends Service {
 
 	private static final String TAG="DataService...";
 //	private DBService   dbServicenew=null;   //数据库服务对象
-	private Handler     daqActivityHandler=null; //UI线程的Handler
+//	private Handler     daqActivityHandler=null; //UI线程的Handler
 	
 	private   final IBinder  dataDealBinder=new DataDealBinder();
 
@@ -84,7 +84,7 @@ public class DataService extends Service {
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-//		restartService();//重启服务，保证服务不被关掉		
+		restartService();//重启服务，保证服务不被关掉		
 	}
 	
 	//重启服务
@@ -95,6 +95,7 @@ public class DataService extends Service {
 		Intent service = new Intent(crt,DataService.class);//显式意图
 		crt.startService(service);//Intent激活组件(Service)		
 	}
+	
 	
 	
 	/**
@@ -110,7 +111,7 @@ public class DataService extends Service {
 		      return DataService.this;
 		 }
 		 
-		 Caijixinxi  gsthread=null;  //广数数据采集线程对象
+		 GSKDataCollectThread  gsthread=null;  //广数数据采集线程对象
 		 
 		//开启数据工作线程
 		public void startDataThread(Handler handler){
@@ -118,7 +119,7 @@ public class DataService extends Service {
 			exec=Executors.newCachedThreadPool();	
 		
 			//开启数据采集线程
-			DataCollectThread dataCollectThread=new DataCollectThread(handler,HandleMsgTypeMcro.HUAZHONG1_5);
+			HzDataCollectThread dataCollectThread=new HzDataCollectThread(handler,HandleMsgTypeMcro.HUAZHONG1_5);
 			exec.execute(dataCollectThread);			
 			Log.d(TAG, "DataCollectThread...开启");	
 			

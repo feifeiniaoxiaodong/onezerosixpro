@@ -31,14 +31,10 @@ import android.util.Log;
  * Created by wei on 2017/4/15.
  */
 
-public class Caijixinxi extends Thread{
-
-   
+public class GSKDataCollectThread extends Thread{
+  
     //线程循环执行标志，改为false时，线程退出循环，线程结束运行
-    private volatile  boolean  threadflag=true;
-
-
-    
+    private volatile  boolean  threadflag=true;  
 /*    static {
         System.loadLibrary("gsknetw-lib");
     }
@@ -56,16 +52,15 @@ public class Caijixinxi extends Thread{
 	int   count = 1;//存储运行信息的id,标识这是第几次采集信息
 	
 	private Handler  daqActivityHandler=null;
-		
-	
+			
 	String machine_SN=null;//数控系统ID
 
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
     
-    public Caijixinxi(String sname){
+    public GSKDataCollectThread(String sname){
         super(sname);
     }
-    public Caijixinxi(String sname,String ip,Handler handler){    	
+    public GSKDataCollectThread(String sname,String ip,Handler handler){    	
         super(sname);
         ipaddr=ip;
         daqActivityHandler=handler;
@@ -99,7 +94,7 @@ public class Caijixinxi extends Thread{
                 if(res<0){
                     Log.i(TAG, "连接到机床失败");
                     try {
-						Thread.sleep(1000*60); //连接失败，过一分钟再连
+						Thread.sleep(1000*10); //连接失败，过一分钟再连
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
