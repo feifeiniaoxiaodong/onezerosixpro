@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.cnc.daqnew.HandleMsgTypeMcro;
+import com.cnc.daqnew.HzDataCollectThread;
 import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
 
@@ -36,6 +37,7 @@ public class MainActivity extends Activity {
 	Map<String, Runnable> threadmap=new HashMap<>();
 	//
 	String curHuazhongRun= null;
+	HzDataCollectThread hzDataCollectThread=null;
 	String curGaojingRun= null;
 	String curGskRun   = null;
 	
@@ -49,7 +51,7 @@ public class MainActivity extends Activity {
 		initViewMap();
 		setClickEven();
 		
-		itemHuazhong.getBtstart().setEnabled(false);
+//		itemHuazhong.getBtstart().setEnabled(false);
 
 	}
 	
@@ -273,15 +275,29 @@ public class MainActivity extends Activity {
 				
 				@Override
 				public void onClick(View v) {
-					itemHuazhong.getAlarm().setText("急停报警");
-					
+//					itemHuazhong.getAlarm().setText("急停报警");
+					String ip=HandleMsgTypeMcro.HUAZHONG1_1;
+					hzDataCollectThread=new HzDataCollectThread(ip);
+					curHuazhongRun=ip; 
+					Thread th=new Thread(hzDataCollectThread);
+					th.setName("huazhong");
+					th.start();
+					itemHuazhong.getBtstart().setEnabled(false);
+					itemHuazhong.getBtstop().setEnabled(true);
+	
 				}
 			});
 		itemHuazhong.getBtstop().setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				itemHuazhong.getAlarm().setText("1急停报警1");
+				if(hzDataCollectThread!=null){
+					hzDataCollectThread.stopCollect(); //关闭数据采集线程
+					curHuazhongRun=null;
+					hzDataCollectThread=null;
+					itemHuazhong.getBtstart().setEnabled(true);
+					itemHuazhong.getBtstop().setEnabled(false);
+				}
 				
 			}
 		});
@@ -303,8 +319,34 @@ public class MainActivity extends Activity {
 				
 				
 			}
-		});
+		});	
+		
+		
+	}
 	
+	
+	//开启华中线程
+	private void startHzThread(String ip){
+				
+		hzDataCollectThread=new HzDataCollectThread(ip);
+		curHuazhongRun=ip; 
+		Thread th=new Thread(hzDataCollectThread);
+		th.setName("huazhong");
+		th.start();
+		itemHuazhong.getBtstart().setEnabled(false);
+		itemHuazhong.getBtstop().setEnabled(true);
+	}
+	
+	//关闭华中线程
+	private void stopHzThread(){
+		
+		if(hzDataCollectThread!=null){
+			hzDataCollectThread.stopCollect(); //关闭数据采集线程
+			curHuazhongRun=null;
+			hzDataCollectThread=null;
+			itemHuazhong.getBtstart().setEnabled(true);
+			itemHuazhong.getBtstop().setEnabled(false);
+		}
 	}
 	
 }

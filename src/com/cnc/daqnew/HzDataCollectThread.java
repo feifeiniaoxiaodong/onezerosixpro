@@ -65,6 +65,10 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 	String machineIP = "192.168.188.113"; //机床的IP地址
 	int    machinePort = 21;			  //机床端口号
 	
+	public HzDataCollectThread(String ip){
+		this(ip,21);
+	}
+	
 	public HzDataCollectThread(String ip,int port){
 		this.delMsgHandler=DelMsgServie.getHandlerService();
 		this.daqActivityHandler=DaqActivity.getmHandler();

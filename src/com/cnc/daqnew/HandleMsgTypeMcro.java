@@ -18,11 +18,11 @@ public class HandleMsgTypeMcro {
 	    
 	    
 	    //机床的IP地址路径
-	    public static final String HUAZHONG1_1="cncip112";
-	    public static final String HUAZHONG1_2="cncip114";
-	    public static final String HUAZHONG1_3="cncip113";
-	    public static final String HUAZHONG1_4="cncip111";
-	    public static final String HUAZHONG1_5="cncip110";
+	    public static final String HUAZHONG1_1="192.168.188.112";
+	    public static final String HUAZHONG1_2="192.168.188.114";
+	    public static final String HUAZHONG1_3="192.168.188.113";
+	    public static final String HUAZHONG1_4="192.168.188.111";
+	    public static final String HUAZHONG1_5="192.168.188.110";
 	    
 	    
 	    //服务器地址
