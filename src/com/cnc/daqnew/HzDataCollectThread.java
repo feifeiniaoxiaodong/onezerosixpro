@@ -15,11 +15,14 @@ import android.util.Log;
 
 import com.cnc.daq.DaqActivity;
 import com.cnc.daq.DaqData;
+import com.cnc.daq.MainActivity;
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataLog;
 import com.cnc.domain.DataReg;
 import com.cnc.domain.DataRun;
 import com.cnc.domain.DataType;
+import com.cnc.domain.UiDataAlarmRun;
+import com.cnc.domain.UiDataNo;
 import com.cnc.huazhong.HncAPI;
 import com.cnc.huazhong.HncSystem;
 import com.cnc.netService.HncTools;
@@ -43,8 +46,10 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 	int   macChannel = 0;//机床的通道信息
 	int   count = 1;//存储运行信息的id,标识这是第几次采集信息
 	
+	
 	private Handler  daqActivityHandler=null,
 					 delMsgHandler =null;
+	private Handler  mainHander=null ;
 					
 	String tp = "HNC-818A";//数控系统型号
 	String machine_SN=null;//数控系统ID
@@ -63,6 +68,7 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 	public HzDataCollectThread(String ip,int port){
 		this.delMsgHandler=DelMsgServie.getHandlerService();
 		this.daqActivityHandler=DaqActivity.getmHandler();
+		mainHander=MainActivity.getMainActivityHandler();
 		machineIP=ip;
 		machinePort=port;		
 	}
@@ -129,65 +135,70 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 	 */
 	private void daq() 
 	{
-//		if(HncAPI.HNCNetIsConnect(Client) != 0) //每次数据采集时，都要测试机床是否处于连接状态
-//		{
-//			//如果没有连接上，这里要进行处理
-//			Client = -1;//这里必须要重新跳到初始化去
-//			Log.i(TAG, "未能连接");
-//		}
-//		else {	
+		
+		StringBuilder  sbalram=new StringBuilder();
+		sbalram.append("Alarm:");
+		
+		String strTime = formatter.format(new Date());//开始采集信息的各种事件
+		
+		if(!boolGetMacInfo)   //如果没有获得过机床的基本信息
 		{
-			String strTime = formatter.format(new Date());//开始采集信息的各种事件
-			
-			if(!boolGetMacInfo)   //如果没有获得过机床的基本信息
-			{
-				//注册信息
-				DataReg dataReg = HncTools.getMacInfo(Client); //获取机床的基本信息			
-				//机床ID
-				machine_SN=dataReg.getId();
+			//注册信息
+			DataReg dataReg = HncTools.getMacInfo(Client); //获取机床的基本信息			
+			//机床ID
+			machine_SN=dataReg.getId();
 //				DaqData.setCncid(machine_SN);
-				//得到通道号
-				macChannel = HncAPI.HNCSystemGetValueInt(HncSystem.HNC_SYS_ACTIVE_CHAN, Client);//机床的通道信息
-				dataReg.setTime(strTime);		//设置采集的时间戳
-				dataReg.setTp(tp);   			//数控系统型号
-				synchronized(RegLock.class){
-					DaqData.getListDataReg().add(dataReg);
-				}
+			//得到通道号
+			macChannel = HncAPI.HNCSystemGetValueInt(HncSystem.HNC_SYS_ACTIVE_CHAN, Client);//机床的通道信息
+			dataReg.setTime(strTime);		//设置采集的时间戳
+			dataReg.setTp(tp);   			//数控系统型号
+			synchronized(RegLock.class){
+				DaqData.getListDataReg().add(dataReg);
+			}
 
-				DataLog dataLog=new DataLog(machine_SN,0,0,strTime);//华中数控不提供“累计加工时间”和“累计运行时间”
-				synchronized(LogLock.class){
-					DaqData.getListDataLog().add(dataLog);
-				}
-				
-				boolGetMacInfo = true;//置为true，表明已经得到了机床基本信息
+			DataLog dataLog=new DataLog(machine_SN,0,0,strTime);//华中数控不提供“累计加工时间”和“累计运行时间”
+			synchronized(LogLock.class){
+				DaqData.getListDataLog().add(dataLog);
 			}
-			else//采集运行信息和报警信息
-			{						 
-				//采集报警信息
-				LinkedList<DataAlarm> listDataAlarm = HncTools.getAlarmData(Client);
-				for (DataAlarm dataAlarm : listDataAlarm) {
-					dataAlarm.setId(machine_SN);//设置数控系统ID
-					dataAlarm.setTime(strTime);//设置采集的时间戳
-				}
-				//如果采集到的报警信息不为零或者已有的报警信息不为零，那么就要对报警信息进行分析
-				//对报警信息进行处理,必须要判断报警信息的来到是发生报警还是解除报警，这个分析过程留到主线程中
-				if ((listDataAlarm.size() != 0)||(DaqData.getListDataAlarm().size() != 0)) 
-				{
-					sendMsg2Main(listDataAlarm, HandleMsgTypeMcro.MSG_ALRAM, count);
-				}		
-				
-				//采集运行信息
-				DataRun dataRun = HncTools.getDataRun(Client,macChannel);
-				dataRun.setId(machine_SN); //设置数控系统ID
-				dataRun.setTime(strTime); //加时间戳
-				sendMsg2Main(dataRun,HandleMsgTypeMcro.MSG_RUN,count);
-						
-				count++;//采集次数记录
-				if(count == Integer.MAX_VALUE)//达到最大值的时候记得清零
-					count = 1;
-				
-			}
+			
+			UiDataNo uiDataNo=new UiDataNo(getNoCnc(machineIP),machineIP,machine_SN , DaqData.getAndroidId());
+			sendMsg(mainHander,uiDataNo,HandleMsgTypeMcro.HUAZHONG_UINO,0,0); //发送消息到活动，显示IP地址信息
+			
+			
+			boolGetMacInfo = true;//置为true，表明已经得到了机床基本信息
 		}
+		else//采集运行信息和报警信息
+		{						 
+			//采集报警信息
+			LinkedList<DataAlarm> listDataAlarm = HncTools.getAlarmData(Client);
+			for (DataAlarm dataAlarm : listDataAlarm) {
+				dataAlarm.setId(machine_SN);//设置数控系统ID
+				dataAlarm.setTime(strTime);//设置采集的时间戳
+				sbalram.append(dataAlarm.getCtt()).append(":");
+			}
+			//如果采集到的报警信息不为零或者已有的报警信息不为零，那么就要对报警信息进行分析
+			//对报警信息进行处理,必须要判断报警信息的来到是发生报警还是解除报警，这个分析过程留到主线程中
+			if ((listDataAlarm.size() != 0)||(DaqData.getListDataAlarm().size() != 0)) 
+			{
+				sendMsg2Main(listDataAlarm, HandleMsgTypeMcro.MSG_ALRAM, count);
+			}		
+			
+			//采集运行信息
+			DataRun dataRun = HncTools.getDataRun(Client,macChannel);
+			dataRun.setId(machine_SN); //设置数控系统ID
+			dataRun.setTime(strTime); //加时间戳
+			sendMsg2Main(dataRun,HandleMsgTypeMcro.MSG_RUN,count);
+					
+			count++;//采集次数记录
+			if(count == Integer.MAX_VALUE)//达到最大值的时候记得清零
+				count = 1;
+			
+			//发送到主线程
+			UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
+			sendMsg(mainHander, uiDataAlarmRun, HandleMsgTypeMcro.HUAZHONG_UIALARM	, 0, 0);
+			
+		}
+		
 	}//end daq()函数
 	
 	/**
@@ -241,7 +252,7 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 	//发送消息，通用型
 	private void sendMsg(Handler handler,Object obj, int what, int arg1, int arg2) 
 	{
-		Message msg = Message.obtain();		
+		Message msg = Message.obtain();			
 		msg.what = what;
 		msg.obj = obj;
 		msg.arg1 = arg1;
@@ -259,5 +270,38 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 		// TODO Auto-generated method stub
 		  return threadflag;
 	}
+	
+	private String getNoCnc(String ip){
+		String NoCnc="1-1";
+		if(ip==null){
+			return null;
+		}
+		
+		String lastip= ip.substring(ip.lastIndexOf('.')+1);
+		int lastipint= Integer.valueOf(lastip);
+		
+		switch( lastipint){
+			case 112:
+				NoCnc="HUAZHONG1_1";
+			break;
+			case 114:
+				NoCnc="HUAZHONG1_2";
+			break;
+			case 113:
+				NoCnc="HUAZHONG1_3";
+			break;
+			case 111:
+				NoCnc="HUAZHONG1_4";
+			break;
+			case 110:
+				NoCnc="HUAZHONG1_5";
+			break;
+			default:{}
+		}
+		
+		return NoCnc;
+	}
+
+	
 
 }

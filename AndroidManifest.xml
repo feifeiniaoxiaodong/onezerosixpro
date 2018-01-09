@@ -54,7 +54,7 @@
         </activity>
         
         <activity android:name=".QuickStartActivity" > </activity>
-         <activity android:name="com.cnc.daq.mainActivity"></activity>
+         <activity android:name="com.cnc.daq.MainActivity"></activity>
        
     </application>
 

@@ -32,5 +32,17 @@ public class HandleMsgTypeMcro {
 	    
 	    public static final String  SERVICES_YANG="pathyang";
 	    
+	    
+	    //view
+	    public static final int   	HUAZHONG_UINO= 4001;
+	    public static final int   	HUAZHONG_UIALARM= 4002;
+	    public static final int   	GAOJING_UINO= 5001;
+	    public static final int   	GAOJING_UIALARM= 5002;
+	    public static final int   	GSK01= 6001;
+	    public static final int   	GSK02= 6002;
+	    public static final int   	GSK03= 6003;
+	    public static final int   	GSK04= 6004;
+	    public static final int   	GSK05= 6005;
+	    
 
 }

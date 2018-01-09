@@ -33,6 +33,12 @@ public class DelMsgServie extends Service {
 	//服务首次创建的时候调用
 	@Override
 	public void onCreate() {
+		
+		String androidId = "" + android.provider.Settings.Secure.getString(getContentResolver(),
+				android.provider.Settings.Secure.ANDROID_ID);						//得到androidID
+		DaqData.setAndroidId(androidId);
+		Log.d(TAG, "androidId::" + androidId);	
+		
 		//单独开启一个线程来处理Service Handler 消息
 		new Thread("MyHandlerThread"){
 			public void run() {

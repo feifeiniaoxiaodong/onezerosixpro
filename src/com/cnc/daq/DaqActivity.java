@@ -78,7 +78,7 @@ public class DaqActivity extends Activity implements View.OnClickListener{
 			case R.id.bt2:
 //				dataDealBinder.startDataThread(mHandler); //开启两个子线程
 				
-				Intent intent= new Intent(DaqActivity.this , mainActivity.class);
+				Intent intent= new Intent(DaqActivity.this , MainActivity.class);
 //				intent.putExtra("key", "wei");
 				startActivity(intent);
 				
