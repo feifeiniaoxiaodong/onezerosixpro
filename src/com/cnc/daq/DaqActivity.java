@@ -3,6 +3,7 @@ package com.cnc.daq;
 import com.cnc.daqnew.DataService;
 import com.cnc.daqnew.MsgDealHandler;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,15 +40,18 @@ public class DaqActivity extends Activity implements View.OnClickListener{
 //		setContentView(R.layout.activity_daq);//定义用户界面布局
 		setContentView(R.layout.daqactivity);//定义用户界面布局
 		
+		mHandler=new DaqActivityHandler();//创建该活动自己的Handler
+		
 		Button button = (Button)findViewById(R.id.mybtn); //开启数据采集按钮
 		Button bt2=     (Button)findViewById(R.id.bt2);    //按钮
+		bt2.setText("开启mainActivity");
 		tvDelayTime=(TextView)findViewById(R.id.delaytime);//文本框，延时时间
 		count_runinfo=(TextView)findViewById(R.id.count);
 		
 		button.setOnClickListener(this);
 		bt2.setOnClickListener(this);
 		
-		mHandler=new MsgDealHandler(DaqActivity.this);//创建Handler
+//		mHandler=new MsgDealHandler(DaqActivity.this);//创建Handler
 		
 		startDaqService();	//开启服务	
 	}
@@ -74,8 +78,8 @@ public class DaqActivity extends Activity implements View.OnClickListener{
 			case R.id.bt2:
 //				dataDealBinder.startDataThread(mHandler); //开启两个子线程
 				
-				Intent intent= new Intent(DaqActivity.this , QuickStartActivity.class);
-				intent.putExtra("key", "wei");
+				Intent intent= new Intent(DaqActivity.this , mainActivity.class);
+//				intent.putExtra("key", "wei");
 				startActivity(intent);
 				
 				break;
@@ -168,13 +172,13 @@ public class DaqActivity extends Activity implements View.OnClickListener{
     
     
     //DaqActivity handler
+    @SuppressLint("HandlerLeak") 
     class DaqActivityHandler extends Handler{
     	
     	@Override
     	public void handleMessage(Message msg) {
     		
-    	}
-    	
+    	}    	
     }
    
 

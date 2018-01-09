@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#2000" >
+    
+    <ScrollView 
+        android:id="@+id/scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:overScrollMode="never">
+        
+      <LinearLayout 
+           android:orientation="vertical"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:fitsSystemWindows="true">
+     
+           <TextView 
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:layout_marginTop="10dp"
+               android:layout_marginLeft="10dp"
+               android:text="华中数控"
+               android:textSize="20sp"/>
+           
+           <include  android:id="@+id/huazhong"
+                   layout="@layout/cncinfoitem" />
+           
+           <TextView 
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+                android:layout_marginTop="100dp"
+               android:layout_marginLeft="10dp"
+               android:text="沈阳高精数控"
+               android:textSize="20sp"/>
+           
+          <include  android:id="@+id/gaojing"
+                   layout="@layout/cncinfoitem" />
+          
+          <TextView 
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+                 android:layout_marginTop="100dp"
+               android:layout_marginLeft="10dp"
+               android:text="广州数控"
+               android:textSize="20sp"/>
+               
+          <include  android:id="@+id/gsk1"
+                   layout="@layout/cncinfoitem" />
+          <include  android:id="@+id/gsk2"
+                   layout="@layout/cncinfoitem" />
+          <include  android:id="@+id/gsk3"
+                   layout="@layout/cncinfoitem" />
+         <include  android:id="@+id/gsk4"
+                   layout="@layout/cncinfoitem" />
+         <include  android:id="@+id/gsk5"
+                   layout="@layout/cncinfoitem" />
+           "
+          
+      </LinearLayout>
+  
+    </ScrollView>
+
+
+</LinearLayout>

@@ -8,6 +8,9 @@
 package com.cnc.daq;
 
 public final class R {
+    public static final class array {
+        public static final int week=0x7f040000;
+    }
     public static final class attr {
         /** <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
 Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
@@ -108,7 +111,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int tab_textViewUnSelColor=0x7f010003;
     }
     public static final class color {
-        public static final int black_overlay=0x7f040000;
+        public static final int black_overlay=0x7f050000;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -118,8 +121,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          would include 7" and 10" devices in landscape (~960dp and ~1280dp respectively).
     
          */
-        public static final int activity_horizontal_margin=0x7f050000;
-        public static final int activity_vertical_margin=0x7f050001;
+        public static final int activity_horizontal_margin=0x7f060000;
+        public static final int activity_vertical_margin=0x7f060001;
     }
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
@@ -136,38 +139,57 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int tab05_unsel=0x7f02000b;
     }
     public static final class id {
-        public static final int action_settings=0x7f06000c;
-        public static final int bottom=0x7f060002;
-        public static final int bt2=0x7f060007;
-        public static final int count=0x7f060009;
-        public static final int delaytime=0x7f060008;
-        public static final int left=0x7f060003;
-        public static final int mybtn=0x7f060006;
-        public static final int right=0x7f060004;
-        public static final int tabView=0x7f06000b;
-        public static final int tabview_fragment_container=0x7f060001;
-        public static final int tabview_id=0x7f060000;
-        public static final int textview=0x7f06000a;
-        public static final int top=0x7f060005;
+        public static final int action_settings=0x7f07001d;
+        public static final int alarm=0x7f07000a;
+        public static final int bottom=0x7f070002;
+        public static final int bt2=0x7f070010;
+        public static final int btstart=0x7f07000d;
+        public static final int btstop=0x7f07000e;
+        public static final int count=0x7f070012;
+        public static final int delaytime=0x7f070011;
+        public static final int gaojing=0x7f070016;
+        public static final int gsk1=0x7f070017;
+        public static final int gsk2=0x7f070018;
+        public static final int gsk3=0x7f070019;
+        public static final int gsk4=0x7f07001a;
+        public static final int gsk5=0x7f07001b;
+        public static final int huazhong=0x7f070015;
+        public static final int idandroid=0x7f070009;
+        public static final int idcnc=0x7f070008;
+        public static final int ip=0x7f070007;
+        public static final int left=0x7f070003;
+        public static final int mybtn=0x7f07000f;
+        public static final int no=0x7f070006;
+        public static final int right=0x7f070004;
+        public static final int run=0x7f07000b;
+        public static final int scrollview=0x7f070014;
+        public static final int spinner=0x7f07000c;
+        public static final int tabView=0x7f07001c;
+        public static final int tabview_fragment_container=0x7f070001;
+        public static final int tabview_id=0x7f070000;
+        public static final int textview=0x7f070013;
+        public static final int top=0x7f070005;
     }
     public static final class layout {
-        public static final int daqactivity=0x7f030000;
-        public static final int fragmentmain=0x7f030001;
-        public static final int quickstartactivity=0x7f030002;
-        public static final int splashactivity=0x7f030003;
+        public static final int cncinfoitem=0x7f030000;
+        public static final int daqactivity=0x7f030001;
+        public static final int fragmentmain=0x7f030002;
+        public static final int mainactivity=0x7f030003;
+        public static final int quickstartactivity=0x7f030004;
+        public static final int splashactivity=0x7f030005;
     }
     public static final class menu {
-        public static final int daq=0x7f090000;
+        public static final int daq=0x7f0a0000;
     }
     public static final class string {
-        public static final int action_settings=0x7f070002;
-        public static final int app_name=0x7f070000;
-        public static final int delaytime=0x7f070005;
-        public static final int hello_world=0x7f070001;
-        public static final int startService=0x7f070004;
-        public static final int startThread=0x7f070006;
-        public static final int title=0x7f070003;
-        public static final int title_activity_splash=0x7f070007;
+        public static final int action_settings=0x7f080002;
+        public static final int app_name=0x7f080000;
+        public static final int delaytime=0x7f080005;
+        public static final int hello_world=0x7f080001;
+        public static final int startService=0x7f080004;
+        public static final int startThread=0x7f080006;
+        public static final int title=0x7f080003;
+        public static final int title_activity_splash=0x7f080007;
     }
     public static final class style {
         /** 
@@ -194,15 +216,15 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f080000;
+        public static final int AppBaseTheme=0x7f090000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f080001;
-        public static final int ButtonBar=0x7f080003;
-        public static final int ButtonBarButton=0x7f080004;
-        public static final int FullscreenActionBarStyle=0x7f080005;
-        public static final int FullscreenTheme=0x7f080002;
+        public static final int AppTheme=0x7f090001;
+        public static final int ButtonBar=0x7f090003;
+        public static final int ButtonBarButton=0x7f090004;
+        public static final int FullscreenActionBarStyle=0x7f090005;
+        public static final int FullscreenTheme=0x7f090002;
     }
     public static final class styleable {
         /** 
