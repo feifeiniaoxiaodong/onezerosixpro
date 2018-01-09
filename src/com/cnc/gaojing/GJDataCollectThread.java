@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import com.cnc.daq.DaqActivity;
 import com.cnc.daq.DaqData;
+import com.cnc.daqnew.DataCollect;
 import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataLog;
@@ -17,6 +18,7 @@ import com.cnc.domain.DataReg;
 import com.cnc.domain.DataRun;
 import com.cnc.domain.DataType;
 import com.cnc.gaojing.ndkapi.GJApiFunction;
+import com.cnc.service.DelMsgServie;
 
 //import android.annotation.SuppressLint;
 import java.text.SimpleDateFormat;
@@ -24,33 +26,43 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
- public class GJDataCollectThread implements Runnable {
+//沈阳高精数据采集线程
+ public class GJDataCollectThread implements Runnable,DataCollect {
 
 	private final String TAG="DataCollectThread...";
+	 //线程循环执行标志，改为false时，线程退出循环，线程结束运行
+    private volatile  boolean  threadflag=true; 
 	boolean boolGetMacInfo = false; //标识是否得到机床的基本信息	
 	int     count = 1;     //存储运行信息的id,标识这是第几次采集信息
 	boolean hadconnected =false ;   //连接状态标志	
-	private Handler  daqActivityHandler=null;		
+	private Handler  daqActivityHandler=null,
+					 delMsgHandler =null;
 	String  machineIP = "192.168.188.132"; //机床的IP地址
 //	int    machinePort = 21;			  //机床端口号，高精不需要设置端口号
 //	String  tp = "SYGJ-1000"; //数控系统型号，高精数控系统型号数控系统提供
 //	static  String machine_SN="192.168.188.132"; //数控系统ID，沈阳高精没有提供数控系统ID，暂用IP代替ID
-	String key;
+//	String key;
+	
+	GJDataCollectThread(String ip,int port){
+		machineIP=ip;
+		delMsgHandler=DelMsgServie.getHandlerService();
+		daqActivityHandler=DaqActivity.getmHandler();
+	}
 	
 	GJDataCollectThread(String key){
 //		daqActivityHandler=mHandler;
 		daqActivityHandler=DaqActivity.getmHandler();
-		this.key=key;
+//		this.key=key;
 	}
 	
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 	
 	@Override
 	public void run() {
-		String str=getPath(key);
+		/*String str=getPath(key);
 		if(str!=null){
 			machineIP=str;
-		}
+		}*/
 		
 		dnc.main.connectToNC(machineIP);  //连接到机床
 		//必须先连接机床才能检测到nml文件
@@ -58,7 +70,7 @@ import android.util.Log;
 			Log.d(TAG,"找不到nml配置文件");			
 		}
 		
-		while(true){
+		while(threadflag){
 			
 			if(!dnc.main.getConnnectState()){ //检测连接状态
 				//未连接，重新连接				
@@ -150,15 +162,13 @@ import android.util.Log;
 			dataRun.setId(machineIP); //设置数控系统ID
 			dataRun.setTime(strTime); //加时间戳
 			sendMsg2Main(dataRun,HandleMsgTypeMcro.MSG_RUN,count);
-			
-			
+						
 			count++;//采集次数记录
 			if(count == Integer.MAX_VALUE)//达到最大值的时候记得清零
 				count = 1;
 		
 		}
 	}    //end daq()
-	
 	
 	
 	/**
@@ -168,7 +178,7 @@ import android.util.Log;
 	 */
 	private  void sendMsg2Main(Object obj, int what) 
 	{
-		sendMsg(daqActivityHandler, obj, what,0,0);
+		sendMsg(delMsgHandler, obj, what,0,0);
 	}
 	
 	/**
@@ -176,7 +186,7 @@ import android.util.Log;
 	 */
 	private  void sendMsg2Main(Object obj, int what, int arg1) 
 	{
-		sendMsg(daqActivityHandler, obj, what, arg1, 0);
+		sendMsg(delMsgHandler, obj, what, arg1, 0);
 	}
 
 	/**
@@ -204,7 +214,7 @@ import android.util.Log;
 	 * @param key
 	 * @return
 	 */
-	private String  getPath(String key){
+/*	private String  getPath(String key){
 		InputStream in=null;
 		Properties pro=null;
 		String path=null;
@@ -230,6 +240,18 @@ import android.util.Log;
 			}						
 		}
 		return path;
+	}*/
+
+	@Override
+	public void stopCollect() {
+		// TODO Auto-generated method stub
+		threadflag=false;
+	}
+
+	@Override
+	public boolean isThreadRunning() {
+		// TODO Auto-generated method stub
+		  return threadflag;
 	}
 
 }

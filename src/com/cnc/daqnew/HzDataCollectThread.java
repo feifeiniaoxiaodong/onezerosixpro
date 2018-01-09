@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.cnc.daq.DaqActivity;
 import com.cnc.daq.DaqData;
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataLog;
@@ -23,6 +24,7 @@ import com.cnc.huazhong.HncAPI;
 import com.cnc.huazhong.HncSystem;
 import com.cnc.netService.HncTools;
 import com.cnc.netService.Intialize;
+import com.cnc.service.DelMsgServie;
 import com.cnc.utils.LogLock;
 import com.cnc.utils.RegLock;
 /**
@@ -30,20 +32,23 @@ import com.cnc.utils.RegLock;
  * @author wei
  *
  */
-public class HzDataCollectThread implements Runnable{
+public class HzDataCollectThread implements Runnable,DataCollect{
 	
 	private final String TAG="DataCollectThread...";
+	 //线程循环执行标志，改为false时，线程退出循环，线程结束运行
+    private volatile  boolean  threadflag=true; 
 	public int Client = -1;	   //连接状态标识， -1标识未连接
 
 	boolean boolGetMacInfo = false; //标识是否得到机床的基本信息
 	int   macChannel = 0;//机床的通道信息
 	int   count = 1;//存储运行信息的id,标识这是第几次采集信息
 	
-	private Handler  daqActivityHandler=null;
-		
+	private Handler  daqActivityHandler=null,
+					 delMsgHandler =null;
+					
 	String tp = "HNC-818A";//数控系统型号
 	String machine_SN=null;//数控系统ID
-	String pathcnc=null;
+//	String pathcnc=null;
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 	
 	/*static {  
@@ -52,15 +57,25 @@ public class HzDataCollectThread implements Runnable{
         System.loadLibrary("hzHncAPI");  
     }*/
 
+	String machineIP = "192.168.188.113"; //机床的IP地址
+	int    machinePort = 21;			  //机床端口号
+	
+	public HzDataCollectThread(String ip,int port){
+		this.delMsgHandler=DelMsgServie.getHandlerService();
+		this.daqActivityHandler=DaqActivity.getmHandler();
+		machineIP=ip;
+		machinePort=port;		
+	}
+	
 	public HzDataCollectThread(Handler handler,String pathcnc) {
 		this.daqActivityHandler=handler;	
-		this.pathcnc=pathcnc;
+//		this.pathcnc=pathcnc;
 	}
 		
 	@Override
 	public void run() {
 		int inialRes = -1;//是否已经初始化
-		String machineIP = "192.168.188.113"; //机床的IP地址
+/*		String machineIP = "192.168.188.113"; //机床的IP地址
 		int    machinePort = 21;			  //机床端口号
 		
 		String str=getPath(pathcnc),
@@ -68,9 +83,9 @@ public class HzDataCollectThread implements Runnable{
 		if(str != null && strp!=null ){
 			machineIP=str;
 			machinePort=Integer.parseInt(strp);
-		}
+		}*/
 
-		while(true)
+		while(threadflag)
 		{
 			if(inialRes != 0)
 				inialRes = new Intialize().inial();//首先初始化
@@ -86,7 +101,7 @@ public class HzDataCollectThread implements Runnable{
 					else{
 						sendMsg2Main("连接机床失败", HandleMsgTypeMcro.MSG_IFAILURE);
 						try {							
-							Thread.sleep(1000*60); //连接机床失败过一分钟再连							
+							Thread.sleep(1000*10); //连接机床失败过一分钟再连							
 						} catch (InterruptedException e) {					
 							e.printStackTrace();
 						} 
@@ -180,7 +195,7 @@ public class HzDataCollectThread implements Runnable{
 	 * @param key
 	 * @return
 	 */
-	private String  getPath(String key){
+	/*private String  getPath(String key){
 		InputStream in=null;
 		Properties pro=null;
 		String path=null;
@@ -208,31 +223,41 @@ public class HzDataCollectThread implements Runnable{
 			}						
 		}
 		return path;
-	}
+	}*/
 	
 	
 	//发送消息到主线程
 	private void sendMsg2Main(Object obj, int what) 
 	{
-		sendMsg(daqActivityHandler, obj, what,0,0);
+		sendMsg(delMsgHandler, obj, what,0,0);
 	}
 	
 	//发送消息到主线程
 	private void sendMsg2Main(Object obj, int what, int arg1) 
 	{
-		sendMsg(daqActivityHandler, obj, what, arg1, 0);
+		sendMsg(delMsgHandler, obj, what, arg1, 0);
 	}
 
 	//发送消息，通用型
 	private void sendMsg(Handler handler,Object obj, int what, int arg1, int arg2) 
 	{
-		Message msg = Message.obtain();
+		Message msg = Message.obtain();		
 		msg.what = what;
 		msg.obj = obj;
 		msg.arg1 = arg1;
 		msg.arg2 = arg2;
 		handler.sendMessage(msg);
 	}
-		
-	
+
+	@Override
+	public void stopCollect() {
+		threadflag=false;	//结束线程	
+	}
+
+	@Override
+	public boolean isThreadRunning() {
+		// TODO Auto-generated method stub
+		  return threadflag;
+	}
+
 }

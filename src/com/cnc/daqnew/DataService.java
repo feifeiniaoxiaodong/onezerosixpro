@@ -143,7 +143,7 @@ public class DataService extends Service {
 		
 		public void stopgskThread(){
 			if(gsthread!=null){
-				gsthread.setThreadfalg(false);
+//				gsthread.setThreadfalg(false);
 			}
 			
 		}

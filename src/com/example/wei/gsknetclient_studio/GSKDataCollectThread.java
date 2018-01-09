@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.cnc.daq.DaqData;
+import com.cnc.daqnew.DataCollect;
 import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataLog;
@@ -31,7 +32,7 @@ import android.util.Log;
  * Created by wei on 2017/4/15.
  */
 
-public class GSKDataCollectThread extends Thread{
+public class GSKDataCollectThread implements Runnable ,DataCollect{
   
     //线程循环执行标志，改为false时，线程退出循环，线程结束运行
     private volatile  boolean  threadflag=true;  
@@ -49,19 +50,19 @@ public class GSKDataCollectThread extends Thread{
     int linked=0; //连接状态
     boolean boolGetMacInfo = false; //标识是否得到机床的基本信息
 	
-	int   count = 1;//存储运行信息的id,标识这是第几次采集信息
-	
-	private Handler  daqActivityHandler=null;
+	int   count = 1;//存储运行信息的id,标识这是第几次采集信息	
+	private Handler  daqActivityHandler=null,
+					 delMsgHandler =null;
 			
 	String machine_SN=null;//数控系统ID
 
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
     
     public GSKDataCollectThread(String sname){
-        super(sname);
+//        super(sname);
     }
     public GSKDataCollectThread(String sname,String ip,Handler handler){    	
-        super(sname);
+//        super(sname);
         ipaddr=ip;
         daqActivityHandler=handler;
     }
@@ -216,13 +217,14 @@ public class GSKDataCollectThread extends Thread{
     	
     }//end daq()
 
-    public boolean isThreadfalg() {
+    @Override
+    public boolean isThreadRunning() {
         return threadflag;
     }
-
-    public void setThreadfalg(boolean threadfalg) {
-        this.threadflag = threadfalg;
-    }
+//
+//    public void setThreadfalg(boolean threadfalg) {
+//        this.threadflag = threadfalg;
+//    }
 
 
     private DataVersion getVersionInfo(){
@@ -278,6 +280,11 @@ public class GSKDataCollectThread extends Thread{
 		msg.arg1 = arg1;
 		msg.arg2 = arg2;
 		handler.sendMessage(msg);
+	}
+	
+	@Override
+	public void stopCollect() {
+		 this.threadflag=false;		
 	}
 	
 

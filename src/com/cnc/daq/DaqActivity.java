@@ -11,6 +11,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -164,6 +165,17 @@ public class DaqActivity extends Activity implements View.OnClickListener{
     public static Handler getmHandler() {
 		return mHandler;
 	}
+    
+    
+    //DaqActivity handler
+    class DaqActivityHandler extends Handler{
+    	
+    	@Override
+    	public void handleMessage(Message msg) {
+    		
+    	}
+    	
+    }
    
 
 }
