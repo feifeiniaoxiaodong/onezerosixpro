@@ -14,10 +14,10 @@ public class UiDataNo {
 	
 	public UiDataNo(String no, String ip, String idcnc, String idandroid) {
 		super();
-		this.no = no;
-		this.ip = ip;
-		this.idcnc = idcnc;
-		this.idandroid = idandroid;
+		this.no = "No:"+no;
+		this.ip ="IP:"+ ip;
+		this.idcnc ="IDCnc"+ idcnc;
+		this.idandroid ="IDAndroid"+ idandroid;
 	}
 	public String getNo() {
 		return no;

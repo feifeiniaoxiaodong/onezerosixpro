@@ -11,4 +11,15 @@
         <item >星期天</item>
     </string-array>
     
+      <string-array name="huazhongip">
+          <item >192.168.188.110</item>
+          <item >192.168.188.111</item>
+          <item >192.168.188.112</item>
+          <item >192.168.188.113</item>
+          <item >192.168.188.114</item>
+
+      </string-array>
+      
+      
+    
 </resources>

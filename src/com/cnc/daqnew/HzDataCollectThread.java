@@ -141,7 +141,7 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 	{
 		
 		StringBuilder  sbalram=new StringBuilder();
-		sbalram.append("Alarm:");
+		
 		
 		String strTime = formatter.format(new Date());//开始采集信息的各种事件
 		

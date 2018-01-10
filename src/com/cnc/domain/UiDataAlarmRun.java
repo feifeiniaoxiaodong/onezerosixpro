@@ -14,8 +14,8 @@ public class UiDataAlarmRun {
 
 	public UiDataAlarmRun(String alarminfo, String runinfo) {
 		super();
-		this.alarminfo = alarminfo;
-		this.runinfo = runinfo;
+		this.alarminfo ="Alarm"+ alarminfo;
+		this.runinfo = "RunInfo"+runinfo;
 	}
 
 	public String getAlarminfo() {

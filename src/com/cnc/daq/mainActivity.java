@@ -10,22 +10,32 @@ import com.cnc.domain.UiDataNo;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainActivity extends Activity {
 	final String TAG="mainactivity";
 	static Handler  mainActivityHandler=null;
 	
-	Map<String, ItemViewHolder>  viewmap=new HashMap<>();
+	SharedPreferences pref;
+	
+	SharedPreferences.Editor editor ;
+	
+//	Map<String, ItemViewHolder>  viewmap=new HashMap<>();
 	ItemViewHolder itemHuazhong =null,
 					itemGaojing=null,
 					itemGsk01=null,
@@ -36,8 +46,10 @@ public class MainActivity extends Activity {
 
 	Map<String, Runnable> threadmap=new HashMap<>();
 	//
-	String curHuazhongRun= null;
+	String curHuazhongRun = null;
 	HzDataCollectThread hzDataCollectThread=null;
+	String spinnerselectedIPhz=null;
+	
 	String curGaojingRun= null;
 	String curGskRun   = null;
 	
@@ -47,9 +59,10 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.mainactivity);
 		mainActivityHandler=new mainHandler();
-		
+		pref= PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 		initViewMap();
 		setClickEven();
+		startDefaultThread();
 		
 //		itemHuazhong.getBtstart().setEnabled(false);
 
@@ -96,6 +109,17 @@ public class MainActivity extends Activity {
 			}
 	
 		}
+	}
+	
+	
+	private void startDefaultThread(){
+		//华中线程
+		String preip = pref.getString("huazhong", null);
+		if(preip!=null){
+			//开启线程
+			startHzThread(preip);
+		}
+		
 	}
 	
 	
@@ -275,32 +299,40 @@ public class MainActivity extends Activity {
 				
 				@Override
 				public void onClick(View v) {
-//					itemHuazhong.getAlarm().setText("急停报警");
-					String ip=HandleMsgTypeMcro.HUAZHONG1_1;
-					hzDataCollectThread=new HzDataCollectThread(ip);
-					curHuazhongRun=ip; 
-					Thread th=new Thread(hzDataCollectThread);
-					th.setName("huazhong");
-					th.start();
-					itemHuazhong.getBtstart().setEnabled(false);
-					itemHuazhong.getBtstop().setEnabled(true);
-	
+					startHzThread(spinnerselectedIPhz);	//开启线程
 				}
 			});
 		itemHuazhong.getBtstop().setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				if(hzDataCollectThread!=null){
-					hzDataCollectThread.stopCollect(); //关闭数据采集线程
-					curHuazhongRun=null;
-					hzDataCollectThread=null;
-					itemHuazhong.getBtstart().setEnabled(true);
-					itemHuazhong.getBtstop().setEnabled(false);
-				}
-				
+				stopHzThread();		//关闭线程		
 			}
 		});
+		
+		final Spinner spinner=itemHuazhong.getSpinner();		
+		String[] mItemshz=getResources().getStringArray(R.array.huazhongip);
+		ArrayAdapter<String> adapter=new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mItemshz);
+		spinner.setAdapter(adapter);
+		
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int pos, long id 	) {
+				// TODO Auto-generated method stub
+				String strsel=spinner.getSelectedItem().toString();
+//				itemHuazhong.getIp().setText(strsel);
+				spinnerselectedIPhz=strsel;
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+				Toast.makeText(MainActivity.this, "select nothing", Toast.LENGTH_SHORT).show();
+			}
+		});
+		
 		
 	
 		//高精
@@ -309,17 +341,30 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				
+//				editor =pref.edit();
+//				editor.putString("huazhong", "huazhong");
+//				editor.apply();
+//				
+//				itemGaojing.getNo().setText(pref.getString("huazhong", "error"));
+//				
+//				editor =pref.edit();
+//				editor.putString("huazhong", "gaojing");
+//				editor.apply();
+//				
+//				itemGaojing.getIp().setText(pref.getString("huazhong", "error"));
 				
+		
 			}
 		});
 		itemGaojing.getBtstop().setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				
-				
+								
 			}
 		});	
+		
+		
 		
 		
 	}
@@ -335,6 +380,11 @@ public class MainActivity extends Activity {
 		th.start();
 		itemHuazhong.getBtstart().setEnabled(false);
 		itemHuazhong.getBtstop().setEnabled(true);
+		
+		editor =pref.edit();
+		editor.putString("huazhong", ip); //持久化保存
+		editor.apply();
+		
 	}
 	
 	//关闭华中线程
@@ -348,5 +398,20 @@ public class MainActivity extends Activity {
 			itemHuazhong.getBtstop().setEnabled(false);
 		}
 	}
+	
+	public void  perfertest(){
+		
+//		SharedPreferences pref;
+//		
+//		SharedPreferences.Editor editor ;
+		
+		
+		editor =pref.edit();
+		editor.putString("huazhong", "");
+		editor.apply();
+		
+	}
+	
+	
 	
 }
