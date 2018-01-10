@@ -1,6 +1,6 @@
 package com.cnc.daqnew;
 
-public interface DataCollect {
+public interface DataCollectInter {
 	
 	public void stopCollect();
 	public boolean isThreadRunning();

@@ -119,9 +119,9 @@ public class DataService extends Service {
 			exec=Executors.newCachedThreadPool();	
 		
 			//开启数据采集线程
-			HzDataCollectThread dataCollectThread=new HzDataCollectThread(handler,HandleMsgTypeMcro.HUAZHONG1_5);
-			exec.execute(dataCollectThread);			
-			Log.d(TAG, "DataCollectThread...开启");	
+//			HzDataCollectThread dataCollectThread=new HzDataCollectThread(handler,HandleMsgTypeMcro.HUAZHONG1_5);
+//			exec.execute(dataCollectThread);			
+//			Log.d(TAG, "DataCollectThread...开启");	
 			
 			//采集第二台机床
 			/*DataCollectThread dataCollectThread2=new DataCollectThread(handler,HandleMsgTypeMcro.HUAZHONG1_1);
@@ -129,9 +129,9 @@ public class DataService extends Service {
 			Log.d(TAG, "DataCollectThread...开启");*/
 			
 			//开启数据发送线程
-			DataTransmitThread dataTransmitThread=new DataTransmitThread(handler);			
-			exec.execute(dataTransmitThread);
-			Log.d(TAG, "DataTransmitThread...开启");
+//			DataTransmitThread dataTransmitThread=new DataTransmitThread(handler);			
+//			exec.execute(dataTransmitThread);
+//			Log.d(TAG, "DataTransmitThread...开启");
 
 //			Transmit_Test_offline  transmit1=new Transmit_Test_offline();
 //			new Thread(transmit1).start();
@@ -155,9 +155,7 @@ public class DataService extends Service {
 		public void shutDownThread(){
 //			exec.shutdownNow();
 		}
-		
-		
-					
+				
 	}
 	
 	

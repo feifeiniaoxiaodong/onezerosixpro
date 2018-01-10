@@ -18,6 +18,7 @@ import com.cnc.DataBaseService.DBService;
 import com.cnc.DataBaseService.DataAlarmPlus;
 import com.cnc.DataBaseService.DataRunPlus;
 import com.cnc.daq.DaqData;
+import com.cnc.daq.MainActivity;
 import com.cnc.domain.DataDelayTime;
 import com.cnc.domain.DataLog;
 import com.cnc.domain.DataReg;
@@ -51,7 +52,8 @@ public class DataTransmitThread implements Runnable{
 	
 	private DBService dbservice=null;     		//SQLite数据库操作对象
 	private Handler   daqActvityHandler=null;  //Activity的Handler
-   	
+   	private Handler   mainActivityHandler =null;
+	
 	int[]   keys={1,5,10,15,30,50,60,70,80,90,100};
 	int  	pointer=0,
 			len=keys.length;
@@ -59,6 +61,7 @@ public class DataTransmitThread implements Runnable{
 	public DataTransmitThread(Handler handler) {
 		daqActvityHandler=handler;
 		dbservice=DBService.getInstanceDBService();
+		mainActivityHandler=MainActivity.getMainActivityHandler();
 //		path=getPath("path"); //初始化远端服务器地址
 	}
 
@@ -177,7 +180,7 @@ public class DataTransmitThread implements Runnable{
 		long  countRun=0; //未发送的运行信息的条数
 				
 		countRun=dbservice.getCountRunInfo();//检查SQLite数据库中运行信息的条数
-		String str="本地SQLite数据库中未发送的运行信息有: "+countRun+"条";
+		String str=countRun+"";
 		sendMsg2Main(str,HandleMsgTypeMcro.MSG_COUNTRUN);//发送给UI的Handler
 		
 		//发送特定条数的运行信息
@@ -301,8 +304,12 @@ public class DataTransmitThread implements Runnable{
 			delayTime.setSpeed(speedn);			
 		}
 		
-		String str="用时:"+ timePeriod+"ms;"+ "数据大小: "+countBytes +"bytes;"+"发送速率:"+speed(timePeriod,countBytes);	
-		sendMsg2Main(str,HandleMsgTypeMcro.MSG_DELAYTIME);//发送延时时间
+//		String str="用时:"+ timePeriod+"ms;"+ "数据大小: "+countBytes +"bytes;"+"发送速率:"+speed(timePeriod,countBytes);
+		StringBuilder strb=new StringBuilder();
+		strb.append(timePeriod+"ms").append(":");
+		strb.append(countBytes+"bytes").append(":");
+		strb.append(speed(timePeriod,countBytes));
+		sendMsg2Main(strb.toString(),HandleMsgTypeMcro.MSG_DELAYTIME);//发送延时时间
 		
 		return response;
 	}
@@ -334,12 +341,12 @@ public class DataTransmitThread implements Runnable{
 	
 	//发送消息到主线程
 	private void sendMsg2Main(Object obj, int what) {	
-		sendMsg(daqActvityHandler, obj, what,0,0);
+		sendMsg(mainActivityHandler, obj, what,0,0);
 	}
 	
 	//发送消息到主线程
 	private void sendMsg2Main(Object obj, int what, int arg1){ 	
-		sendMsg(daqActvityHandler, obj, what, arg1, 0);
+		sendMsg(mainActivityHandler, obj, what, arg1, 0);
 	}
 
 	//发送消息，通用型

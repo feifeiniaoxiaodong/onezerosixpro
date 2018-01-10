@@ -35,7 +35,7 @@ import com.cnc.utils.RegLock;
  * @author wei
  *
  */
-public class HzDataCollectThread implements Runnable,DataCollect{
+public class HzDataCollectThread implements Runnable,DataCollectInter{
 	
 	private final String TAG="DataCollectThread...";
 	 //线程循环执行标志，改为false时，线程退出循环，线程结束运行
@@ -45,15 +45,14 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 	boolean boolGetMacInfo = false; //标识是否得到机床的基本信息
 	int   macChannel = 0;//机床的通道信息
 	int   count = 1;//存储运行信息的id,标识这是第几次采集信息
-	
-	
-	private Handler  daqActivityHandler=null,
-					 delMsgHandler =null;
+		
+//	private Handler  daqActivityHandler=null,
+	private Handler  delMsgHandler =null;
 	private Handler  mainHander=null ;
 					
 	String tp = "HNC-818A";//数控系统型号
 	String machine_SN=null;//数控系统ID
-//	String pathcnc=null;
+
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 	
 	/*static {  
@@ -71,29 +70,20 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 	
 	public HzDataCollectThread(String ip,int port){
 		this.delMsgHandler=DelMsgServie.getHandlerService();
-		this.daqActivityHandler=DaqActivity.getmHandler();
+//		this.daqActivityHandler=DaqActivity.getmHandler();
 		mainHander=MainActivity.getMainActivityHandler();
 		machineIP=ip;
 		machinePort=port;		
 	}
 	
-	public HzDataCollectThread(Handler handler,String pathcnc) {
+/*	public HzDataCollectThread(Handler handler,String pathcnc) {
 		this.daqActivityHandler=handler;	
 //		this.pathcnc=pathcnc;
-	}
+	}*/
 		
 	@Override
 	public void run() {
 		int inialRes = -1;//是否已经初始化
-/*		String machineIP = "192.168.188.113"; //机床的IP地址
-		int    machinePort = 21;			  //机床端口号
-		
-		String str=getPath(pathcnc),
-			   strp=getPath("cncport");
-		if(str != null && strp!=null ){
-			machineIP=str;
-			machinePort=Integer.parseInt(strp);
-		}*/
 
 		while(threadflag)
 		{
@@ -141,8 +131,7 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 	{
 		
 		StringBuilder  sbalram=new StringBuilder();
-		
-		
+				
 		String strTime = formatter.format(new Date());//开始采集信息的各种事件
 		
 		if(!boolGetMacInfo)   //如果没有获得过机床的基本信息
@@ -199,8 +188,7 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 			
 			//发送到主线程
 			UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
-			sendMsg(mainHander, uiDataAlarmRun, HandleMsgTypeMcro.HUAZHONG_UIALARM	, 0, 0);
-			
+			sendMsg(mainHander, uiDataAlarmRun, HandleMsgTypeMcro.HUAZHONG_UIALARM	, 0, 0);			
 		}
 		
 	}//end daq()函数
@@ -217,8 +205,7 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 		
 		pro =new Properties();
 		in=DataTransmitThread.class.getResourceAsStream(DataType.pathResource);
-		
-		
+				
 		try {
 			pro.load(new InputStreamReader(in,"utf-8"));
 			
@@ -271,7 +258,7 @@ public class HzDataCollectThread implements Runnable,DataCollect{
 
 	@Override
 	public boolean isThreadRunning() {
-		// TODO Auto-generated method stub
+		
 		  return threadflag;
 	}
 	

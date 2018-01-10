@@ -140,7 +140,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int tab05_unsel=0x7f02000b;
     }
     public static final class id {
-        public static final int action_settings=0x7f07001d;
+        public static final int action_settings=0x7f070022;
         public static final int alarm=0x7f07000a;
         public static final int bottom=0x7f070002;
         public static final int bt2=0x7f070010;
@@ -170,6 +170,11 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int tabview_id=0x7f070000;
         public static final int textview=0x7f070013;
         public static final int top=0x7f070005;
+        public static final int txcachenum=0x7f07001d;
+        public static final int txdelay=0x7f07001e;
+        public static final int txpakagesize=0x7f070020;
+        public static final int txsendno=0x7f07001f;
+        public static final int txspeed=0x7f070021;
     }
     public static final class layout {
         public static final int cncinfoitem=0x7f030000;
@@ -177,7 +182,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int fragmentmain=0x7f030002;
         public static final int mainactivity=0x7f030003;
         public static final int quickstartactivity=0x7f030004;
-        public static final int splashactivity=0x7f030005;
+        public static final int sendinfo=0x7f030005;
+        public static final int splashactivity=0x7f030006;
     }
     public static final class menu {
         public static final int daq=0x7f0a0000;

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <TextView            
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+             android:layout_marginTop="20dp"
+			android:textSize="22sp"
+			android:text="数据发送信息："  /> 
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+         android:layout_marginTop="15dp">
+    
+       <TextView 
+            android:id="@+id/txcachenum"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"  
+			android:textSize="18sp"
+			android:text="cacheNum:"  /> 
+      
+        <TextView 
+            android:id="@+id/txdelay"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+			android:textSize="18sp"
+			android:text="delay:"  />  
+
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+         android:layout_marginTop="15dp">
+        
+       <TextView 
+            android:id="@+id/txsendno"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"  
+			android:textSize="18sp"
+			android:text="sendNum:"  /> 
+      
+          <TextView 
+            android:id="@+id/txpakagesize"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+			android:textSize="18sp"
+			android:text="packsize:"  />  
+
+    </LinearLayout>
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+         android:layout_marginTop="15dp">
+        
+        <TextView 
+            android:id="@+id/txspeed"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+			android:textSize="18sp"
+			android:text="speed:"  />  
+        
+    </LinearLayout>
+    
+
+
+</LinearLayout>

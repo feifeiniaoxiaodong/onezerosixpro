@@ -43,6 +43,8 @@ public class MainActivity extends Activity {
 					itemGsk03=null,
 					itemGsk04=null,
 					itemGsk05=null;
+	TextView  cachenum , delay ,sendnum ,packsize ,speed ;
+	
 
 	Map<String, Runnable> threadmap=new HashMap<>();
 	//
@@ -103,7 +105,20 @@ public class MainActivity extends Activity {
 				break;
 			case HandleMsgTypeMcro.GSK05:
 				break;
-
+				
+			//处理数据发送信息
+			case HandleMsgTypeMcro.MSG_DELAYTIME://延时时间
+				String str =(String )msg.obj;
+				String[] strs= str.split(":");
+				delay.setText(strs[0]); //
+				packsize.setText(strs[1]);
+				speed.setText(strs[2]); 
+				
+				break;
+			case HandleMsgTypeMcro.MSG_COUNTRUN: //CacheNum
+				String strcache =(String)msg.obj;
+				cachenum.setText("cacheNum:"+strcache+"条");
+				break;
 			default:
 				break;
 			}
@@ -199,6 +214,12 @@ public class MainActivity extends Activity {
 
 	
 	private void initViewMap(){
+		
+		cachenum=(TextView)findViewById(R.id.txcachenum);
+		delay =(TextView)findViewById(R.id.txdelay);
+		sendnum=(TextView)findViewById(R.id.txsendno);
+		packsize=(TextView)findViewById(R.id.txpakagesize);
+		speed=(TextView)findViewById(R.id.txspeed);
 	
 		Log.d(TAG,"initViewMap");
 		TextView no = (TextView)findViewById(R.id.gaojing).findViewById(R.id.no);

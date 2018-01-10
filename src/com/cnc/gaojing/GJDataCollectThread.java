@@ -10,7 +10,7 @@ import java.util.Properties;
 
 import com.cnc.daq.DaqActivity;
 import com.cnc.daq.DaqData;
-import com.cnc.daqnew.DataCollect;
+import com.cnc.daqnew.DataCollectInter;
 import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataLog;
@@ -27,7 +27,7 @@ import android.os.Message;
 import android.util.Log;
 
 //沈阳高精数据采集线程
- public class GJDataCollectThread implements Runnable,DataCollect {
+ public class GJDataCollectThread implements Runnable,DataCollectInter {
 
 	private final String TAG="DataCollectThread...";
 	 //线程循环执行标志，改为false时，线程退出循环，线程结束运行
