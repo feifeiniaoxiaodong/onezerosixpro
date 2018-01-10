@@ -17,12 +17,12 @@ public class DaqData {
 //	private static DataReg dataReg = null; //注册信息
 //	private static DataLog dataLog =null;   //登录和登出信息
 	
+
 	private static LinkedList<DataAlarm> listDataAlarm = new LinkedList<DataAlarm>();//储存报警信息
 	
 	private static List<DataReg>  listDataReg= Collections.synchronizedList( new ArrayList<DataReg>());
 	private static List<DataLog>  listDataLog=  Collections.synchronizedList(new ArrayList<DataLog>());
 	
- 
 	/*
 	 * 比较报警信息是否相同，如果相同则返回true
 	 */
@@ -45,10 +45,15 @@ public class DaqData {
 //		DaqData.cncid = cncid;
 //	}
 
-
 	public static String getAndroidId() {
 		return androidId;
 	}
+	
+
+	public static String getForthg() {
+		return forthG;
+	}
+
 	public static void setAndroidId(String androidId) {
 		DaqData.androidId = androidId;
 	}

@@ -1,10 +1,12 @@
 package com.cnc.daq;
 
+import com.cnc.daqnew.DataTransmitThread;
 import com.cnc.service.DelMsgServie;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -15,6 +17,7 @@ import android.view.MenuItem;
  *
  */
 public class SplashActivity extends Activity {
+	final String TAG="SplashActivity";
 
 	static {  
         // 加载华中动态库  
@@ -50,6 +53,8 @@ public class SplashActivity extends Activity {
 						
 			} //end run()
 		}).start();
+		
+	
 		
 	}
 }

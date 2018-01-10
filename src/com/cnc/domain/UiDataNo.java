@@ -5,19 +5,17 @@ public class UiDataNo {
 	String ip;
 	String idcnc;
 	String idandroid;
-	
-	
-	
+
 	public UiDataNo() {
 		super();
 	}
 	
 	public UiDataNo(String no, String ip, String idcnc, String idandroid) {
 		super();
-		this.no = "No:"+no;
-		this.ip ="IP:"+ ip;
-		this.idcnc ="IDCnc"+ idcnc;
-		this.idandroid ="IDAndroid"+ idandroid;
+		this.no = "No: "+no;
+		this.ip ="IP: "+ ip;
+		this.idcnc ="IDCnc: "+ idcnc;
+		this.idandroid ="IDAndroid: "+ idandroid;
 	}
 	public String getNo() {
 		return no;

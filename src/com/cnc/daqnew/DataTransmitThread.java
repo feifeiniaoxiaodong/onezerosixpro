@@ -58,6 +58,11 @@ public class DataTransmitThread implements Runnable{
 	int  	pointer=0,
 			len=keys.length;
 	
+	public DataTransmitThread(){
+		dbservice=DBService.getInstanceDBService();
+		mainActivityHandler=MainActivity.getMainActivityHandler();
+	}
+	
 	public DataTransmitThread(Handler handler) {
 		daqActvityHandler=handler;
 		dbservice=DBService.getInstanceDBService();

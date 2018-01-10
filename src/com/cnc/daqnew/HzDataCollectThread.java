@@ -83,15 +83,17 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 		
 	@Override
 	public void run() {
-		int inialRes = -1;//是否已经初始化
-
+		int inialRes = -1;//是否已经初始化    inialRes != 0
+		int b=0;
 		while(threadflag)
 		{
-			if(inialRes != 0)
-				inialRes = new Intialize().inial();//首先初始化
-			else//初始化成功
-			{					
-//				if(Client < 0)//没有连接机床
+
+			if(inialRes != 0){
+				//首先初始化,只能初始化一次
+				inialRes=Intialize.getInstance().inial6(getInitLocalport(machineIP));
+	
+			}else{ //初始化成功
+
 				if(HncAPI.HNCNetIsConnect(Client) != 0)
 				{						
 					//采集数据之前初始化，得到目的机器的IP和port
@@ -111,7 +113,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 					daq();//调用数据采集函数采集数据，同时把采集到的数据发送到主线程
 				}			
 			}
-			
+
 			//采集数据间隔时间,采集结束之后线程休眠一段时间
 			try {
 //				Thread.sleep(700);//采集数据间隔时间设置为1S,因为采集过程耗时大约300毫秒，所以设置为700
@@ -120,7 +122,10 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 				e.printStackTrace();
 			} 
 			
-		}//end while(true)		
+		}//end while(true)	
+		
+		HncAPI.HNCNetExit();//断开连接
+		
 	}//end run()
 	
 	
@@ -154,7 +159,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 				DaqData.getListDataLog().add(dataLog);
 			}
 			
-			UiDataNo uiDataNo=new UiDataNo(getNoCnc(machineIP),machineIP,machine_SN , DaqData.getAndroidId());
+			UiDataNo uiDataNo=new UiDataNo("",machineIP,machine_SN , DaqData.getAndroidId());
 			sendMsg(mainHander,uiDataNo,HandleMsgTypeMcro.HUAZHONG_UINO,0,0); //发送消息到活动，显示IP地址信息
 			
 			
@@ -253,44 +258,27 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 
 	@Override
 	public void stopCollect() {
-		threadflag=false;	//结束线程	
+		this.threadflag=false;	//结束线程
+		
 	}
 
 	@Override
-	public boolean isThreadRunning() {
-		
+	public boolean isThreadRunning() {		
 		  return threadflag;
 	}
 	
-	private String getNoCnc(String ip){
-		String NoCnc="1-1";
-		if(ip==null){
-			return null;
-		}
-		
-		String lastip= ip.substring(ip.lastIndexOf('.')+1);
-		int lastipint= Integer.valueOf(lastip);
-		
-		switch( lastipint){
-			case 112:
-				NoCnc="HUAZHONG1_1";
-			break;
-			case 114:
-				NoCnc="HUAZHONG1_2";
-			break;
-			case 113:
-				NoCnc="HUAZHONG1_3";
-			break;
-			case 111:
-				NoCnc="HUAZHONG1_4";
-			break;
-			case 110:
-				NoCnc="HUAZHONG1_5";
-			break;
-			default:{}
-		}
-		
-		return NoCnc;
+
+	
+	//根据IP地址获取不同初始化端口号
+	//实现采集机床的切换
+	private int getInitLocalport(String ip){
+		if(ip==null || "".equals(ip.trim())){
+			return 10015;
+		}		
+		int port=10015;
+		String  num= ip.substring(ip.lastIndexOf('.')+1);
+		int n = Integer.valueOf(num);	
+		return n+9905;
 	}
 
 	

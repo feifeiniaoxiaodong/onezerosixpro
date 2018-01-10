@@ -2,7 +2,10 @@ package com.cnc.daq;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import com.cnc.daqnew.DataTransmitThread;
 import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.daqnew.HzDataCollectThread;
 import com.cnc.domain.UiDataAlarmRun;
@@ -32,7 +35,7 @@ public class MainActivity extends Activity {
 	static Handler  mainActivityHandler=null;
 	
 	SharedPreferences pref;
-	
+	 ExecutorService exec=null;
 	SharedPreferences.Editor editor ;
 	
 //	Map<String, ItemViewHolder>  viewmap=new HashMap<>();
@@ -62,11 +65,17 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.mainactivity);
 		mainActivityHandler=new mainHandler();
 		pref= PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		exec=Executors.newCachedThreadPool();//线程池
 		initViewMap();
 		setClickEven();
 		startDefaultThread();
 		
 //		itemHuazhong.getBtstart().setEnabled(false);
+		
+		DataTransmitThread dataTransmitThread=new DataTransmitThread();
+		exec.execute(dataTransmitThread);
+//		new Thread(dataTransmitThread).start();
+		Log.d(TAG,"开启了数据发送线程");
 
 	}
 	
@@ -377,6 +386,7 @@ public class MainActivity extends Activity {
 	//开启华中线程
 	private void startHzThread(String spinItem_NOIP){
 		String ip=null,no=null;
+		
 		if(spinItem_NOIP!=null && !"".equals(spinItem_NOIP)){
 			 ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
 			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
@@ -385,10 +395,13 @@ public class MainActivity extends Activity {
 			 
 			 if(ip!=null && !"".equals(ip)){
 				currentHZDcObj=new HzDataCollectThread(ip);
+//				exec.execute(currentHZDcObj);//开启线程
+				Log.d(TAG,"开启了数据采集线程");
 				current_HZ_NoIP=spinItem_NOIP; 
 				Thread th=new Thread(currentHZDcObj);
-				th.setName("HZ_DC_Thread");
+//				th.setName("HZ_DC_Thread");
 				th.start();
+//				new Thread(currentHZDcObj).start();
 				itemHuazhong.getBtstart().setEnabled(false);
 				itemHuazhong.getBtstop().setEnabled(true);
 			 }
@@ -414,6 +427,7 @@ public class MainActivity extends Activity {
 			currentHZDcObj=null;
 			itemHuazhong.getBtstart().setEnabled(true);
 			itemHuazhong.getBtstop().setEnabled(false);
+			Log.d(TAG,"关闭了数据采集线程");
 		}
 	}
 	

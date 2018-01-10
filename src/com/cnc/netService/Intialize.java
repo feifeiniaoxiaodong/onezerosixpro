@@ -7,11 +7,20 @@ import java.util.Enumeration;
 import com.cnc.huazhong.HncAPI;
 
 public class Intialize {
+	
+	static Intialize intialize=new Intialize();
+	
+	public static Intialize getInstance(){
+		return intialize;
+	}
+	
+	
+	
 	/*
 	 * 初始化,对自身的IP进行初始化和连接目的IP
 	 * 返回值大于等于0，则初始化成功，否则初始化失败
 	 */
-	public int inial()
+	public  int inial()
 	{
 		int result=-1;
     	String localIp = getLocalIpAddress();  //本地IP地址
@@ -20,6 +29,20 @@ public class Intialize {
     	if((localIp != null) && localIp.startsWith("192"))
     	{
 			result= HncAPI.HNCNetInit(localIp, 10015);	//初始化		
+    	}
+		return result;
+	
+	}
+	
+	public  int inial6(int port)
+	{
+		int result=-1;
+    	String localIp = getLocalIpAddress();  //本地IP地址
+    	localIp = localIp.replaceAll("[\\t\\n\\r]", ";");
+    	localIp = findIP(localIp);
+    	if((localIp != null) && localIp.startsWith("192"))
+    	{
+			result= HncAPI.HNCNetInit(localIp, port);	//初始化		
     	}
 		return result;
 	
