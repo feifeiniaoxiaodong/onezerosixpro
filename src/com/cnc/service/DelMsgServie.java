@@ -33,30 +33,28 @@ public class DelMsgServie extends Service {
 	//服务首次创建的时候调用
 	@Override
 	public void onCreate() {
-		
+		//获取androidID
 		String androidId = "" + android.provider.Settings.Secure.getString(getContentResolver(),
-				android.provider.Settings.Secure.ANDROID_ID);						//得到androidID
+				android.provider.Settings.Secure.ANDROID_ID);						
 		DaqData.setAndroidId(androidId);
 		Log.d(TAG, "androidId::" + androidId);	
 		
-		//单独开启一个线程来处理Service Handler 消息
+		//单独开启一个线程处理Service Handler 消息
 		new Thread("MyHandlerThread"){
 			public void run() {
 				Looper.prepare();
 				handlerService=new ServiceHandler();
-				Looper.loop();
-	
-			};
-			
+				Looper.loop();	
+			};			
 		}.start();
-
+		Log.d(TAG, "onCreate");
 		super.onCreate();
 	}
 	
-	//
+	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		
+		Log.d(TAG, "onStartCommand");
 		return super.onStartCommand(intent, flags, startId);
 	}
 
@@ -81,8 +79,7 @@ public class DelMsgServie extends Service {
 	public static Handler getHandlerService() {
 		return handlerService;
 	}
-	
-	
+		
 	static class ServiceHandler   extends Handler {
 		
 		@SuppressLint("SimpleDateFormat") 
@@ -213,6 +210,7 @@ public class DelMsgServie extends Service {
 	}
 	
 	
+	
 	Map<String ,Runnable >  map =new HashMap<>();
 	
 	//绑定服务允许的操作
@@ -224,8 +222,7 @@ public class DelMsgServie extends Service {
 		public  void startHzThread(String ip,int port){
 			
 		}
-		
-		
+	
 	}
 
 }

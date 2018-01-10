@@ -23,7 +23,7 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
 		/*//暂不开启开机启动
 		Intent service = new Intent(context, DataService.class);//显式/隐式
 		context.startService(service);//Intent激活组件(Service)
-*/	
+*/
 		Intent splashactivity = new Intent(context, SplashActivity.class);//显式/隐式
 		splashactivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		

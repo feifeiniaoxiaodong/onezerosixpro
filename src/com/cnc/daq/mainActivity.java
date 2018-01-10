@@ -46,9 +46,9 @@ public class MainActivity extends Activity {
 
 	Map<String, Runnable> threadmap=new HashMap<>();
 	//
-	String curHuazhongRun = null;
-	HzDataCollectThread hzDataCollectThread=null;
-	String spinnerselectedIPhz=null;
+	String current_HZ_NoIP = null;
+	HzDataCollectThread currentHZDcObj=null;
+	String currentSpinSelItem=null;
 	
 	String curGaojingRun= null;
 	String curGskRun   = null;
@@ -77,8 +77,8 @@ public class MainActivity extends Activity {
 			switch (msg.what) {
 			case HandleMsgTypeMcro.HUAZHONG_UINO:
 				UiDataNo uidatano=(UiDataNo)msg.obj;
-				itemHuazhong.getNo().setText(uidatano.getNo());
-				itemHuazhong.getIp().setText(uidatano.getIp());
+//				itemHuazhong.getNo().setText(uidatano.getNo());
+//				itemHuazhong.getIp().setText(uidatano.getIp());
 				itemHuazhong.getIdcnc().setText(uidatano.getIdcnc());
 				itemHuazhong.getIdandroid().setText(uidatano.getIdandroid());
 				
@@ -111,15 +111,17 @@ public class MainActivity extends Activity {
 		}
 	}
 	
-	
+	/**
+	 * 开启上次开启的线程，单厂家只开启一台
+	 */
 	private void startDefaultThread(){
 		//华中线程
 		String preip = pref.getString("huazhong", null);
-		if(preip!=null){
+		if(preip!=null && !preip.trim().equals("")){
 			//开启线程
 			startHzThread(preip);
 		}
-		
+
 	}
 	
 	
@@ -195,10 +197,9 @@ public class MainActivity extends Activity {
 	}
 	
 
+	
 	private void initViewMap(){
-		
-		
-		
+	
 		Log.d(TAG,"initViewMap");
 		TextView no = (TextView)findViewById(R.id.gaojing).findViewById(R.id.no);
 		TextView ip = (TextView)findViewById(R.id.gaojing).findViewById(R.id.ip);
@@ -290,8 +291,6 @@ public class MainActivity extends Activity {
 	}
 
 
-
-	
 	private void setClickEven(){
 		
 		//华中
@@ -299,7 +298,9 @@ public class MainActivity extends Activity {
 				
 				@Override
 				public void onClick(View v) {
-					startHzThread(spinnerselectedIPhz);	//开启线程
+					
+					startHzThread(currentSpinSelItem);
+					
 				}
 			});
 		itemHuazhong.getBtstop().setOnClickListener(new OnClickListener() {
@@ -320,15 +321,13 @@ public class MainActivity extends Activity {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int pos, long id 	) {
-				// TODO Auto-generated method stub
-				String strsel=spinner.getSelectedItem().toString();
-//				itemHuazhong.getIp().setText(strsel);
-				spinnerselectedIPhz=strsel;
+				currentSpinSelItem=spinner.getSelectedItem().toString().trim();		
+				
 			}
 
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
+			
 				Toast.makeText(MainActivity.this, "select nothing", Toast.LENGTH_SHORT).show();
 			}
 		});
@@ -340,20 +339,7 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				
-//				editor =pref.edit();
-//				editor.putString("huazhong", "huazhong");
-//				editor.apply();
-//				
-//				itemGaojing.getNo().setText(pref.getString("huazhong", "error"));
-//				
-//				editor =pref.edit();
-//				editor.putString("huazhong", "gaojing");
-//				editor.apply();
-//				
-//				itemGaojing.getIp().setText(pref.getString("huazhong", "error"));
-				
-		
+
 			}
 		});
 		itemGaojing.getBtstop().setOnClickListener(new OnClickListener() {
@@ -363,26 +349,37 @@ public class MainActivity extends Activity {
 								
 			}
 		});	
-		
-		
-		
-		
+	
 	}
 	
 	
 	//开启华中线程
-	private void startHzThread(String ip){
-				
-		hzDataCollectThread=new HzDataCollectThread(ip);
-		curHuazhongRun=ip; 
-		Thread th=new Thread(hzDataCollectThread);
-		th.setName("huazhong");
-		th.start();
-		itemHuazhong.getBtstart().setEnabled(false);
-		itemHuazhong.getBtstop().setEnabled(true);
-		
+	private void startHzThread(String spinItem_NOIP){
+		String ip=null,no=null;
+		if(spinItem_NOIP!=null && !"".equals(spinItem_NOIP)){
+			 ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
+			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
+			 itemHuazhong.getNo().setText("No:"+no);
+			 itemHuazhong.getIp().setText("IP:"+ip);
+			 
+			 if(ip!=null && !"".equals(ip)){
+				currentHZDcObj=new HzDataCollectThread(ip);
+				current_HZ_NoIP=spinItem_NOIP; 
+				Thread th=new Thread(currentHZDcObj);
+				th.setName("HZ_DC_Thread");
+				th.start();
+				itemHuazhong.getBtstart().setEnabled(false);
+				itemHuazhong.getBtstop().setEnabled(true);
+			 }
+		}else{
+			 currentHZDcObj=null;
+			 current_HZ_NoIP=null;
+			 itemHuazhong.getNo().setText("No:");
+			 itemHuazhong.getIp().setText("IP:");
+		}
+
 		editor =pref.edit();
-		editor.putString("huazhong", ip); //持久化保存
+		editor.putString("huazhong", spinItem_NOIP); //持久化保存
 		editor.apply();
 		
 	}
@@ -390,27 +387,26 @@ public class MainActivity extends Activity {
 	//关闭华中线程
 	private void stopHzThread(){
 		
-		if(hzDataCollectThread!=null){
-			hzDataCollectThread.stopCollect(); //关闭数据采集线程
-			curHuazhongRun=null;
-			hzDataCollectThread=null;
+		if(currentHZDcObj!=null){
+			currentHZDcObj.stopCollect(); //关闭数据采集线程
+			current_HZ_NoIP=null;
+			currentHZDcObj=null;
 			itemHuazhong.getBtstart().setEnabled(true);
 			itemHuazhong.getBtstop().setEnabled(false);
 		}
 	}
 	
-	public void  perfertest(){
+/*	public void  perfertest(){
 		
 //		SharedPreferences pref;
 //		
 //		SharedPreferences.Editor editor ;
-		
-		
+	
 		editor =pref.edit();
 		editor.putString("huazhong", "");
 		editor.apply();
 		
-	}
+	}*/
 	
 	
 	
