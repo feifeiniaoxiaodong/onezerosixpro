@@ -1,6 +1,8 @@
 package com.cnc.daq;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,20 +42,16 @@ public class MainActivity extends Activity {
 	 ExecutorService exec=null;
 	SharedPreferences.Editor editor ;
 	
-//	Map<String, ItemViewHolder>  viewmap=new HashMap<>();
+	Map<String, ItemViewHolder>  viewmapgGsk=new HashMap<>();
+	
+	
 	ItemViewHolder itemHuazhong =null,
-					itemGaojing=null,
-					itemGsk01=null,
-					itemGsk02=null,
-					itemGsk03=null,
-					itemGsk04=null,
-					itemGsk05=null;
+					itemGaojing=null;
+	
 	TextView  cachenum , delay ,sendnum ,packsize ,speed ;
 	
-
 	Map<String, Runnable> threadmap=new HashMap<>();
 	
-
 	String currentSpinSelItem_Hz=null,
 			currentSpinSelItem_Gj=null;
 	
@@ -63,8 +61,10 @@ public class MainActivity extends Activity {
 	String current_Gj_NoIP= null;
 	GJDataCollectThread currentGjDcObj=null;//Gaojing
 	
+	String [] gskIpArray=null; //gsk ip list
 	String current_Gsk_NoIP = null;			//guangzhou shu kong 
-	GSKDataCollectThread currentGskDcobj=null;
+	GSKDataCollectThread currentGskDcobj_1=null;
+	Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -74,8 +74,10 @@ public class MainActivity extends Activity {
 		mainActivityHandler=new mainHandler();
 		pref= PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 		exec=Executors.newCachedThreadPool();//线程池
+		gskIpArray =getResources().getStringArray(R.array.gskip);//广数ip地址
+		
 		initViewMap();
-		setClickEven();
+		
 		startDefaultThread();
 		
 		//开启发送线程
@@ -88,7 +90,8 @@ public class MainActivity extends Activity {
 	
 	@SuppressLint("HandlerLeak") 
 	class mainHandler extends Handler{
-		
+		String strlabel=null;
+		ItemViewHolder itemViewHolder=null;
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
@@ -116,8 +119,24 @@ public class MainActivity extends Activity {
 				itemGaojing.getAlarm().setText(gjUiDataAlarmRun.getAlarminfo());
 				itemGaojing.getRuninfo().setText(gjUiDataAlarmRun.getRuninfo());
 				break;
-			case HandleMsgTypeMcro.GSK01:
+			case HandleMsgTypeMcro.GSK_UINO: //gsk
+				UiDataNo gskdatano=(UiDataNo)msg.obj;
+				 strlabel =gskdatano.getThreadlabel();
+				if(strlabel!=null){
+					itemViewHolder=viewmapgGsk.get(strlabel);
+					itemViewHolder.getIdcnc().setText(gskdatano.getIdcnc());
+					itemViewHolder.getIdandroid().setText(gskdatano.getIdandroid());
+				}
 				break;
+			case HandleMsgTypeMcro.GSK_UIALARM://gsk
+				UiDataAlarmRun gskUiDataAlarmRun=(UiDataAlarmRun)msg.obj;
+				strlabel=gskUiDataAlarmRun.getThreadlabel();
+				itemViewHolder=viewmapgGsk.get(strlabel);
+				itemViewHolder.getAlarm().setText(gskUiDataAlarmRun.getAlarminfo());
+				itemViewHolder.getRuninfo().setText(gskUiDataAlarmRun.getRuninfo());
+						
+				break;
+				
 			case HandleMsgTypeMcro.GSK02:
 				break;
 			case HandleMsgTypeMcro.GSK03:
@@ -152,11 +171,28 @@ public class MainActivity extends Activity {
 	 */
 	private void startDefaultThread(){
 		//华中线程
-		String preip = pref.getString("huazhong", null);
-		if(preip!=null && !preip.trim().equals("")){
+		String preipHz = pref.getString("huazhong", null);
+		if(preipHz!=null && !preipHz.trim().equals("")){
 			//开启线程
-			startHzThread(preip);
+			startHzThread(preipHz);
 		}
+		//高精
+		String preipGj=pref.getString("gaojing", null);
+		if(preipGj!=null && !preipGj.equals("")){
+			startGjThread(preipGj);
+		}
+		
+		for(int i=0;i<gskIpArray.length;i++){
+			String str= gskIpArray[i];
+			String no=null , preNoip=null;
+			if(str!=null && !"".equals(str.trim())){
+				no=str.substring(0, str.indexOf(':'));
+				preNoip=pref.getString(no, null);
+				if(preNoip!=null){
+					startGskThread(preNoip);//开启广数数据采集线程
+				}
+			}
+		}	
 	}
 	
 	
@@ -234,6 +270,12 @@ public class MainActivity extends Activity {
 	//init all view  components id
 	private void initViewMap(){
 		
+	ItemViewHolder	itemGsk01=null,
+					itemGsk02=null,
+					itemGsk03=null,
+					itemGsk04=null,
+					itemGsk05=null;
+			
 		cachenum=(TextView)findViewById(R.id.txcachenum);
 		delay =(TextView)findViewById(R.id.txdelay);
 		sendnum=(TextView)findViewById(R.id.txsendno);
@@ -327,10 +369,20 @@ public class MainActivity extends Activity {
 		 btstop=(Button) findViewById(R.id.gsk5).findViewById(R.id.btstop);
 		 itemGsk05=new ItemViewHolder(no, ip, idcnc, idandroid, alarm, run, spinner, btstart, btstop);
 //		 viewmap.put("gsk5", itemViewHolder);
+		
+		 viewmapgGsk.put("Gsk1_1", itemGsk01);
+		 viewmapgGsk.put("Gsk1_2", itemGsk02);
+		 viewmapgGsk.put("Gsk1_3", itemGsk03);
+		 viewmapgGsk.put("Gsk1_4", itemGsk04);
+		 viewmapgGsk.put("Gsk1_5", itemGsk05);
 		 
+		 setClickEven();
+		 initGskviewIPandNo();
+				
 	}
 
 
+	//设置按钮点击事件
 	private void setClickEven(){
 		
 		//华中 start button
@@ -392,23 +444,109 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view,
-					int pos, long id) {
-				// TODO Auto-generated method stub
+				int pos, long id) {
 				currentSpinSelItem_Gj=spinnerGj.getSelectedItem().toString().trim();				
 			}
 
 			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub				
+			public void onNothingSelected(AdapterView<?> arg0) {				
 			}
 		});	
 		
-		/*<<<<==================================>>>>*/
+		//gaojing click even 
+		for(int i=0;i< gskIpArray.length;i++){
+			String no,ip;
+			final String strItem=gskIpArray[i];
+			if(strItem!=null && !"".equals(strItem.trim())){
+				no=strItem.substring(0, strItem.indexOf(':'));
+				ItemViewHolder itemViewHolder= viewmapgGsk.get(no);
+				itemViewHolder.getBtstart().setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						startGskThread(strItem);						
+					}
+				});
+				
+				itemViewHolder.getBtstop().setOnClickListener(new OnClickListener() {			
+					@Override
+					public void onClick(View v) {
+						stopGskThread(strItem);
+					}
+				});
+						
+			}
+		}
 		
+
+		/*<<<<==================================>>>>*/
+		/*itemGsk01.getBtstart().setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startGskThread(gskIpArray[1]);
+			}
+		});
+		itemGsk01.getBtstop().setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				stopGskThread(gskIpArray[1]);
+			}
+		});*/
+		/*<<<<==================================>>>>*/
+		/*itemGsk02.getBtstart().setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startGskThread(gskIpArray[2]);
+			}
+		});
+		itemGsk02.getBtstop().setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				stopGskThread(gskIpArray[2]);
+			}
+		});*/
+		/*<<<<==================================>>>>*/
+		/*itemGsk03.getBtstart().setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startGskThread(gskIpArray[3]);
+			}
+		});
+		itemGsk03.getBtstop().setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				stopGskThread(gskIpArray[3]);
+			}
+		});*/
+		/*<<<<==================================>>>>*/
+		/*itemGsk04.getBtstart().setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startGskThread(gskIpArray[4]);
+			}
+		});
+		itemGsk04.getBtstop().setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				stopGskThread(gskIpArray[4]);
+			}
+		});*/
+		/*<<<<==================================>>>>*/
+		/*itemGsk05.getBtstart().setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				startGskThread(gskIpArray[5]);
+			}
+		});
+		itemGsk05.getBtstop().setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				stopGskThread(gskIpArray[5]);
+			}
+		});*/
 		
 	}
-	
-	
+		
 	//开启华中线程
 	private void startHzThread(String spinItem_NOIP){
 		String ip=null,no=null;
@@ -438,7 +576,7 @@ public class MainActivity extends Activity {
 		editor =pref.edit();
 		editor.putString("huazhong", spinItem_NOIP); //持久化保存
 		editor.apply();
-		
+				
 	}
 	
 	//关闭华中线程
@@ -451,8 +589,14 @@ public class MainActivity extends Activity {
 			itemHuazhong.getBtstart().setEnabled(true);
 			itemHuazhong.getBtstop().setEnabled(false);
 			Log.d(TAG,"关闭了华中数据采集线程");
+			
+			editor =pref.edit();
+			editor.remove("huazhong");
+			editor.apply();
+	
 		}
 	}
+	
 	//start gaojing thread
 	private void startGjThread(String spinItem_NOIP){
 		String ip=null,no=null;
@@ -483,6 +627,7 @@ public class MainActivity extends Activity {
 		editor.putString("gaojing", spinItem_NOIP); //持久化保存
 		editor.apply();
 	}
+	
 	//stop gaojing thread
 	private void stopGjThread(){
 		if(currentGjDcObj!=null){
@@ -493,9 +638,71 @@ public class MainActivity extends Activity {
 			itemGaojing.getBtstart().setEnabled(true);
 			itemGaojing.getBtstop().setEnabled(false);
 			Log.d(TAG,"关闭了高精数据采集线程");
+			
+			editor =pref.edit();
+			editor.remove("gaojing");
+			editor.apply();			
 		}
 	}
 	
+	//start gsk data collect thread
 	
+	private void startGskThread(String spinItem_NOIP ){
+		String ip=null,no=null;
+		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
+			ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
+			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
+			 if(ip!=null && ip.startsWith("192.168.188.")){
+				 GSKDataCollectThread gskobj=new GSKDataCollectThread(ip,no);
+				 mapgskThreadobj.put(no, gskobj);
+				 exec.execute(gskobj);
+				 
+				 viewmapgGsk.get(no).getBtstart().setEnabled(false);
+				 viewmapgGsk.get(no).getBtstop().setEnabled(true);
+			 }
+			 
+			editor =pref.edit();
+			editor.putString(no , spinItem_NOIP); //持久化保存
+			editor.apply();				
+		}		
+	}
 	
+	//stop gsk data collect thread
+	private void stopGskThread(String spinItem_NOIP){
+		String ip=null,no=null;
+		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
+			ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
+			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
+			 GSKDataCollectThread gskobj=mapgskThreadobj.get(no) ; //停止线程
+			 if(gskobj !=null){
+				 gskobj.stopCollect();
+				 mapgskThreadobj.remove(no);
+				 viewmapgGsk.get(no).getBtstart().setEnabled(true);
+				 viewmapgGsk.get(no).getBtstop().setEnabled(false);
+				 
+				 editor =pref.edit();
+				 editor.remove(no);
+				 editor.apply();
+			 } 
+		}		
+	}	
+	
+	//初始化广数的界面
+	private void initGskviewIPandNo(){
+		ItemViewHolder  itemViewHolder=null;
+		if(gskIpArray==null){
+			return ;
+		}
+		for(int i=0;i< gskIpArray.length;i++){
+			String str= gskIpArray[i];
+			String no=null , ip=null;
+			if(str!=null && !"".equals(str.trim())){
+				no=str.substring(0, str.indexOf(':'));
+				ip=str.substring(str.indexOf(':')+1);
+				itemViewHolder=viewmapgGsk.get(no);
+				itemViewHolder.getNo().setText(no);
+				itemViewHolder.getIp().setText(ip);
+			}
+		}
+	}
 }

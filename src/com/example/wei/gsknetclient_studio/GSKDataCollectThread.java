@@ -40,20 +40,20 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
   
     //线程循环执行标志，改为false时，线程退出循环，线程结束运行
     private volatile  boolean  threadflag=true;  
+    private static final String TAG="GSKDataCollect()... Thread";
 /*    static {
         System.loadLibrary("gsknetw-lib");
     }
     	String pathcnc=null;
     */
-
-    private static final String TAG="GSKDataCollect()... Thread";
+   
     private long clientnum=0;  //操作句柄,为native类对象地址
     private String machineIP="192.168.188.128";
     int port=5000;
     int res=0;
     int linked=0; //连接状态
     boolean boolGetMacInfo = false; //标识是否得到机床的基本信息
-	
+	String threadlabel =null; //线程标记
 	int   count = 1;//存储运行信息的id,标识这是第几次采集信息	
 	private Handler  daqActivityHandler=null,
 					 delMsgHandler =null,
@@ -64,6 +64,11 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
     
+	public GSKDataCollectThread(String ip,String threadlabel){	
+		this(ip,5000);
+		this.threadlabel=threadlabel;
+	}
+	
     public GSKDataCollectThread(String ip){
     	this(ip,5000);
     }
@@ -120,8 +125,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
                 e.printStackTrace();
             }
         }//end while  //end for
-
-       
+     
         //释放内存
         if( (res=GSKNativeApi.GSKRM_FreeObj(clientnum) )>0){
             clientnum=0;//清除对象后要把句柄号置0
@@ -164,7 +168,8 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     			boolGetMacInfo=true;
     			
     			UiDataNo uiDataNo=new UiDataNo("",machineIP,machine_SN , DaqData.getAndroidId());
-    			sendMsg(mainActivityHandler,uiDataNo,HandleMsgTypeMcro.HUAZHONG_UINO,0,0); //发送消息到活动，显示IP地址信息    			
+    			uiDataNo.setThreadlabel(threadlabel); //thread label
+    			sendMsg(mainActivityHandler,uiDataNo,HandleMsgTypeMcro.GSK_UINO,0,0); //发送消息到活动，显示IP地址信息    			
     		}		
     	}else{ //采集运行信息和报警信息
     		StringBuilder  sbalram=new StringBuilder();//报警信息
@@ -223,7 +228,8 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 			
 			//发送到主线程
 			UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
-			sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.HUAZHONG_UIALARM	, 0, 0);
+			uiDataAlarmRun.setThreadlabel(threadlabel);//thread label
+			sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.GSK_UIALARM	, 0, 0);
     	}
     	
     }//end daq()
@@ -265,14 +271,12 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     
        
 	//发送消息到主线程
-	private void sendMsg2Main(Object obj, int what) 
-	{
+	private void sendMsg2Main(Object obj, int what) {	
 		sendMsg(delMsgHandler, obj, what,0,0);
 	}
 	
 	//发送消息到主线程
-	private void sendMsg2Main(Object obj, int what, int arg1) 
-	{
+	private void sendMsg2Main(Object obj, int what, int arg1) {	
 		sendMsg(delMsgHandler, obj, what, arg1, 0);
 	}
 
@@ -292,5 +296,4 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 		 this.threadflag=false;		
 	}
 	
-
 }

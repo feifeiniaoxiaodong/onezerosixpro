@@ -145,7 +145,7 @@ import android.util.Log;
 			DaqData.getListDataReg().add(dataReg); //保存注册信息
 			
 			UiDataNo uiDataNo=new UiDataNo("",machineIP,machine_SN , DaqData.getAndroidId());
-			sendMsg(mainActivityHandler,uiDataNo,HandleMsgTypeMcro.HUAZHONG_UINO,0,0); //发送消息到活动，显示IP地址信息
+			sendMsg(mainActivityHandler,uiDataNo,HandleMsgTypeMcro.GAOJING_UINO,0,0); //发送消息到活动，显示IP地址信息
 			
 			boolGetMacInfo = true;//置为true，表明已经得到了机床基本信息
 			
@@ -179,7 +179,7 @@ import android.util.Log;
 			
 			//发送到主线程
 			UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
-			sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.HUAZHONG_UIALARM	, 0, 0);
+			sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.GAOJING_UIALARM	, 0, 0);
 		}
 	}    //end daq()
 		

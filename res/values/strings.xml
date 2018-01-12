@@ -8,7 +8,18 @@
     <string name="startService">开启服务</string>
     <string name="delaytime">延时时间</string>
     <string name="startThread">开启线程</string>
-  
+    
+    <string name="gsk1_name">Gsk1_1</string>
+  	<string name="gsk2_name">Gsk1_2</string>
+  	<string name="gsk3_name">Gsk1_3</string>
+  	<string name="gsk4_name">Gsk1_4</string>
+  	<string name="gsk5_name">Gsk1_5</string>
+  	
+  	<string name="gsk1_ip">192.168.188.6</string>
+  	<string name="gsk2_ip">192.168.188.6</string>
+  	<string name="gsk3_ip">192.168.188.6</string>
+  	<string name="gsk4_ip">192.168.188.6</string>
+  	<string name="gsk5_ip">192.168.188.6</string>
     
     <string name="title_activity_splash">SplashActivity</string>
 

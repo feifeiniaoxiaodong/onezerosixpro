@@ -5,6 +5,7 @@ public class UiDataNo {
 	String ip;
 	String idcnc;
 	String idandroid;
+	String threadlabel; //线程标记
 
 	public UiDataNo() {
 		super();
@@ -17,6 +18,16 @@ public class UiDataNo {
 		this.idcnc ="IDCnc: "+ idcnc;
 		this.idandroid ="IDAndroid: "+ idandroid;
 	}
+	
+	
+	public String getThreadlabel() {
+		return threadlabel;
+	}
+
+	public void setThreadlabel(String threadlabel) {
+		this.threadlabel = threadlabel;
+	}
+
 	public String getNo() {
 		return no;
 	}

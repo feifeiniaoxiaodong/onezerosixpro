@@ -194,11 +194,21 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int action_settings=0x7f080002;
         public static final int app_name=0x7f080000;
         public static final int delaytime=0x7f080005;
+        public static final int gsk1_ip=0x7f08000c;
+        public static final int gsk1_name=0x7f080007;
+        public static final int gsk2_ip=0x7f08000d;
+        public static final int gsk2_name=0x7f080008;
+        public static final int gsk3_ip=0x7f08000e;
+        public static final int gsk3_name=0x7f080009;
+        public static final int gsk4_ip=0x7f08000f;
+        public static final int gsk4_name=0x7f08000a;
+        public static final int gsk5_ip=0x7f080010;
+        public static final int gsk5_name=0x7f08000b;
         public static final int hello_world=0x7f080001;
         public static final int startService=0x7f080004;
         public static final int startThread=0x7f080006;
         public static final int title=0x7f080003;
-        public static final int title_activity_splash=0x7f080007;
+        public static final int title_activity_splash=0x7f080011;
     }
     public static final class style {
         /** 
