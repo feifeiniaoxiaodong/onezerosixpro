@@ -110,7 +110,7 @@ public class DelMsgServie extends Service {
 	/**************************以下是报警信息处理流程************************************************/               
 	         case HandleMsgTypeMcro.MSG_ALRAM://报警信息 10
 	         	@SuppressWarnings("unchecked")
-					LinkedList<DataAlarm> listDataAlarm = (LinkedList<DataAlarm>)msg.obj;
+				LinkedList<DataAlarm> listDataAlarm = (LinkedList<DataAlarm>)msg.obj;
 	         	showDataAlarm(listDataAlarm);
 	         	String strTime=formatter.format(new Date()); 
 	         	
@@ -121,6 +121,7 @@ public class DelMsgServie extends Service {
 							DaqData.getListDataAlarm().add(dataAlarm);//记录当前所有的报警
 //							alarmHandle(dataAlarm); //保存报警信息到数据库
 							DBService.getInstanceDBService().saveAlarmData(dataAlarm);
+							Log.d(TAG,"向SQLite中添加了一条报警信息0");
 						}
 	         	}else{	//如果当前已经有了报警记录
 	         	
@@ -131,6 +132,7 @@ public class DelMsgServie extends Service {
 								dataAlarm.setF((byte)1);//标识这是报警结束
 								dataAlarm.setTime(strTime);//报警结束时间
 								DBService.getInstanceDBService().saveAlarmData(dataAlarm);
+								Log.d(TAG,"向SQLite中添加了一条报警信息-1");
 							}
 							DaqData.getListDataAlarm().clear();//清空这个链表
 						}
@@ -143,6 +145,7 @@ public class DelMsgServie extends Service {
 									DaqData.getListDataAlarm().add(dataAlarm);//添加到当前报警记录
 //									alarmHandle(dataAlarm);//报警处理，添加到SQLite数据库中
 									DBService.getInstanceDBService().saveAlarmData(dataAlarm);
+									Log.d(TAG,"向SQLite中添加了一条报警信息0");
 								}
 							}
 							for (DataAlarm dataAlarm : DaqData.getListDataAlarm()) //找出当前被清除的报警信息
@@ -154,6 +157,7 @@ public class DelMsgServie extends Service {
 									dataAlarm.setTime(strTime);//报警结束时间
 //									alarmHandle(dataAlarm);//报警处理，添加到SQLite数据库中	
 									DBService.getInstanceDBService().saveAlarmData(dataAlarm);
+									Log.d(TAG,"向SQLite中添加了一条报警信息1");
 								}
 							}
 						}

@@ -422,8 +422,7 @@ public class MainActivity extends Activity {
 		/*<<<<==================================>>>>*/
 	
 		//高精 start button
-		itemGaojing.getBtstart().setOnClickListener(new OnClickListener() {
-			
+		itemGaojing.getBtstart().setOnClickListener(new OnClickListener() {			
 			@Override
 			public void onClick(View v) {
 				startGjThread(currentSpinSelItem_Gj);
@@ -575,8 +574,7 @@ public class MainActivity extends Activity {
 
 		editor =pref.edit();
 		editor.putString("huazhong", spinItem_NOIP); //持久化保存
-		editor.apply();
-				
+		editor.apply();				
 	}
 	
 	//关闭华中线程

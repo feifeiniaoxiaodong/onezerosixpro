@@ -5,12 +5,15 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import android.util.Log;
+
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataLog;
 import com.cnc.domain.DataReg;
 
 public class DaqData {
 
+	static final String TAG="DaqData...";
 	public static final String forthG="liantong";
 //	private static String cncid="beihangmechine001";		//数控机床ID
 	private static String androidId=null;	//android系统的ID号
@@ -29,11 +32,19 @@ public class DaqData {
 	public static boolean compareAlarmData(DataAlarm dataAlarm1, DataAlarm dataAlarm2)
 	{		
 		boolean same = false;
-		if(dataAlarm1.getNo().equals(dataAlarm2.getNo())&&
-				dataAlarm1.getCtt().equals(dataAlarm2.getCtt()))
-		{			
-			same = true;
-		}
+		if(dataAlarm1!=null && dataAlarm2 !=null){
+			if(dataAlarm1.getNo().equals(dataAlarm2.getNo())&&
+					dataAlarm1.getCtt().equals(dataAlarm2.getCtt())&&
+					dataAlarm1.getId().equals(dataAlarm2.getId()))  //比较机床ID，区分不同机床的报警信息
+			{	
+				Log.d(TAG,"alarm 比较相同");
+				Log.d(TAG, dataAlarm1.toString()  + "======"+dataAlarm2.toString());
+				same = true;
+				return same;
+			}
+		}	
+		Log.d(TAG,"alarm 比较不同");
+		Log.d(TAG, dataAlarm1.toString()  + "======"+dataAlarm2.toString());
 		return same;
 	}
 	
@@ -89,8 +100,7 @@ public class DaqData {
 		{			
 			for (DataAlarm  dataAlarmOriginal : listDataAlarm) {
 				if(compareAlarmData(dataAlarm, dataAlarmOriginal))
-					newAlarm = false;
-					return newAlarm;
+					return false;
 			}			
 		}
 		return newAlarm;
@@ -104,12 +114,11 @@ public class DaqData {
 	 */
 	public static boolean whetherRelAlarm(DataAlarm dataAlarm,LinkedList<DataAlarm> listDataAlarm) {
 		boolean newAlarm = true; //
-		if(dataAlarm != null)//输入的报警不为空
+		if(dataAlarm != null &&  listDataAlarm!=null)//输入的报警不为空
 		{			
 			for (DataAlarm  dataAlarmOriginal : listDataAlarm) {
 				if(compareAlarmData(dataAlarm, dataAlarmOriginal))
-					newAlarm = false;
-					return newAlarm;
+					return false;
 			}			
 		}
 		return newAlarm;

@@ -212,8 +212,7 @@ public class DataTransmitThread implements Runnable{
 			
 			String res = Post.sendData(path,JsonUtil.object2Json(generalData));//发送数据			
 			//判断是否发送成功						
-			if(resultofPost.equals(res))
-			{					
+			if(resultofPost.equals(res)){							
 				Log.d(TAG, "发送计时信息成功！");
 			}
 			else if(resultofExcep.equals(res)){	//发送失败					

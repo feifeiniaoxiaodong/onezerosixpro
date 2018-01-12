@@ -84,15 +84,15 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 
         clientnum=GSKNativeApi.GSKRM_Initialization(machineIP,port); //创建底层管理类对象
         if(clientnum<=0){
-            Log.i(TAG, "创建GSKNetClient对象失败");
+            Log.d(TAG, "创建GSKNetClient对象失败");
             return ;
         }
 
         res=GSKNativeApi.GSKRM_Connnect(clientnum);   //连接到CNC
         if(res<0){
-            Log.i(TAG, "连接到机床失败");
+            Log.d(TAG, "连接到机床失败");
         }else{
-        	  Log.i(TAG, "连接到机床成功");
+        	  Log.d(TAG, "连接到机床成功");
         }
 
 /**********************************************************/
@@ -105,14 +105,14 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
                 GSKNativeApi.GSKRM_CloseConnect(clientnum);
                 res=GSKNativeApi.GSKRM_Connnect(clientnum);   //连接到CNC
                 if(res<0){
-                    Log.i(TAG, "连接到机床失败");
+                    Log.d(TAG, "连接到机床失败");
                     try {
 						Thread.sleep(1000*10); //连接失败，过一分钟再连
 					} catch (InterruptedException e) {						
 						e.printStackTrace();
 					}
                 }else{
-                	 Log.i(TAG, "连接到机床成功");
+                	 Log.d(TAG, "连接到机床成功");
                 }
             }else{
                 //采集数据
@@ -137,7 +137,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     //采集数据
     private void getDaq(){ 
     	String timeStr=formatter.format(new Date());//时间戳   	
-    	//采集注册信息 和登陆等处信息
+    	//采集注册信息 和登入登出信息
     	if(!boolGetMacInfo){
     		
     		DataVersion dataVersion=getVersionInfo(); //读取版本信息
@@ -201,37 +201,36 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     			{
     				sendMsg2Main(listDataAlarm, HandleMsgTypeMcro.MSG_ALRAM, count);
     			}  			 
-    		 }
-    		     		
-    		//采集运行信息
-			float aspdx[]=bhSample.getAspd(); //实际转速
-			float apstx[]=bhSample.getApst();//进给轴指令位置
-		    float cpstx[]=bhSample.getCpst();//进给轴实际位置
-		    float loadx[]=bhSample.getLoad();//负载电流
-			
-			DataRun dataRun=new DataRun(machine_SN, bhSample.getCas(), bhSample.getCcs(), bhSample.getAload(), 
-					aspdx[1], aspdx[2], aspdx[3], aspdx[4], aspdx[5],      //实际转速
-					cpstx[1], cpstx[2], cpstx[3], cpstx[4], cpstx[5], 		//实际位置
-					apstx[1], apstx[2], apstx[3], apstx[4], apstx[5], 		//指令位置
-					loadx[1], loadx[2], loadx[3], loadx[4], loadx[5], 		//负载电流
-					bhSample.getPrognum(), //运行程序编号
-					bhSample.getProgname(), //程序名
-					bhSample.getRunstatus(),//代码运行状态
-					bhSample.getGclinenum(),//运行行号
-					bhSample.getGcmode(),					   //通道模态
-					timeStr) ;    			 //时间戳
-			sendMsg2Main(dataRun,HandleMsgTypeMcro.MSG_RUN,count);
-			
-			count++;//采集次数记录
-			if(count == Integer.MAX_VALUE)//达到最大值的时候记得清零
-				count = 1;
-			
-			//发送到主线程
-			UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
-			uiDataAlarmRun.setThreadlabel(threadlabel);//thread label
-			sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.GSK_UIALARM	, 0, 0);
-    	}
-    	
+    		     		     		
+	    		//采集运行信息
+				float aspdx[]=bhSample.getAspd(); //实际转速
+				float apstx[]=bhSample.getApst();//进给轴指令位置
+			    float cpstx[]=bhSample.getCpst();//进给轴实际位置
+			    float loadx[]=bhSample.getLoad();//负载电流
+				
+				DataRun dataRun=new DataRun(machine_SN, bhSample.getCas(), bhSample.getCcs(), bhSample.getAload(), 
+						aspdx[1], aspdx[2], aspdx[3], aspdx[4], aspdx[5],      //实际转速
+						cpstx[1], cpstx[2], cpstx[3], cpstx[4], cpstx[5], 		//实际位置
+						apstx[1], apstx[2], apstx[3], apstx[4], apstx[5], 		//指令位置
+						loadx[1], loadx[2], loadx[3], loadx[4], loadx[5], 		//负载电流
+						bhSample.getPrognum(), //运行程序编号
+						bhSample.getProgname(), //程序名
+						bhSample.getRunstatus(),//代码运行状态
+						bhSample.getGclinenum(),//运行行号
+						bhSample.getGcmode(),					   //通道模态
+						timeStr) ;    			 //时间戳
+				sendMsg2Main(dataRun,HandleMsgTypeMcro.MSG_RUN,count);
+				
+				count++;//采集次数记录
+				if(count == Integer.MAX_VALUE)//达到最大值的时候记得清零
+					count = 1;
+				
+				//发送到主线程
+				UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
+				uiDataAlarmRun.setThreadlabel(threadlabel);//thread label
+				sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.GSK_UIALARM	, 0, 0);
+    		}
+    	}//end else
     }//end daq()
 
     @Override
@@ -248,7 +247,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
                 dataver.loginfor();
             }
         }else {
-            Log.i("JNITest","getVersionInfo...读回的字节流为空");
+            Log.d("JNITest","getVersionInfo...读回的字节流为空");
         }
         return dataver;
     }
@@ -261,10 +260,10 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
         if(tmpbytes!=null){
             dataBeiHang=BytetoJavaUtil.batojavaDataBHSAMPLE_STATIC(tmpbytes);
 
-            Log.i("JNITest",Thread.currentThread().getName());
-            Log.i("JNITest","北航数据"+ dataBeiHang.toString());
+            Log.d("JNITest",Thread.currentThread().getName());
+//            Log.d("JNITest","北航数据"+ dataBeiHang.toString());
         }else{
-            Log.i("JNITest","DataBHSAMPLE_STATIC...读回的字节流为空");
+            Log.d("JNITest","DataBHSAMPLE_STATIC...读回的字节流为空");
         }
         return dataBeiHang;
     }

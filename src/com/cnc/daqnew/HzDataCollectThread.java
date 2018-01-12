@@ -31,7 +31,7 @@ import com.cnc.service.DelMsgServie;
 import com.cnc.utils.LogLock;
 import com.cnc.utils.RegLock;
 /**
- * 数据采集子线程
+ * 华中数据采集子线程
  * @author wei
  *
  */

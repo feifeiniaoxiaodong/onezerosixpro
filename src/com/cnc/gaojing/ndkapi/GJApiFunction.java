@@ -90,8 +90,7 @@ public class GJApiFunction {
 			
 			Log.d(TAG,alarmobj.toString()); //打印报警信息
 		}
-		
-				
+					
 		return alarmlist;		
 	}
 	

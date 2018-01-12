@@ -82,11 +82,10 @@ import android.util.Log;
 				//必须先连接机床才能检测到nml文件
 //				if(dnc.main.status_nml==null){ //检查是否存在nml配置文件
 //					Log.d(TAG,"找不到nml配置文件");			
-//				}				
+//				}			
 				if(dnc.main.getConnnectState()  && dnc.main.status_nml!=null){ 
-					hadconnected=true;
-					sendMsg2Main("高精连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS); //
-					
+//					hadconnected=true;
+					sendMsg2Main("高精连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS); //					
 				}else{
 					sendMsg2Main("高精连接机床失败", HandleMsgTypeMcro.MSG_LFAILURE); //
 					Log.d(TAG,"找不到nml配置文件");
@@ -109,15 +108,19 @@ import android.util.Log;
                 	Log.i(TAG,"dnc.main.msg为空！");
                 }				
 			}
-		//采集数据间隔时间,采集结束之后线程休眠一段时间
+			
+			//采集数据间隔时间,采集结束之后线程休眠一段时间
 			try {
 				Thread.sleep(1000);//采集数据间隔时间设置为1S,因为采集过程耗时大约300毫秒，所以设置为700
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+			} catch (InterruptedException e) {				
 				e.printStackTrace();
-			} 
-	
-		}//end while()	
+			} 	
+		}//end while()
+		
+		/*if(dnc.main.getConnnectState()){
+			dnc.main.disconnectToNC();	//空指针异常		
+		}*/
+				
 	} //end run()
 		
 	/**
