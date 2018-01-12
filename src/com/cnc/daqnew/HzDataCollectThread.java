@@ -76,10 +76,6 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 		machinePort=port;		
 	}
 	
-/*	public HzDataCollectThread(Handler handler,String pathcnc) {
-		this.daqActivityHandler=handler;	
-//		this.pathcnc=pathcnc;
-	}*/
 		
 	@Override
 	public void run() {
@@ -89,7 +85,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 		{
 
 			if(inialRes != 0){
-				//首先初始化,只能初始化一次
+				//首先初始化,只能初始化一次；对于不同的机床IP初始化不同的端口号
 				inialRes=Intialize.getInstance().inial6(getInitLocalport(machineIP));
 	
 			}else{ //初始化成功
@@ -99,9 +95,9 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 					//采集数据之前初始化，得到目的机器的IP和port
 					Client = HncAPI.HNCNetConnect(machineIP,machinePort);//要连接的机床的IP和端口
 					if (Client >= 0 )
-						sendMsg2Main("连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS);//初始化成功						
+						sendMsg2Main("华中连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS);//初始化成功						
 					else{
-						sendMsg2Main("连接机床失败", HandleMsgTypeMcro.MSG_IFAILURE);
+						sendMsg2Main("华中连接机床失败", HandleMsgTypeMcro.MSG_IFAILURE);
 						try {							
 							Thread.sleep(1000*10); //连接机床失败过一分钟再连							
 						} catch (InterruptedException e) {					
@@ -124,7 +120,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 			
 		}//end while(true)	
 		
-		HncAPI.HNCNetExit();//断开连接
+		HncAPI.HNCNetExit();//退出线程断开连接，重新连接需要重新初始化
 		
 	}//end run()
 	
@@ -134,9 +130,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	 */
 	private void daq() 
 	{
-		
-		StringBuilder  sbalram=new StringBuilder();
-				
+			
 		String strTime = formatter.format(new Date());//开始采集信息的各种事件
 		
 		if(!boolGetMacInfo)   //如果没有获得过机床的基本信息
@@ -166,7 +160,8 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 			boolGetMacInfo = true;//置为true，表明已经得到了机床基本信息
 		}
 		else//采集运行信息和报警信息
-		{						 
+		{	
+			StringBuilder  sbalram=new StringBuilder();
 			//采集报警信息
 			LinkedList<DataAlarm> listDataAlarm = HncTools.getAlarmData(Client);
 			for (DataAlarm dataAlarm : listDataAlarm) {
@@ -268,7 +263,6 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	}
 	
 
-	
 	//根据IP地址获取不同初始化端口号
 	//实现采集机床的切换
 	private int getInitLocalport(String ip){
@@ -281,6 +275,5 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 		return n+9905;
 	}
 
-	
 
 }

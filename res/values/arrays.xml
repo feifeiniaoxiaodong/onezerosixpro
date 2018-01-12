@@ -12,14 +12,33 @@
     </string-array>
     
       <string-array name="huazhongip">
+          <item ></item>
           <item >Huazhong1_1:192.168.188.112</item>
           <item >Huazhong1_2:192.168.188.114</item>
           <item >Huazhong1_3:192.168.188.113</item>
           <item >Huazhong1_4:192.168.188.111</item>
           <item >Huazhong1_5:192.168.188.110</item>
-          <item ></item>
-
       </string-array>
+      
+      <string-array  name="gaojingip">
+          <item></item>
+          <item>Gaojing1_1:192.168.188.132</item>
+          <item>Gaojing1_2:192.168.188.132</item>
+          <item>Gaojing1_3:192.168.188.132</item>
+          <item>Gaojing1_4:192.168.188.132</item>
+          <item>Gaojing1_5:192.168.188.132</item>         
+      </string-array>
+      
+      <string-array name="gskip">
+          <item></item>
+          <item>Gsk1_1:192.168.188.6</item>
+          <item>Gsk1_2:192.168.188.6</item>
+          <item>Gsk1_3:192.168.188.6</item>
+          <item>Gsk1_4:192.168.188.6</item>
+          <item>Gsk1_5:192.168.188.6</item>
+      </string-array>
+      
+      
       
       
     

@@ -10,6 +10,8 @@ import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.daqnew.HzDataCollectThread;
 import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
+import com.cnc.gaojing.GJDataCollectThread;
+import com.example.wei.gsknetclient_studio.GSKDataCollectThread;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -50,13 +52,19 @@ public class MainActivity extends Activity {
 	
 
 	Map<String, Runnable> threadmap=new HashMap<>();
-	//
-	String current_HZ_NoIP = null;
-	HzDataCollectThread currentHZDcObj=null;
-	String currentSpinSelItem=null;
 	
-	String curGaojingRun= null;
-	String curGskRun   = null;
+
+	String currentSpinSelItem_Hz=null,
+			currentSpinSelItem_Gj=null;
+	
+	String current_HZ_NoIP = null;		//Huazhong
+	HzDataCollectThread currentHZDcObj=null;
+	
+	String current_Gj_NoIP= null;
+	GJDataCollectThread currentGjDcObj=null;//Gaojing
+	
+	String current_Gsk_NoIP = null;			//guangzhou shu kong 
+	GSKDataCollectThread currentGskDcobj=null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +78,9 @@ public class MainActivity extends Activity {
 		setClickEven();
 		startDefaultThread();
 		
-//		itemHuazhong.getBtstart().setEnabled(false);
-		
+		//开启发送线程
 		DataTransmitThread dataTransmitThread=new DataTransmitThread();
 		exec.execute(dataTransmitThread);
-//		new Thread(dataTransmitThread).start();
 		Log.d(TAG,"开启了数据发送线程");
 
 	}
@@ -86,7 +92,7 @@ public class MainActivity extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case HandleMsgTypeMcro.HUAZHONG_UINO:
+			case HandleMsgTypeMcro.HUAZHONG_UINO:  //huazhong cncid and android id
 				UiDataNo uidatano=(UiDataNo)msg.obj;
 //				itemHuazhong.getNo().setText(uidatano.getNo());
 //				itemHuazhong.getIp().setText(uidatano.getIp());
@@ -94,15 +100,21 @@ public class MainActivity extends Activity {
 				itemHuazhong.getIdandroid().setText(uidatano.getIdandroid());
 				
 				break;
-			case HandleMsgTypeMcro.HUAZHONG_UIALARM:
+			case HandleMsgTypeMcro.HUAZHONG_UIALARM: //huazhong running and alarm information
 				UiDataAlarmRun uialarmrun=(UiDataAlarmRun)msg.obj;
 				itemHuazhong.getAlarm().setText(uialarmrun.getAlarminfo());
 				itemHuazhong.getRuninfo().setText(uialarmrun.getRuninfo());
 				
 				break;	
-			case HandleMsgTypeMcro.GAOJING_UINO:
+			case HandleMsgTypeMcro.GAOJING_UINO: //Gaojing cncid and android id
+				UiDataNo gjdatano=(UiDataNo)msg.obj;
+				itemGaojing.getIdcnc().setText(gjdatano.getIdcnc());
+				itemGaojing.getIdandroid().setText(gjdatano.getIdandroid());
 				break;
-			case HandleMsgTypeMcro.GAOJING_UIALARM:
+			case HandleMsgTypeMcro.GAOJING_UIALARM://Gaojing running and alarm information
+				UiDataAlarmRun gjUiDataAlarmRun=(UiDataAlarmRun)msg.obj;
+				itemGaojing.getAlarm().setText(gjUiDataAlarmRun.getAlarminfo());
+				itemGaojing.getRuninfo().setText(gjUiDataAlarmRun.getRuninfo());
 				break;
 			case HandleMsgTypeMcro.GSK01:
 				break;
@@ -119,9 +131,9 @@ public class MainActivity extends Activity {
 			case HandleMsgTypeMcro.MSG_DELAYTIME://延时时间
 				String str =(String )msg.obj;
 				String[] strs= str.split(":");
-				delay.setText(strs[0]); //
-				packsize.setText(strs[1]);
-				speed.setText(strs[2]); 
+				delay.setText("delay: "+strs[0]); //
+				packsize.setText("packSize:"+strs[1]);
+				speed.setText("speed:"+strs[2]); 
 				
 				break;
 			case HandleMsgTypeMcro.MSG_COUNTRUN: //CacheNum
@@ -145,7 +157,6 @@ public class MainActivity extends Activity {
 			//开启线程
 			startHzThread(preip);
 		}
-
 	}
 	
 	
@@ -216,12 +227,11 @@ public class MainActivity extends Activity {
 
 		public Button getBtstop() {
 			return btstop;
-		}
-	
+		}	
 	}
 	
 
-	
+	//init all view  components id
 	private void initViewMap(){
 		
 		cachenum=(TextView)findViewById(R.id.txcachenum);
@@ -323,16 +333,14 @@ public class MainActivity extends Activity {
 
 	private void setClickEven(){
 		
-		//华中
+		//华中 start button
 		itemHuazhong.getBtstart().setOnClickListener(new OnClickListener() {
-				
 				@Override
-				public void onClick(View v) {
-					
-					startHzThread(currentSpinSelItem);
-					
+				public void onClick(View v) {					
+					startHzThread(currentSpinSelItem_Hz);// start Huazhong data collection thread and save ip to preference				
 				}
 			});
+//		huazhong stop button
 		itemHuazhong.getBtstop().setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -340,46 +348,64 @@ public class MainActivity extends Activity {
 				stopHzThread();		//关闭线程		
 			}
 		});
-		
-		final Spinner spinner=itemHuazhong.getSpinner();		
+		//Huazhong spinner click setting 
+		final Spinner spinnerHz=itemHuazhong.getSpinner();		
 		String[] mItemshz=getResources().getStringArray(R.array.huazhongip);
-		ArrayAdapter<String> adapter=new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mItemshz);
-		spinner.setAdapter(adapter);
+		ArrayAdapter<String> adapterHz=new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mItemshz);
+		spinnerHz.setAdapter(adapterHz);
 		
-		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+		spinnerHz.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int pos, long id 	) {
-				currentSpinSelItem=spinner.getSelectedItem().toString().trim();		
-				
+				currentSpinSelItem_Hz=spinnerHz.getSelectedItem().toString().trim();						
 			}
-
 			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-			
+			public void onNothingSelected(AdapterView<?> arg0) {	
 				Toast.makeText(MainActivity.this, "select nothing", Toast.LENGTH_SHORT).show();
 			}
 		});
 		
-		
+		/*<<<<==================================>>>>*/
 	
-		//高精
+		//高精 start button
 		itemGaojing.getBtstart().setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-
+				startGjThread(currentSpinSelItem_Gj);
 			}
 		});
-		itemGaojing.getBtstop().setOnClickListener(new OnClickListener() {
-			
+		//gaojing stop button 
+		itemGaojing.getBtstop().setOnClickListener(new OnClickListener() {			
 			@Override
 			public void onClick(View v) {
-								
+				stopGjThread();
 			}
 		});	
-	
+		final Spinner spinnerGj=itemGaojing.getSpinner(); //gaojing spinner
+		String[] mItemsGj=getResources().getStringArray(R.array.gaojingip);
+		ArrayAdapter<String> adapterGj=new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mItemsGj);
+		spinnerGj.setAdapter(adapterGj);
+		spinnerGj.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int pos, long id) {
+				// TODO Auto-generated method stub
+				currentSpinSelItem_Gj=spinnerGj.getSelectedItem().toString().trim();				
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub				
+			}
+		});	
+		
+		/*<<<<==================================>>>>*/
+		
+		
 	}
 	
 	
@@ -395,15 +421,12 @@ public class MainActivity extends Activity {
 			 
 			 if(ip!=null && !"".equals(ip)){
 				currentHZDcObj=new HzDataCollectThread(ip);
-//				exec.execute(currentHZDcObj);//开启线程
-				Log.d(TAG,"开启了数据采集线程");
 				current_HZ_NoIP=spinItem_NOIP; 
-				Thread th=new Thread(currentHZDcObj);
-//				th.setName("HZ_DC_Thread");
-				th.start();
-//				new Thread(currentHZDcObj).start();
+				exec.execute(currentHZDcObj);//开启线程				
+
 				itemHuazhong.getBtstart().setEnabled(false);
 				itemHuazhong.getBtstop().setEnabled(true);
+				Log.d(TAG,"开启了华中数据采集线程");
 			 }
 		}else{
 			 currentHZDcObj=null;
@@ -427,21 +450,51 @@ public class MainActivity extends Activity {
 			currentHZDcObj=null;
 			itemHuazhong.getBtstart().setEnabled(true);
 			itemHuazhong.getBtstop().setEnabled(false);
-			Log.d(TAG,"关闭了数据采集线程");
+			Log.d(TAG,"关闭了华中数据采集线程");
 		}
 	}
-	
-/*	public void  perfertest(){
+	//start gaojing thread
+	private void startGjThread(String spinItem_NOIP){
+		String ip=null,no=null;
 		
-//		SharedPreferences pref;
-//		
-//		SharedPreferences.Editor editor ;
-	
+		if(spinItem_NOIP!=null && !"".equals(spinItem_NOIP)){
+			 ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
+			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
+			 itemGaojing.getNo().setText("No:"+no);
+			 itemGaojing.getIp().setText("IP:"+ip);
+			 
+			 if(ip!=null && !"".equals(ip)){
+				currentGjDcObj=new GJDataCollectThread(ip);					
+				current_Gj_NoIP=spinItem_NOIP; 
+				exec.execute(currentGjDcObj);//开启线程	
+				
+				itemGaojing.getBtstart().setEnabled(false);
+				itemGaojing.getBtstop().setEnabled(true);
+				Log.d(TAG,"开启了高精数据采集线程");
+			 }
+		}else{
+			currentGjDcObj=null;
+			current_Gj_NoIP=null;
+			itemGaojing.getNo().setText("No:");
+			itemGaojing.getIp().setText("IP:");
+		}
+
 		editor =pref.edit();
-		editor.putString("huazhong", "");
+		editor.putString("gaojing", spinItem_NOIP); //持久化保存
 		editor.apply();
-		
-	}*/
+	}
+	//stop gaojing thread
+	private void stopGjThread(){
+		if(currentGjDcObj!=null){
+			currentGjDcObj.stopCollect(); //关闭数据采集线程
+			current_Gj_NoIP=null;
+			currentGjDcObj=null;
+			
+			itemGaojing.getBtstart().setEnabled(true);
+			itemGaojing.getBtstop().setEnabled(false);
+			Log.d(TAG,"关闭了高精数据采集线程");
+		}
+	}
 	
 	
 	

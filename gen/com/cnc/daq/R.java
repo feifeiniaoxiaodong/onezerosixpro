@@ -9,6 +9,8 @@ package com.cnc.daq;
 
 public final class R {
     public static final class array {
+        public static final int gaojingip=0x7f040002;
+        public static final int gskip=0x7f040003;
         public static final int huazhongip=0x7f040001;
         public static final int week=0x7f040000;
     }

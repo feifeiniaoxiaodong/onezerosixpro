@@ -6,17 +6,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.cnc.daq.DaqData;
+import com.cnc.daq.MainActivity;
 import com.cnc.daqnew.DataCollectInter;
 import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataLog;
 import com.cnc.domain.DataReg;
 import com.cnc.domain.DataRun;
+import com.cnc.domain.UiDataAlarmRun;
+import com.cnc.domain.UiDataNo;
 import com.cnc.gsk.data.domain.DataBHSAMPLE_STATIC;
 import com.cnc.gsk.data.domain.DataVersion;
 import com.cnc.gsk.data.domain.Mcronum;
 import com.cnc.gsk.datautils.BytetoJavaUtil;
 import com.cnc.netService.HncTools;
+import com.cnc.service.DelMsgServie;
 import com.cnc.utils.JsonUtil;
 import com.cnc.utils.LogLock;
 import com.cnc.utils.RegLock;
@@ -43,8 +47,8 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     */
 
     private static final String TAG="GSKDataCollect()... Thread";
-    private long clientnum=0;//操作句柄
-    String ipaddr="192.168.188.128";
+    private long clientnum=0;  //操作句柄,为native类对象地址
+    private String machineIP="192.168.188.128";
     int port=5000;
     int res=0;
     int linked=0; //连接状态
@@ -52,25 +56,28 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 	
 	int   count = 1;//存储运行信息的id,标识这是第几次采集信息	
 	private Handler  daqActivityHandler=null,
-					 delMsgHandler =null;
+					 delMsgHandler =null,
+					 mainActivityHandler=null;
 			
-	String machine_SN=null;//数控系统ID
+	private String machine_SN=null;//数控系统ID
 
-	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
+	@SuppressLint("SimpleDateFormat")
+	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
     
-    public GSKDataCollectThread(String sname){
-//        super(sname);
+    public GSKDataCollectThread(String ip){
+    	this(ip,5000);
     }
-    public GSKDataCollectThread(String sname,String ip,Handler handler){    	
-//        super(sname);
-        ipaddr=ip;
-        daqActivityHandler=handler;
+    public GSKDataCollectThread(String ip,int	port){    	
+    	this.machineIP=ip;
+    	this.port=port;
+    	delMsgHandler=DelMsgServie.getHandlerService();
+    	mainActivityHandler=MainActivity.getMainActivityHandler();
     }
 	   
     @Override
     public void run(){
 
-        clientnum=GSKNativeApi.GSKRM_Initialization(ipaddr,port); //创建底层管理类对象
+        clientnum=GSKNativeApi.GSKRM_Initialization(machineIP,port); //创建底层管理类对象
         if(clientnum<=0){
             Log.i(TAG, "创建GSKNetClient对象失败");
             return ;
@@ -96,12 +103,11 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
                     Log.i(TAG, "连接到机床失败");
                     try {
 						Thread.sleep(1000*10); //连接失败，过一分钟再连
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+					} catch (InterruptedException e) {						
 						e.printStackTrace();
 					}
                 }else{
-                	  Log.i(TAG, "连接到机床成功");
+                	 Log.i(TAG, "连接到机床成功");
                 }
             }else{
                 //采集数据
@@ -156,9 +162,12 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 					DaqData.getListDataLog().add(dataLog);
 				}
     			boolGetMacInfo=true;
+    			
+    			UiDataNo uiDataNo=new UiDataNo("",machineIP,machine_SN , DaqData.getAndroidId());
+    			sendMsg(mainActivityHandler,uiDataNo,HandleMsgTypeMcro.HUAZHONG_UINO,0,0); //发送消息到活动，显示IP地址信息    			
     		}		
     	}else{ //采集运行信息和报警信息
-    		
+    		StringBuilder  sbalram=new StringBuilder();//报警信息
     		DataBHSAMPLE_STATIC bhSample=getBeiHangInfo();//获取运行信息、报警信息、登录登出信息集合
     		//采集报警信息
     		 List<DataAlarm> listDataAlarm =new LinkedList<DataAlarm>();
@@ -178,6 +187,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
         					 							timeStr, 
         					 							alminfor[i] );
         			 listDataAlarm.add(dataAlarm);
+        			 sbalram.append(alminfor[i]).append(":");
         		 }
 
     			//如果采集到的报警信息不为零或者已有的报警信息不为零，那么就要对报警信息进行分析
@@ -185,12 +195,9 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     			if ((listDataAlarm.size() != 0)||(DaqData.getListDataAlarm().size() != 0)) 
     			{
     				sendMsg2Main(listDataAlarm, HandleMsgTypeMcro.MSG_ALRAM, count);
-    			}
-    			 
-    			 
+    			}  			 
     		 }
-    		 
-    		
+    		     		
     		//采集运行信息
 			float aspdx[]=bhSample.getAspd(); //实际转速
 			float apstx[]=bhSample.getApst();//进给轴指令位置
@@ -213,6 +220,10 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 			count++;//采集次数记录
 			if(count == Integer.MAX_VALUE)//达到最大值的时候记得清零
 				count = 1;
+			
+			//发送到主线程
+			UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
+			sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.HUAZHONG_UIALARM	, 0, 0);
     	}
     	
     }//end daq()
@@ -221,11 +232,6 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     public boolean isThreadRunning() {
         return threadflag;
     }
-//
-//    public void setThreadfalg(boolean threadfalg) {
-//        this.threadflag = threadfalg;
-//    }
-
 
     private DataVersion getVersionInfo(){
          DataVersion dataver=null;    //版本信息
@@ -257,18 +263,17 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
         return dataBeiHang;
     }
     
-    
-    
+       
 	//发送消息到主线程
 	private void sendMsg2Main(Object obj, int what) 
 	{
-		sendMsg(daqActivityHandler, obj, what,0,0);
+		sendMsg(delMsgHandler, obj, what,0,0);
 	}
 	
 	//发送消息到主线程
 	private void sendMsg2Main(Object obj, int what, int arg1) 
 	{
-		sendMsg(daqActivityHandler, obj, what, arg1, 0);
+		sendMsg(delMsgHandler, obj, what, arg1, 0);
 	}
 
 	//发送消息，通用型
