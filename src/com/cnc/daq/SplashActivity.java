@@ -41,7 +41,7 @@ public class SplashActivity extends Activity {
 			@Override
 			public void run() {	
 				try {
-					Thread.sleep(800);
+					Thread.sleep(1000*5);
 				} catch (InterruptedException e) {					
 					e.printStackTrace();
 				}
@@ -53,9 +53,7 @@ public class SplashActivity extends Activity {
 						
 			} //end run()
 		}).start();
-		
-	
-		
+
 	}
 }
 

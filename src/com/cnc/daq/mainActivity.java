@@ -164,18 +164,20 @@ public class MainActivity extends Activity {
 	 * 开启上次开启的线程，单厂家只开启一台
 	 */
 	private void startDefaultThread(){
+
 		//华中线程
 		String preipHz = pref.getString("huazhong", null);
 		if(preipHz!=null && !preipHz.trim().equals("")){
 			//开启线程
 			startHzThread(preipHz);
 		}
+		
 		//高精
 		String preipGj=pref.getString("gaojing", null);
 		if(preipGj!=null && !preipGj.equals("")){
 			startGjThread(preipGj);
 		}
-		
+	
 		for(int i=0;i<gskIpArray.length;i++){
 			String str= gskIpArray[i];
 			String no=null , preNoip=null;
@@ -184,13 +186,12 @@ public class MainActivity extends Activity {
 				preNoip=pref.getString(no, null);
 				if(preNoip!=null){
 					startGskThread(preNoip);//开启广数数据采集线程
+				
 				}
 			}
-		}
-		
+		}				
 	}
-	
-	
+
 	public static Handler getMainActivityHandler() {
 		return mainActivityHandler;
 	}
