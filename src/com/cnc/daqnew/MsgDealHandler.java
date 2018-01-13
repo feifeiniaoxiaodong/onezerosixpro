@@ -74,7 +74,7 @@ public class MsgDealHandler extends Handler {
 					{
 						for (DataAlarm dataAlarm : DaqData.getListDataAlarm()) 
 						{
-							dataAlarm.setF((byte)1);//标识这是报警结束
+							dataAlarm.setF((byte)1);//标识报警结束
 							dataAlarm.setTime(strTime);//报警结束时间
 							alarmHandle(dataAlarm);
 						}
