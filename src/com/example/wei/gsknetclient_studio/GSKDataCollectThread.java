@@ -99,7 +99,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
         }
 
 /**********************************************************/
-
+        
         while(threadflag){
         	
             linked=GSKNativeApi.GSKRM_GetConnectState(clientnum);//查连接状态

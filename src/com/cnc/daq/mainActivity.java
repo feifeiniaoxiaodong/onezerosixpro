@@ -44,7 +44,6 @@ public class MainActivity extends Activity {
 	
 	Map<String, ItemViewHolder>  viewmapgGsk=new HashMap<>();
 	
-	
 	ItemViewHolder itemHuazhong =null,
 					itemGaojing=null;
 	
@@ -52,7 +51,7 @@ public class MainActivity extends Activity {
 	
 	Map<String, Runnable> threadmap=new HashMap<>();
 	
-	String currentSpinSelItem_Hz=null,
+	String  currentSpinSelItem_Hz=null,
 			currentSpinSelItem_Gj=null;
 	
 	String current_HZ_NoIP = null;		//Huazhong
@@ -63,18 +62,18 @@ public class MainActivity extends Activity {
 	
 	String [] gskIpArray=null; //gsk ip list
 	String current_Gsk_NoIP = null;			//guangzhou shu kong 
-	GSKDataCollectThread currentGskDcobj_1=null;
+	GSKDataCollectThread  currentGskDcobj_1=null;
 	Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.mainactivity);
 		mainActivityHandler=new mainHandler();
 		pref= PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 		exec=Executors.newCachedThreadPool();//线程池
-		gskIpArray =getResources().getStringArray(R.array.gskip);//广数ip地址
+		gskIpArray =getResources().getStringArray(R.array.gskip);   //广数ip地址
 		
 		initViewMap();
 		
@@ -84,10 +83,8 @@ public class MainActivity extends Activity {
 		DataTransmitThread dataTransmitThread=new DataTransmitThread();
 		exec.execute(dataTransmitThread);
 		Log.d(TAG,"开启了数据发送线程");
-
 	}
-	
-	
+		
 	@SuppressLint("HandlerLeak") 
 	class mainHandler extends Handler{
 		String strlabel=null;
@@ -95,31 +92,29 @@ public class MainActivity extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case HandleMsgTypeMcro.HUAZHONG_UINO:  //huazhong cncid and android id
+			case HandleMsgTypeMcro.HUAZHONG_UINO:         //huazhong cncid and android id
 				UiDataNo uidatano=(UiDataNo)msg.obj;
 //				itemHuazhong.getNo().setText(uidatano.getNo());
 //				itemHuazhong.getIp().setText(uidatano.getIp());
 				itemHuazhong.getIdcnc().setText(uidatano.getIdcnc());
-				itemHuazhong.getIdandroid().setText(uidatano.getIdandroid());
-				
+				itemHuazhong.getIdandroid().setText(uidatano.getIdandroid());				
 				break;
-			case HandleMsgTypeMcro.HUAZHONG_UIALARM: //huazhong running and alarm information
+			case HandleMsgTypeMcro.HUAZHONG_UIALARM:      //huazhong running and alarm information
 				UiDataAlarmRun uialarmrun=(UiDataAlarmRun)msg.obj;
 				itemHuazhong.getAlarm().setText(uialarmrun.getAlarminfo());
-				itemHuazhong.getRuninfo().setText(uialarmrun.getRuninfo());
-				
+				itemHuazhong.getRuninfo().setText(uialarmrun.getRuninfo());				
 				break;	
-			case HandleMsgTypeMcro.GAOJING_UINO: //Gaojing cncid and android id
+			case HandleMsgTypeMcro.GAOJING_UINO:         //Gaojing cncid and android id
 				UiDataNo gjdatano=(UiDataNo)msg.obj;
 				itemGaojing.getIdcnc().setText(gjdatano.getIdcnc());
 				itemGaojing.getIdandroid().setText(gjdatano.getIdandroid());
 				break;
-			case HandleMsgTypeMcro.GAOJING_UIALARM://Gaojing running and alarm information
+			case HandleMsgTypeMcro.GAOJING_UIALARM:      //Gaojing running and alarm information
 				UiDataAlarmRun gjUiDataAlarmRun=(UiDataAlarmRun)msg.obj;
 				itemGaojing.getAlarm().setText(gjUiDataAlarmRun.getAlarminfo());
 				itemGaojing.getRuninfo().setText(gjUiDataAlarmRun.getRuninfo());
 				break;
-			case HandleMsgTypeMcro.GSK_UINO: //gsk
+			case HandleMsgTypeMcro.GSK_UINO: 			//gsk
 				UiDataNo gskdatano=(UiDataNo)msg.obj;
 				 strlabel =gskdatano.getThreadlabel();
 				if(strlabel!=null){
@@ -128,15 +123,14 @@ public class MainActivity extends Activity {
 					itemViewHolder.getIdandroid().setText(gskdatano.getIdandroid());
 				}
 				break;
-			case HandleMsgTypeMcro.GSK_UIALARM://gsk
+			case HandleMsgTypeMcro.GSK_UIALARM:   	//gsk
 				UiDataAlarmRun gskUiDataAlarmRun=(UiDataAlarmRun)msg.obj;
 				strlabel=gskUiDataAlarmRun.getThreadlabel();
 				itemViewHolder=viewmapgGsk.get(strlabel);
 				itemViewHolder.getAlarm().setText(gskUiDataAlarmRun.getAlarminfo());
 				itemViewHolder.getRuninfo().setText(gskUiDataAlarmRun.getRuninfo());
 						
-				break;
-				
+				break;				
 			case HandleMsgTypeMcro.GSK02:
 				break;
 			case HandleMsgTypeMcro.GSK03:
@@ -192,7 +186,8 @@ public class MainActivity extends Activity {
 					startGskThread(preNoip);//开启广数数据采集线程
 				}
 			}
-		}	
+		}
+		
 	}
 	
 	

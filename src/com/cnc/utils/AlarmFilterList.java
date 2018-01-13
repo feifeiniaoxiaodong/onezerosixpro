@@ -2,6 +2,7 @@ package com.cnc.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class AlarmFilterList {
 	
 	private static final String TAG="AlarmFilterList..."; 
 	private Handler    handler =null ;  //把报警信息发送到数据处理线程进行处理
-	private List<DataAlarm> nowAlarmList =new LinkedList<>();//当前正在发生的报警
+	private LinkedList<DataAlarm> nowAlarmList =new LinkedList<>();//当前正在发生的报警
 	@SuppressLint("SimpleDateFormat") 
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 	private String stampTime = formatter.format(System.currentTimeMillis());
@@ -31,7 +32,7 @@ public class AlarmFilterList {
 	}
 	
 	public void saveCollectedAlarmList( List<DataAlarm> collectAlarmList){
-		stampTime = formatter.format(System.currentTimeMillis());//每次调用还函数都要更新时间戳
+		stampTime = formatter.format(new Date());//每次调用还函数都要更新时间戳
 		
 		//当前没有报警发生
 		if( this.nowAlarmList.isEmpty()){

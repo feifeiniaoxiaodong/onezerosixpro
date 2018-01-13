@@ -82,20 +82,16 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	@Override
 	public void run() {
 		int inialRes = -1;//是否已经初始化    inialRes != 0
-		int b=0;
-		while(threadflag)
-		{
-
+		while(threadflag){
+			
 			if(inialRes != 0){
 				//首先初始化,只能初始化一次；对于不同的机床IP初始化不同的端口号
 				inialRes=Intialize.getInstance().inial6(getInitLocalport(machineIP));
-	
 			}else{ //初始化成功
-
 				if(HncAPI.HNCNetIsConnect(Client) != 0)
-				{						
+				{
+					HncAPI.HNCNetConnect(machineIP, machinePort);
 					//采集数据之前初始化，得到目的机器的IP和port
-					Client = HncAPI.HNCNetConnect(machineIP,machinePort);//要连接的机床的IP和端口
 					if (Client >= 0 )
 						sendMsg2Main("华中连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS);//初始化成功						
 					else{
@@ -104,10 +100,9 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 							Thread.sleep(1000*10); //连接机床失败过一分钟再连							
 						} catch (InterruptedException e) {					
 							e.printStackTrace();
-						} 
+					    } 
 					}					
-				}
-				else{				
+				}else{				
 					daq();//调用数据采集函数采集数据，同时把采集到的数据发送到主线程
 				}			
 			}
@@ -116,7 +111,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 			try {
 //				Thread.sleep(700);//采集数据间隔时间设置为1S,因为采集过程耗时大约300毫秒，所以设置为700
 				Thread.sleep(1000);
-			} catch (InterruptedException e) {					
+			}catch (InterruptedException e) {					
 				e.printStackTrace();
 			} 
 			
@@ -131,8 +126,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	 * 数据采集函数
 	 */
 	private void daq() 
-	{
-			
+	{			
 		String strTime = formatter.format(new Date());//开始采集信息的各种事件
 		
 		if(!boolGetMacInfo)   //如果没有获得过机床的基本信息
@@ -157,8 +151,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 			
 			UiDataNo uiDataNo=new UiDataNo("",machineIP,machine_SN , DaqData.getAndroidId());
 			sendMsg(mainHander,uiDataNo,HandleMsgTypeMcro.HUAZHONG_UINO,0,0); //发送消息到活动，显示IP地址信息
-			
-			
+					
 			boolGetMacInfo = true;//置为true，表明已经得到了机床基本信息
 		}
 		else//采集运行信息和报警信息
@@ -265,7 +258,6 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 		  return threadflag;
 	}
 	
-
 	//根据IP地址获取不同初始化端口号
 	//实现采集机床的切换
 	private int getInitLocalport(String ip){
