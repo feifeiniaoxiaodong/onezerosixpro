@@ -90,7 +90,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 			}else{ //初始化成功
 				if(HncAPI.HNCNetIsConnect(Client) != 0)
 				{
-					HncAPI.HNCNetConnect(machineIP, machinePort);
+					Client=HncAPI.HNCNetConnect(machineIP, machinePort);
 					//采集数据之前初始化，得到目的机器的IP和port
 					if (Client >= 0 )
 						sendMsg2Main("华中连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS);//初始化成功						
