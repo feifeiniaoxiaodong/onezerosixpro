@@ -28,6 +28,7 @@ import com.cnc.huazhong.HncSystem;
 import com.cnc.netService.HncTools;
 import com.cnc.netService.Intialize;
 import com.cnc.service.DelMsgServie;
+import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.LogLock;
 import com.cnc.utils.RegLock;
 /**
@@ -53,7 +54,8 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	String tp = "HNC-818A";//数控系统型号
 	String machine_SN=null;//数控系统ID
 
-	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
+	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
+	private AlarmFilterList   alarmFilterList =null; //报警信息缓存过滤对象
 	
 	/*static {  
         // 加载动态库  
@@ -70,10 +72,10 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	
 	public HzDataCollectThread(String ip,int port){
 		this.delMsgHandler=DelMsgServie.getHandlerService();
-//		this.daqActivityHandler=DaqActivity.getmHandler();
 		mainHander=MainActivity.getMainActivityHandler();
 		machineIP=ip;
-		machinePort=port;		
+		machinePort=port;
+		this.alarmFilterList=new AlarmFilterList(delMsgHandler);
 	}
 	
 		
@@ -171,9 +173,10 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 			}
 			//如果采集到的报警信息不为零或者已有的报警信息不为零，那么就要对报警信息进行分析
 			//对报警信息进行处理,必须要判断报警信息的来到是发生报警还是解除报警，这个分析过程留到主线程中
-			if ((listDataAlarm.size() != 0)||(DaqData.getListDataAlarm().size() != 0)) 
+			if ((!listDataAlarm.isEmpty())|| (!alarmFilterList.getNowAlarmList().isEmpty())) 
 			{
-				sendMsg2Main(listDataAlarm, HandleMsgTypeMcro.MSG_ALRAM, count);
+//				sendMsg2Main(listDataAlarm, HandleMsgTypeMcro.MSG_ALRAM, count);
+				alarmFilterList.saveCollectedAlarmList(listDataAlarm);
 			}		
 			
 			//采集运行信息

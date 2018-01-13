@@ -6,21 +6,29 @@ import java.util.LinkedList;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.cnc.DataBaseService.DBService;
 import com.cnc.daq.DaqData;
+import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.domain.DataAlarm;
 
 //报警信息存储、过滤工具类
 public class AlarmFilterList {
 	
 	private static final String TAG="AlarmFilterList..."; 
-	
+	private Handler    handler =null ;  //把报警信息发送到数据处理线程进行处理
 	private List<DataAlarm> nowAlarmList =new LinkedList<>();//当前正在发生的报警
 	@SuppressLint("SimpleDateFormat") 
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 	private String stampTime = formatter.format(System.currentTimeMillis());
+	
+	public AlarmFilterList(Handler handler){
+		this.handler=handler;
+	}
 	
 	public void saveCollectedAlarmList( List<DataAlarm> collectAlarmList){
 		stampTime = formatter.format(System.currentTimeMillis());//每次调用还函数都要更新时间戳
@@ -67,8 +75,13 @@ public class AlarmFilterList {
 	}
 
 	//保存报警信息
+	//由于读写数据库花时间较长，所以把信息发送给handler处理线程进行保存，提高数据采集线程的处理速度
 	private void handleAlarmItem(DataAlarm tmpAlarm){
-		DBService.getInstanceDBService().saveAlarmData(tmpAlarm);//保存到数据库，准备发送到服务器
+//		DBService.getInstanceDBService().saveAlarmData(tmpAlarm);//保存到数据库，准备发送到服务器
+		Message  msg= this.handler.obtainMessage();
+		msg.what=HandleMsgTypeMcro.MSG_ALRAM; //报警信息
+		msg.obj= tmpAlarm;
+		this.handler.sendMessage(msg);//发送消息
 	}
 
 

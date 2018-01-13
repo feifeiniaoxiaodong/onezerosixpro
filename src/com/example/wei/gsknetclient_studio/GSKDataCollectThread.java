@@ -21,6 +21,7 @@ import com.cnc.gsk.data.domain.Mcronum;
 import com.cnc.gsk.datautils.BytetoJavaUtil;
 import com.cnc.netService.HncTools;
 import com.cnc.service.DelMsgServie;
+import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.JsonUtil;
 import com.cnc.utils.LogLock;
 import com.cnc.utils.RegLock;
@@ -63,7 +64,8 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
-    
+	private AlarmFilterList   alarmFilterList =null; //报警信息缓存过滤对象
+	
 	public GSKDataCollectThread(String ip,String threadlabel){	
 		this(ip,5000);
 		this.threadlabel=threadlabel;
@@ -77,6 +79,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     	this.port=port;
     	delMsgHandler=DelMsgServie.getHandlerService();
     	mainActivityHandler=MainActivity.getMainActivityHandler();
+    	this.alarmFilterList=new  AlarmFilterList(delMsgHandler);
     }
 	   
     @Override
@@ -197,10 +200,9 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 
     			//如果采集到的报警信息不为零或者已有的报警信息不为零，那么就要对报警信息进行分析
     			//对报警信息进行处理,必须要判断报警信息的来到是发生报警还是解除报警，这个分析过程留到主线程中
-    			if ((listDataAlarm.size() != 0)||(DaqData.getListDataAlarm().size() != 0)) 
-    			{
-    				sendMsg2Main(listDataAlarm, HandleMsgTypeMcro.MSG_ALRAM, count);
-    			}  			 
+    			if ((listDataAlarm.size() != 0)||(!alarmFilterList.getNowAlarmList().isEmpty())){
+    				alarmFilterList.saveCollectedAlarmList(listDataAlarm);
+    			} 			 
     		     		     		
 	    		//采集运行信息
 				float aspdx[]=bhSample.getAspd(); //实际转速

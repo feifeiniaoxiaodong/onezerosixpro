@@ -70,6 +70,7 @@ public class DelMsgServie extends Service {
 		super.onDestroy();
 	}
 	
+	//服务重启函数
 	private void reStartService(){
 		Context context= getApplicationContext();
 		Intent intent=new Intent(context , DelMsgServie.class);
@@ -109,59 +110,9 @@ public class DelMsgServie extends Service {
 	             break;
 	/**************************以下是报警信息处理流程************************************************/               
 	         case HandleMsgTypeMcro.MSG_ALRAM://报警信息 10
-	         	@SuppressWarnings("unchecked")
-				LinkedList<DataAlarm> listDataAlarm = (LinkedList<DataAlarm>)msg.obj;
-	         	showDataAlarm(listDataAlarm);
-	         	String strTime=formatter.format(new Date()); 
-	         	
-	         	if(DaqData.getListDataAlarm().size() == 0){//如果当前的报警记录为零，则采集到的报警数不为零，说明有新的报警进入
-	         	
-	         		for (DataAlarm dataAlarm : listDataAlarm) {
-							dataAlarm.setF((byte)0);	//标识这是报警发生
-							DaqData.getListDataAlarm().add(dataAlarm);//记录当前所有的报警
-//							alarmHandle(dataAlarm); //保存报警信息到数据库
-							DBService.getInstanceDBService().saveAlarmData(dataAlarm);
-							Log.d(TAG,"向SQLite中添加了一条报警信息0");
-						}
-	         	}else{	//如果当前已经有了报警记录
-	         	
-						if(listDataAlarm.size() == 0)//已有报警，这次采集不到报警信息，所以报警全部消除
-						{
-							for (DataAlarm dataAlarm : DaqData.getListDataAlarm()) 
-							{
-								dataAlarm.setF((byte)1);//标识这是报警结束
-								dataAlarm.setTime(strTime);//报警结束时间
-								DBService.getInstanceDBService().saveAlarmData(dataAlarm);
-								Log.d(TAG,"向SQLite中添加了一条报警信息-1");
-							}
-							DaqData.getListDataAlarm().clear();//清空这个链表
-						}
-						else //已有报警和此次报警都不为零，这种情况最复杂，但是也是最少见
-						{
-							for (DataAlarm dataAlarm : listDataAlarm) {
-								if(DaqData.whetherNewAlarm(dataAlarm))//确认是否是新的报警信息
-								{
-									dataAlarm.setF((byte)0);//标识这是报警发生
-									DaqData.getListDataAlarm().add(dataAlarm);//添加到当前报警记录
-//									alarmHandle(dataAlarm);//报警处理，添加到SQLite数据库中
-									DBService.getInstanceDBService().saveAlarmData(dataAlarm);
-									Log.d(TAG,"向SQLite中添加了一条报警信息0");
-								}
-							}
-							for (DataAlarm dataAlarm : DaqData.getListDataAlarm()) //找出当前被清除的报警信息
-							{	//如果报警记录中有，而当前报警中却没有找到该报警，说明这条报警信息已经消除
-								if(DaqData.whetherRelAlarm(dataAlarm,listDataAlarm))//确认报警信息记录在已经消失
-								{
-									DaqData.getListDataAlarm().remove(dataAlarm);
-									dataAlarm.setF((byte)1);//标识这是报警结束
-									dataAlarm.setTime(strTime);//报警结束时间
-//									alarmHandle(dataAlarm);//报警处理，添加到SQLite数据库中	
-									DBService.getInstanceDBService().saveAlarmData(dataAlarm);
-									Log.d(TAG,"向SQLite中添加了一条报警信息1");
-								}
-							}
-						}
-					}             	        		
+	         	DataAlarm dataAlarm=(DataAlarm)msg.obj;	         	
+	         	DBService.getInstanceDBService().saveAlarmData(dataAlarm);//保存到数据库，准备发送到服务器
+				            	        		
 	         	break;
 	/**************************以下是注册信息和运行信息的储存************************************************/ 
 	         case HandleMsgTypeMcro.MSG_REG://得到机床的基本信息 11，注册信息

@@ -22,6 +22,7 @@ import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
 import com.cnc.gaojing.ndkapi.GJApiFunction;
 import com.cnc.service.DelMsgServie;
+import com.cnc.utils.AlarmFilterList;
 
 //import android.annotation.SuppressLint;
 import java.text.SimpleDateFormat;
@@ -49,8 +50,8 @@ import android.util.Log;
 //	int    machinePort = 21;			  //机床端口号，高精不需要设置端口号
 //	String  tp = "SYGJ-1000"; //数控系统型号，高精数控系统型号数控系统提供
 	private String machine_SN=machineIP; //数控系统ID，沈阳高精没有提供数控系统ID，暂用IP代替ID
-
-
+	private AlarmFilterList   alarmFilterList =null; //报警信息缓存过滤对象
+	
 	public GJDataCollectThread(String ip){
 		this(ip,0);
 	}
@@ -60,6 +61,7 @@ import android.util.Log;
 		machine_SN=ip;
 		delMsgHandler=DelMsgServie.getHandlerService();
 		mainActivityHandler=MainActivity.getMainActivityHandler();
+		this.alarmFilterList=new AlarmFilterList(delMsgHandler);
 	}
 		
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
@@ -165,9 +167,8 @@ import android.util.Log;
 			
 			//如果采集到的报警信息不为零或者已有的报警信息不为零，那么就要对报警信息进行分析
 			//对报警信息进行处理,必须要判断报警信息的来到是发生报警还是解除报警，这个分析过程留到主线程中
-			if ((listDataAlarm.size() != 0)||(DaqData.getListDataAlarm().size() != 0)) 
-			{
-				sendMsg2Main(listDataAlarm, HandleMsgTypeMcro.MSG_ALRAM, count);
+			if ((listDataAlarm.size() != 0)||(!alarmFilterList.getNowAlarmList().isEmpty())){
+				alarmFilterList.saveCollectedAlarmList(listDataAlarm);
 			}
 			
 			//采集运行信息
