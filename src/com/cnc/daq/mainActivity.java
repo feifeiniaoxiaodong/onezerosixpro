@@ -1,12 +1,17 @@
 package com.cnc.daq;
 
+import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+import java.text.SimpleDateFormat;
 import com.cnc.daqnew.DataTransmitThread;
 import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.daqnew.HzDataCollectThread;
@@ -18,10 +23,13 @@ import com.example.wei.gsknetclient_studio.GSKDataCollectThread;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
+
+import android.nfc.cardemulation.OffHostApduService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,10 +45,10 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 	final String TAG="mainactivity";
 	static Handler  mainActivityHandler=null;
-	
-	SharedPreferences pref;
-	 ExecutorService exec=null;
+	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");//时间戳格式
+	SharedPreferences pref;	
 	SharedPreferences.Editor editor ;
+	ExecutorService exec=null;
 	
 	Map<String, ItemViewHolder>  viewmapgGsk=new HashMap<>();
 	
@@ -49,8 +57,8 @@ public class MainActivity extends Activity {
 	
 	TextView  cachenum , delay ,sendnum ,packsize ,speed ;
 	
-	Map<String, Runnable> threadmap=new HashMap<>();
-	
+//	Map<String, Runnable> threadmap=new HashMap<>();
+	DataTransmitThread dataTransmitThread=null; //数据发送线程
 	String  currentSpinSelItem_Hz=null,
 			currentSpinSelItem_Gj=null;
 	
@@ -77,12 +85,40 @@ public class MainActivity extends Activity {
 		
 		initViewMap();
 		
-		startDefaultThread();
-		
-		//开启发送线程
-		DataTransmitThread dataTransmitThread=new DataTransmitThread();
-		exec.execute(dataTransmitThread);
-		Log.d(TAG,"开启了数据发送线程");
+		startTask(); //开启数据采集和发送线程
+
+	}
+	
+	
+	//开启各种任务
+	private void startTask(){
+		new Thread(){
+			public void run() {
+				//开启发送线程
+				if(dataTransmitThread==null){
+					dataTransmitThread=new DataTransmitThread();
+					exec.execute(dataTransmitThread);
+					Log.d(TAG,"开启了数据发送线程");
+				}
+								
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				startDefaultThread(); //开启上次关机时开启的线程
+				
+				//设置定时开关任务
+				Timer timer=new Timer(true);
+				timer.scheduleAtFixedRate(new startTask(), 1000*60, 1000*60*30);//每隔半小时执行一次任务
+				timer.scheduleAtFixedRate(new stopTask(), 1000*60, 1000*60*30);
+				
+				
+			} //end run
+			
+		}.start();		
 	}
 		
 	@SuppressLint("HandlerLeak") 
@@ -161,32 +197,32 @@ public class MainActivity extends Activity {
 	}
 	
 	/**
-	 * 开启上次开启的线程，单厂家只开启一台
+	 * 开启上次开启的线程
 	 */
 	private  void startDefaultThread(){
-
+							
 		//华中线程
 		String preipHz = pref.getString("huazhong", null);
-		if(preipHz!=null && !preipHz.trim().equals("")){
+		if(preipHz!=null && !preipHz.trim().equals("") && currentHZDcObj==null){
 			//开启线程
 			startHzThread(preipHz);
 		}
-		
+			
 		//高精
 		String preipGj=pref.getString("gaojing", null);
-		if(preipGj!=null && !preipGj.equals("")){
+		if(preipGj!=null && !preipGj.equals("") && currentGjDcObj==null){
 			startGjThread(preipGj);
 		}
-	
+		
 		for(int i=0;i<gskIpArray.length;i++){
 			String str= gskIpArray[i];
 			String no=null , preNoip=null;
 			if(str!=null && !"".equals(str.trim())){
 				no=str.substring(0, str.indexOf(':'));
 				preNoip=pref.getString(no, null);
-				if(preNoip!=null){
-					startGskThread(preNoip);//开启广数数据采集线程
-				
+				Object obj =mapgskThreadobj.get(no);
+				if(preNoip!=null && obj==null){ //开启该线程时应保证该线程还未开启
+					startGskThread(preNoip);//开启广数数据采集线程				
 				}
 			}
 		}				
@@ -195,8 +231,7 @@ public class MainActivity extends Activity {
 	public static Handler getMainActivityHandler() {
 		return mainActivityHandler;
 	}
-	
-	
+		
 	class ItemViewHolder{
 		TextView  no,ip,
 				 idcnc,
@@ -223,7 +258,6 @@ public class MainActivity extends Activity {
 			this.btstart = btstart;
 			this.btstop = btstop;
 		}
-
 
 		public TextView getIp() {
 			return ip;
@@ -393,7 +427,7 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				stopHzThread();		//关闭线程		
+				stopHzThread(true);		//关闭线程		
 			}
 		});
 		//Huazhong spinner click setting 
@@ -428,7 +462,7 @@ public class MainActivity extends Activity {
 		itemGaojing.getBtstop().setOnClickListener(new OnClickListener() {			
 			@Override
 			public void onClick(View v) {
-				stopGjThread();
+				stopGjThread(true);
 			}
 		});	
 		final Spinner spinnerGj=itemGaojing.getSpinner(); //gaojing spinner
@@ -466,80 +500,11 @@ public class MainActivity extends Activity {
 				itemViewHolder.getBtstop().setOnClickListener(new OnClickListener() {			
 					@Override
 					public void onClick(View v) {
-						stopGskThread(strItem);
+						stopGskThread(strItem,true);
 					}
-				});
-						
+				});						
 			}
 		}
-		
-
-		/*<<<<==================================>>>>*/
-		/*itemGsk01.getBtstart().setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				startGskThread(gskIpArray[1]);
-			}
-		});
-		itemGsk01.getBtstop().setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				stopGskThread(gskIpArray[1]);
-			}
-		});*/
-		/*<<<<==================================>>>>*/
-		/*itemGsk02.getBtstart().setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				startGskThread(gskIpArray[2]);
-			}
-		});
-		itemGsk02.getBtstop().setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				stopGskThread(gskIpArray[2]);
-			}
-		});*/
-		/*<<<<==================================>>>>*/
-		/*itemGsk03.getBtstart().setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				startGskThread(gskIpArray[3]);
-			}
-		});
-		itemGsk03.getBtstop().setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				stopGskThread(gskIpArray[3]);
-			}
-		});*/
-		/*<<<<==================================>>>>*/
-		/*itemGsk04.getBtstart().setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				startGskThread(gskIpArray[4]);
-			}
-		});
-		itemGsk04.getBtstop().setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				stopGskThread(gskIpArray[4]);
-			}
-		});*/
-		/*<<<<==================================>>>>*/
-		/*itemGsk05.getBtstart().setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				startGskThread(gskIpArray[5]);
-			}
-		});
-		itemGsk05.getBtstop().setOnClickListener(new OnClickListener() {			
-			@Override
-			public void onClick(View v) {
-				stopGskThread(gskIpArray[5]);
-			}
-		});*/
-		
 	}
 		
 	//开启华中线程
@@ -574,7 +539,7 @@ public class MainActivity extends Activity {
 	}
 	
 	//关闭华中线程
-	private void stopHzThread(){
+	private void stopHzThread(boolean repref){
 		
 		if(currentHZDcObj!=null){
 			currentHZDcObj.stopCollect(); //关闭数据采集线程
@@ -583,10 +548,12 @@ public class MainActivity extends Activity {
 			itemHuazhong.getBtstart().setEnabled(true);
 			itemHuazhong.getBtstop().setEnabled(false);
 			Log.d(TAG,"关闭了华中数据采集线程");
-			
-			editor =pref.edit();
-			editor.remove("huazhong");
-			editor.apply();	
+			if(repref){
+				editor =pref.edit();
+				editor.remove("huazhong");
+				editor.apply();	
+				
+			}		
 		}
 	}
 	
@@ -622,7 +589,7 @@ public class MainActivity extends Activity {
 	}
 	
 	//stop gaojing thread
-	private void stopGjThread(){
+	private void stopGjThread(boolean repref){
 		if(currentGjDcObj!=null){
 			currentGjDcObj.stopCollect(); //关闭数据采集线程
 			current_Gj_NoIP=null;
@@ -631,10 +598,11 @@ public class MainActivity extends Activity {
 			itemGaojing.getBtstart().setEnabled(true);
 			itemGaojing.getBtstop().setEnabled(false);
 			Log.d(TAG,"关闭了高精数据采集线程");
-			
-			editor =pref.edit();
-			editor.remove("gaojing");
-			editor.apply();			
+			if( repref){
+				editor =pref.edit();
+				editor.remove("gaojing");
+				editor.apply();	
+			}				
 		}
 	}
 	
@@ -659,7 +627,7 @@ public class MainActivity extends Activity {
 	}
 	
 	//stop gsk data collect thread
-	private void stopGskThread(String spinItem_NOIP){
+	private void stopGskThread(String spinItem_NOIP, boolean repref){
 		String no=null;
 		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
 //			String ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
@@ -670,10 +638,11 @@ public class MainActivity extends Activity {
 				 mapgskThreadobj.remove(no);
 				 viewmapgGsk.get(no).getBtstart().setEnabled(true);
 				 viewmapgGsk.get(no).getBtstop().setEnabled(false);
-				 
-				 editor =pref.edit();
-				 editor.remove(no);
-				 editor.apply();
+				 if(repref){
+					 editor =pref.edit();
+					 editor.remove(no);
+					 editor.apply(); 
+				 }				 
 			 } 
 		}		
 	}	
@@ -695,6 +664,75 @@ public class MainActivity extends Activity {
 				itemViewHolder.getIp().setText(ip);
 			}
 		}
+	}
+	//停止采集所有数据采集线程
+	private void offLineAllDatacollectThread(){
+		//停止华中数据采集
+		stopHzThread(false); //停止数据采集，但是不移除pref中保存的采集地址
+		//停止高精数据采集
+		stopGjThread(false);
+		//停止广数数据采集
+		for(int i=0;i<gskIpArray.length;i++){
+			String str= gskIpArray[i];
+			stopGskThread(str, false);
+		}	
+	}
+
+	//定时启动任务，开始数据的采集和发送
+	class  startTask extends TimerTask{
+	
+		@Override
+		public void run() {
+			
+			String time=formatter.format(Calendar.getInstance().getTime());
+			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
+			if( hour== 7 ){
+				//开启发送线程
+				if(dataTransmitThread==null){
+					dataTransmitThread=new DataTransmitThread();
+					exec.execute(dataTransmitThread);
+					Log.d(TAG,"开启了数据发送线程");
+				}
+								
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				startDefaultThread(); //开启上次关机时开启的线程
+			}
+			Log.d(TAG,"执行了定时启动任务");
+		}//end run
+		
+	}
+
+	//定时任务，数据采集和发送都下线
+	class stopTask extends TimerTask{
+	
+		@Override
+		public void run() {
+			
+			String time=formatter.format(Calendar.getInstance().getTime());
+			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
+			if( hour== 18 ){
+				
+				offLineAllDatacollectThread(); //定时下线数据采集线程
+				
+				try {
+					Thread.sleep(1000*60*5); //五分钟后再停止数据发送线程
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(dataTransmitThread !=null && dataTransmitThread.getIsCountinueRun()){
+					dataTransmitThread.setIsCountinueRun(false); //关闭数据发送线程，停止数据发送
+					dataTransmitThread=null;
+				}
+			}
+			Log.d(TAG,"执行了定时下线任务");						
+		}		
 	}
 }
 

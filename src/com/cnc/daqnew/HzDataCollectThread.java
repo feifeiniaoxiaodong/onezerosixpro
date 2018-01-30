@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -31,6 +32,7 @@ import com.cnc.service.DelMsgServie;
 import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.LogLock;
 import com.cnc.utils.RegLock;
+import com.cnc.utils.SaveRunTime;
 /**
  * 华中数据采集子线程
  * @author wei
@@ -46,7 +48,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	boolean boolGetMacInfo = false; //标识是否得到机床的基本信息
 	int   macChannel = 0;//机床的通道信息
 	int   count = 1;//存储运行信息的id,标识这是第几次采集信息
-		
+	
 //	private Handler  daqActivityHandler=null,
 	private Handler  delMsgHandler =null;
 	private Handler  mainHander=null ;
@@ -82,6 +84,9 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	@Override
 	public void run() {
 		int inialRes = -1;//是否已经初始化    inialRes != 0
+		long  starttime=0; //线程开启时间	
+		starttime=Calendar.getInstance().getTimeInMillis(); //记录下线程开启的时间
+		
 		while(threadflag){
 			
 			if(inialRes != 0){
@@ -118,6 +123,9 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 		}//end while(true)	
 		
 		HncAPI.HNCNetExit();//退出线程断开连接，重新连接需要重新初始化
+		//计算运行时长
+		starttime= Calendar.getInstance().getTimeInMillis() - starttime;
+		SaveRunTime.saveOnTime("hztime", starttime /1000); //以秒为单位保存
 		
 	}//end run()
 	
@@ -143,8 +151,12 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 			synchronized(RegLock.class){
 				DaqData.getListDataReg().add(dataReg);
 			}
-
-			DataLog dataLog=new DataLog(machine_SN,0,0,strTime);//华中数控不提供“累计加工时间”和“累计运行时间”
+			long ontime=SaveRunTime.getOnTime("hztime");
+			
+			DataLog dataLog=new DataLog(machine_SN,
+					ontime,
+					ontime,
+					strTime);//华中数控不提供“累计加工时间”和“累计运行时间”
 			synchronized(LogLock.class){
 				DaqData.getListDataLog().add(dataLog);
 			}

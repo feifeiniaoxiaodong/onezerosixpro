@@ -38,7 +38,7 @@ import com.cnc.utils.RegLock;
 public class DataTransmitThread implements Runnable{
 	
 	private final String TAG="DataTransmitThread...";
-
+	private  volatile boolean  isCountinueRun=true;
    	boolean isRegister = false; //注册标志  
    	boolean isLogin=false; 		//登录登出标志
 	String   path="http://47.94.200.41:8080/DataPush/rec";  //远端服务器地址
@@ -83,7 +83,7 @@ public class DataTransmitThread implements Runnable{
 			path=sPath;
 		}
 		
-		while(true) //如果注册信息与运行信息有消息，那就一直发送
+		while(isCountinueRun) //如果注册信息与运行信息有消息，那就一直发送
 		{
 			synchronized(RegLock.class){
 				//发送注册信息
@@ -138,8 +138,9 @@ public class DataTransmitThread implements Runnable{
 			} catch (InterruptedException e) {				
 				e.printStackTrace();
 			}			
-		}//end while()		
-	}//end run()
+		} //end while()	
+		
+	} //end run()
 	
 	/**
 	 * 发送报警信息
@@ -431,6 +432,16 @@ public class DataTransmitThread implements Runnable{
 		}
 		return path;
 	}
+	
+	
+	public void setIsCountinueRun(boolean flag){
+		this.isCountinueRun=flag;
+	}
+	
+	public boolean getIsCountinueRun(){
+		return isCountinueRun;
+	}
+	
 }
 
 

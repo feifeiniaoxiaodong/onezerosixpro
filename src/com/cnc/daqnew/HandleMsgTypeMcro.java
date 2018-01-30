@@ -46,5 +46,7 @@ public class HandleMsgTypeMcro {
 	    public static final int   	GSK04= 6004;
 	    public static final int   	GSK05= 6005;
 	    
-
+	    
+	
+	    
 }

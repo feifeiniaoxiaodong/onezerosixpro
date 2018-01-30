@@ -146,7 +146,8 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     		DataVersion dataVersion=getVersionInfo(); //读取版本信息
     		DataBHSAMPLE_STATIC bhSample=getBeiHangInfo();//获取运行信息、报警信息、登录登出信息集合
     		
-    		String tp = GSKNativeApi.GSKRM_GetCNCTypeName(clientnum);//数控系统型号，有待测试
+//    		String tp = GSKNativeApi.GSKRM_GetCNCTypeName(clientnum);//数控系统型号，有待测试 ===>乱码
+    		String tp = "25i";
     		
     		if(dataVersion!=null && bhSample!=null){
     			
