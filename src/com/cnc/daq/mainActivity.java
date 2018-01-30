@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
 	String [] gskIpArray=null; //gsk ip list
 	String current_Gsk_NoIP = null;			//guangzhou shu kong 
 	GSKDataCollectThread  currentGskDcobj_1=null;
-	Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
+	Map<String ,Runnable>  mapgskThreadobj=new HashMap<>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -163,7 +163,7 @@ public class MainActivity extends Activity {
 	/**
 	 * 开启上次开启的线程，单厂家只开启一台
 	 */
-	private void startDefaultThread(){
+	private  void startDefaultThread(){
 
 		//华中线程
 		String preipHz = pref.getString("huazhong", null);
@@ -448,9 +448,9 @@ public class MainActivity extends Activity {
 			}
 		});	
 		
-		//gaojing click even 
+		//广数 click event 
 		for(int i=0;i< gskIpArray.length;i++){
-			String no,ip;
+			String no;
 			final String strItem=gskIpArray[i];
 			if(strItem!=null && !"".equals(strItem.trim())){
 				no=strItem.substring(0, strItem.indexOf(':'));
@@ -586,8 +586,7 @@ public class MainActivity extends Activity {
 			
 			editor =pref.edit();
 			editor.remove("huazhong");
-			editor.apply();
-	
+			editor.apply();	
 		}
 	}
 	
@@ -614,7 +613,7 @@ public class MainActivity extends Activity {
 			currentGjDcObj=null;
 			current_Gj_NoIP=null;
 			itemGaojing.getNo().setText("No:");
-			itemGaojing.getIp().setText("IP:");
+			itemGaojing.getIp().setText("IP:");			
 		}
 
 		editor =pref.edit();
@@ -639,8 +638,7 @@ public class MainActivity extends Activity {
 		}
 	}
 	
-	//start gsk data collect thread
-	
+	//start gsk data collect thread	
 	private void startGskThread(String spinItem_NOIP ){
 		String ip=null,no=null;
 		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
@@ -653,8 +651,7 @@ public class MainActivity extends Activity {
 				 
 				 viewmapgGsk.get(no).getBtstart().setEnabled(false);
 				 viewmapgGsk.get(no).getBtstop().setEnabled(true);
-			 }
-			 
+			 }			 
 			editor =pref.edit();
 			editor.putString(no , spinItem_NOIP); //持久化保存
 			editor.apply();				
@@ -663,11 +660,11 @@ public class MainActivity extends Activity {
 	
 	//stop gsk data collect thread
 	private void stopGskThread(String spinItem_NOIP){
-		String ip=null,no=null;
+		String no=null;
 		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
-			ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
+//			String ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
 			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
-			 GSKDataCollectThread gskobj=mapgskThreadobj.get(no) ; //停止线程
+			 GSKDataCollectThread gskobj=(GSKDataCollectThread) mapgskThreadobj.get(no) ; //停止线程
 			 if(gskobj !=null){
 				 gskobj.stopCollect();
 				 mapgskThreadobj.remove(no);
@@ -700,3 +697,5 @@ public class MainActivity extends Activity {
 		}
 	}
 }
+
+

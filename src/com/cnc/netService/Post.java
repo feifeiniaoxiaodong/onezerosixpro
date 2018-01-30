@@ -38,7 +38,8 @@ public class Post {
 	//发送字节流函数
 	private static String sendPOSTRequest(String path, byte[] entity) throws Exception{		
 		HttpURLConnection conn = (HttpURLConnection) new URL(path).openConnection();    //建立http连接
-		conn.setConnectTimeout(1000); //超时时间10s
+		conn.setConnectTimeout(8000); //超时时间8s
+		conn.setReadTimeout(8000);  
 		conn.setRequestMethod("POST"); //传输方式post
 		conn.setDoOutput(true);		//允许对外输出数据，即http传输中的实际内容
 		conn.setDoInput(true);   //允许读取数据

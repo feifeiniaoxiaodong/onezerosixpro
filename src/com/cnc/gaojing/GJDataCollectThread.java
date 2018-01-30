@@ -58,7 +58,7 @@ import android.util.Log;
 	
 	public GJDataCollectThread(String ip,int port){
 		machineIP=ip;
-		machine_SN=ip;
+		machine_SN="G"+ip;
 		delMsgHandler=DelMsgServie.getHandlerService();
 		mainActivityHandler=MainActivity.getMainActivityHandler();
 		this.alarmFilterList=new AlarmFilterList(delMsgHandler);
