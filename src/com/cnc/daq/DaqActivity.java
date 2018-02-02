@@ -34,6 +34,7 @@ public class DaqActivity extends Activity implements View.OnClickListener{
 	TextView tvDelayTime=null;
 	TextView  count_runinfo=null;//未发送的运行信息的条数
 	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

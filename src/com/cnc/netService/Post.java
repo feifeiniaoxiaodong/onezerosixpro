@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import android.util.Log;
 
@@ -15,23 +16,21 @@ public class Post {
 	private final static String tag = "hnctest";
 	
 	//发送数据到服务器端，需要发送的数据都是提前转化为json格式的字符串，已经提前处理好了
-	public static String sendData(String path,String data) {
+	public static String sendData(String path,String data) throws SocketTimeoutException {
 		// TODO Auto-generated method stub
 		String res=null;
 		String upData = "data=" + data;
 		byte[] entity = null;
 		try {
 			entity = upData.toString().getBytes(encoding); //将string转化为字节数组
-		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
+		} catch (UnsupportedEncodingException e1) {			
 			e1.printStackTrace();
 		}//生成实体数据
 		
 		try {
-			res = sendPOSTRequest(path, entity); //发送数据
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			Log.i(tag, e.getMessage());
+			res = sendPOSTRequest(path, entity);
+		} catch (Exception e) {		
+			e.printStackTrace();
 		}
 		return res;
 	}
@@ -39,7 +38,7 @@ public class Post {
 	private static String sendPOSTRequest(String path, byte[] entity) throws Exception{		
 		HttpURLConnection conn = (HttpURLConnection) new URL(path).openConnection();    //建立http连接
 		conn.setConnectTimeout(8000); //超时时间8s
-		conn.setReadTimeout(8000);  
+		conn.setReadTimeout(20000);   //设置数据读取超时时间为20s 
 		conn.setRequestMethod("POST"); //传输方式post
 		conn.setDoOutput(true);		//允许对外输出数据，即http传输中的实际内容
 		conn.setDoInput(true);   //允许读取数据

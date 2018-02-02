@@ -53,7 +53,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	private Handler  delMsgHandler =null;
 	private Handler  mainHander=null ;
 					
-	String tp = "HNC-818A";//数控系统型号
+	private final String tp = "HNC-818A";//数控系统型号
 	String machine_SN=null;//数控系统ID
 
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
@@ -65,8 +65,8 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
         System.loadLibrary("hzHncAPI");  
     }*/
 
-	String machineIP = "192.168.188.113"; //机床的IP地址
-	int    machinePort = 21;			  //机床端口号
+	final String machineIP; //="192.168.188.113"; //机床的IP地址
+	final int    machinePort ;//= 21;			  //机床端口号
 	
 	public HzDataCollectThread(String ip){
 		this(ip,21);
@@ -74,7 +74,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	
 	public HzDataCollectThread(String ip,int port){
 		this.delMsgHandler=DelMsgServie.getHandlerService();
-		mainHander=MainActivity.getMainActivityHandler();
+		this.mainHander=MainActivity.getMainActivityHandler();
 		machineIP=ip;
 		machinePort=port;
 		this.alarmFilterList=new AlarmFilterList(delMsgHandler);
@@ -102,7 +102,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 					else{
 						sendMsg2Main("华中连接机床失败", HandleMsgTypeMcro.MSG_IFAILURE);
 						try {							
-							Thread.sleep(1000*10); //连接机床失败过一分钟再连							
+							Thread.sleep(1000*60); //连接机床失败过一分钟再连							
 						} catch (InterruptedException e) {					
 							e.printStackTrace();
 					    } 
@@ -125,7 +125,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 		HncAPI.HNCNetExit();//退出线程断开连接，重新连接需要重新初始化
 		//计算运行时长
 		starttime= Calendar.getInstance().getTimeInMillis() - starttime;
-		SaveRunTime.saveOnTime("hztime", starttime /1000); //以秒为单位保存
+		SaveRunTime.saveOnTime(machineIP, starttime /1000); //以秒为单位保存,使用IP地址作为主键
 		
 	}//end run()
 	
@@ -134,8 +134,8 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	 * 数据采集函数
 	 */
 	private void daq() 
-	{			
-		String strTime = formatter.format(new Date());//开始采集信息的各种事件
+	{	//开始采集信息的各种事件		
+		String strTime = formatter.format(new Date());//时间戳
 		
 		if(!boolGetMacInfo)   //如果没有获得过机床的基本信息
 		{
@@ -143,25 +143,29 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 			DataReg dataReg = HncTools.getMacInfo(Client); //获取机床的基本信息			
 			//机床ID
 			machine_SN=dataReg.getId();
+			if(machine_SN==null){
+				Log.d(TAG,"没有读到华中机床的ID");
+				return ;  //如果没有读到机床的ID则不进行任何接下来的采集工作
+			}
 //				DaqData.setCncid(machine_SN);
 			//得到通道号
 			macChannel = HncAPI.HNCSystemGetValueInt(HncSystem.HNC_SYS_ACTIVE_CHAN, Client);//机床的通道信息
 			dataReg.setTime(strTime);		//设置采集的时间戳
 			dataReg.setTp(tp);   			//数控系统型号
-			synchronized(RegLock.class){
+			synchronized(RegLock.class){   //加锁同步，同一时刻只能有一个线程修改list中的数据
 				DaqData.getListDataReg().add(dataReg);
 			}
-			long ontime=SaveRunTime.getOnTime("hztime");
 			
+			long ontime=SaveRunTime.getOnTime(machineIP);//累计运行时长			
 			DataLog dataLog=new DataLog(machine_SN,
 					ontime,
 					ontime,
 					strTime);//华中数控不提供“累计加工时间”和“累计运行时间”
-			synchronized(LogLock.class){
+			synchronized(LogLock.class){  //加锁同步
 				DaqData.getListDataLog().add(dataLog);
 			}
 			
-			UiDataNo uiDataNo=new UiDataNo("",machineIP,machine_SN , DaqData.getAndroidId());
+			UiDataNo uiDataNo=new UiDataNo("","",machine_SN , DaqData.getAndroidId());
 			sendMsg(mainHander,uiDataNo,HandleMsgTypeMcro.HUAZHONG_UINO,0,0); //发送消息到活动，显示IP地址信息
 					
 			boolGetMacInfo = true;//置为true，表明已经得到了机床基本信息

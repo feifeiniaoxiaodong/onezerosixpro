@@ -9,11 +9,11 @@ public class UiDataAlarmRun {
 	String threadlabel; //线程标记
 
 	public UiDataAlarmRun() {
-		super();
+		
 	}
 
 	public UiDataAlarmRun(String alarminfo, String runinfo) {
-		super();
+		
 		this.alarminfo ="Alarm: "+ alarminfo;
 		this.runinfo = "RunInfo: "+runinfo;
 	}

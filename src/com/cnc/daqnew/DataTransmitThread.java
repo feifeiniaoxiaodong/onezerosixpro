@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -79,6 +80,7 @@ public class DataTransmitThread implements Runnable{
 //		long  countRun=0; //未发送的运行信息的条数
 	
 		String sPath=getPath(HandleMsgTypeMcro.SERVICES_ALIYUN); //初始化远端服务器地址
+//		String sPath=getPath(HandleMsgTypeMcro.SERVICES_YANG); //初始化远端服务器地址
 		if(sPath!=null){
 			path=sPath;
 		}
@@ -91,18 +93,22 @@ public class DataTransmitThread implements Runnable{
 					
 					DataReg dataReg= DaqData.getListDataReg().get(0); 
 					GeneralData generalData = new GeneralData();
-					generalData.setDid(DataType.DataReg);
+					generalData.setDid(DataType.DataReg); //注册信息
 					if(dataReg.getId()!=null) {
 						 generalData.setDt(JsonUtil.object2Json(dataReg));
-		                 res = Post.sendData(path, JsonUtil.object2Json(generalData));	//发送注册信息
-		                    if(resultofPost.equals(res))
-		                    {
-		                    	DaqData.getListDataReg().remove(0);
-		                        Log.d(TAG, "注册成功");
-		                    }
-		                    else {
-		                        Log.d(TAG,"注册失败！");
-		                    }						
+		                 try {
+							res = Post.sendData(path, JsonUtil.object2Json(generalData));//发送注册信息
+						} catch (SocketTimeoutException e) {							
+							e.printStackTrace();
+						}	
+	                    if(resultofPost.equals(res))
+	                    {
+	                    	DaqData.getListDataReg().remove(0);
+	                        Log.d(TAG, "注册成功");
+	                    }
+	                    else {
+	                        Log.d(TAG,"注册失败！");
+	                    }						
 					}					
 				}
 			}
@@ -110,19 +116,23 @@ public class DataTransmitThread implements Runnable{
 			synchronized(LogLock.class){
 				if(!DaqData.getListDataLog().isEmpty()){
 					DataLog dataLog=DaqData.getListDataLog().get(0);
-					GeneralData generalData = new GeneralData();
-					generalData.setDid(DataType.DataLog);
+					GeneralData generalData2 = new GeneralData();
+					generalData2.setDid(DataType.DataLog); //数据类型->登录登出信息
 					if(dataLog.getId()!=null){
-						 generalData.setDt(JsonUtil.object2Json(dataLog));
-		                 res = Post.sendData(path, JsonUtil.object2Json(generalData));	//发送注册信息
-		                    if(resultofPost.equals(res))
-		                    {
-		                    	DaqData.getListDataLog().remove(0);
-		                        Log.d(TAG, "登录登出成功");
-		                    }
-		                    else {
-		                        Log.d(TAG,"登录登出失败！");
-		                    }	
+						generalData2.setDt(JsonUtil.object2Json(dataLog));
+		                try {
+							res = Post.sendData(path, JsonUtil.object2Json(generalData2));//发送登录登出信息
+						} catch (SocketTimeoutException e) {							
+							e.printStackTrace();
+						}	
+	                    if(resultofPost.equals(res))
+	                    {
+	                    	DaqData.getListDataLog().remove(0);
+	                        Log.d(TAG, "登录登出成功");
+	                    }
+	                    else {
+	                        Log.d(TAG,"登录登出失败！");
+	                    }	
 					}
 				}
 			}
@@ -139,7 +149,7 @@ public class DataTransmitThread implements Runnable{
 				e.printStackTrace();
 			}			
 		} //end while()	
-		
+
 	} //end run()
 	
 	/**
@@ -151,7 +161,7 @@ public class DataTransmitThread implements Runnable{
 		long  countAlarm=0; //未发送的运行信息的条数
 		
 		if((countAlarm=dbservice.getCountAlarmData())>0){
-			DataAlarmPlus dataAlarmPlus = dbservice.findFirstRowAlarmDataP();//获取数据
+			DataAlarmPlus dataAlarmPlus = dbservice.findFirstRowAlarmDataP();//从Sqlite中读取报警信息
 			//将数据打包发送
 			GeneralData generalData = new GeneralData();
 			generalData.setDid(DataType.DataAlarm); 		//报警信息
@@ -191,11 +201,11 @@ public class DataTransmitThread implements Runnable{
 		
 		//发送特定条数的运行信息
 		if(countRun>= keys[pointer = (pointer)%len] ){
-			delayTime=getDataDelayTimeObj(DataType.DataDelay,countRun);
-			sendNumRunInfo(keys[pointer],delayTime);  //有待测试	
+			delayTime=getDataDelayTimeObj(DataType.DataDelay,countRun); //获取一个延时信息对象
+			sendNumRunInfo(keys[pointer],delayTime);  //发送指定条数的运行信息到服务器	
 			++pointer;					
 		}
-		//发送延时时间
+		//发送延时时间，到服务器
 		sendDelayTime(delayTime);
 	}
 	
@@ -211,7 +221,13 @@ public class DataTransmitThread implements Runnable{
 			
 			generalData.setDt(JsonUtil.object2Json(dt));
 			
-			String res = Post.sendData(path,JsonUtil.object2Json(generalData));//发送数据			
+			String res = null;
+			try {
+				res = Post.sendData(path,JsonUtil.object2Json(generalData));
+			} catch (SocketTimeoutException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//发送数据			
 			//判断是否发送成功						
 			if(resultofPost.equals(res)){							
 				Log.d(TAG, "发送计时信息成功！");
@@ -239,11 +255,11 @@ public class DataTransmitThread implements Runnable{
 			
 		StringBuilder  strRun=new StringBuilder(1024*100);
 		
-		DataRunPlus dataRunPlus = dbservice.findNumRowRunInfo(n);		
+		DataRunPlus dataRunPlus = dbservice.findNumRowRunInfo(n);	//从本地数据库中读取n条运行数据	
 		GeneralData generalData = new GeneralData();		
-		generalData.setDid(DataType.DataRun);  //数据类型
+		generalData.setDid(DataType.DataRun);  //数据类型->运行数据
 		
-		if( dataRunPlus.getListRunData().size() == n){
+		if( dataRunPlus.getListRunData().size() == n){  // 那运行数据转化成json格式的字符串
 			strRun.append("[");
 
 			for(DataRun dataRun: dataRunPlus.getListRunData()){
@@ -269,11 +285,11 @@ public class DataTransmitThread implements Runnable{
 			}
 			
 			if(delayTime!=null){
-				delayTime.setNumofmsg(n);
+				delayTime.setNumofmsg(n); //本次发送的信息条数
 			}
 		
 		}else{
-			Log.d(TAG, "取回的运行信息条数与期望不符！！！");
+			Log.d(TAG, "读回的运行信息条数与期望不符！！！");
 			return ;
 		}
 	}
@@ -293,20 +309,23 @@ public class DataTransmitThread implements Runnable{
 		String  strJson=JsonUtil.object2Json(generalData); //本次发送的字符串
 		long  countBytes=strJson.getBytes().length + 5;  //文本长度(byte)
 		 
-		beforeSecond=System.currentTimeMillis();; //发送之前时间
-		
-		response = Post.sendData(path,strJson );//发送数据
-		
-		afterSecond=System.currentTimeMillis();; //发送之后时间
+		beforeSecond=System.currentTimeMillis();; //发送之前时刻
+			
+		try {
+			response = Post.sendData(path,strJson ); //发送数据
+		} catch (SocketTimeoutException e) {		
+			e.printStackTrace();
+		}
+		afterSecond=System.currentTimeMillis();; //发送之后时刻
 				
-		timePeriod=afterSecond-beforeSecond; //计算发送用时
+		timePeriod=afterSecond-beforeSecond; //计算发送所用时长
 		
 		long speedn=countBytes*1000/timePeriod; //发送速率 ，单位  B/s
 		
-		if(delayTime!=null){
-			delayTime.setDelaytime(timePeriod);
-			delayTime.setPackagesize( countBytes );
-			delayTime.setSpeed(speedn);			
+		if(delayTime!=null){    //设置延时对象的各项参数
+			delayTime.setDelaytime(timePeriod);   //延时时间
+			delayTime.setPackagesize( countBytes ); //包大小
+			delayTime.setSpeed(speedn);			  //发送速度
 		}
 		
 //		String str="用时:"+ timePeriod+"ms;"+ "数据大小: "+countBytes +"bytes;"+"发送速率:"+speed(timePeriod,countBytes);
@@ -314,7 +333,7 @@ public class DataTransmitThread implements Runnable{
 		strb.append(timePeriod+"ms").append(":");
 		strb.append(countBytes+"bytes").append(":");
 		strb.append(speed(timePeriod,countBytes));
-		sendMsg2Main(strb.toString(),HandleMsgTypeMcro.MSG_DELAYTIME);//发送延时时间
+		sendMsg2Main(strb.toString(),HandleMsgTypeMcro.MSG_DELAYTIME);//在主页面显示本次发送的延时和速度参数
 		
 		return response;
 	}

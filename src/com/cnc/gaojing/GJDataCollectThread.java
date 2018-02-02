@@ -46,11 +46,13 @@ import android.util.Log;
 	private Handler  
 					 delMsgHandler =null,
 					 mainActivityHandler=null;
-	private String  machineIP = "192.168.188.132"; //机床的IP地址
+	final private String  machineIP ;//= "192.168.188.132"; //机床的IP地址
 //	int    machinePort = 21;			  //机床端口号，高精不需要设置端口号
 //	String  tp = "SYGJ-1000"; //数控系统型号，高精数控系统型号数控系统提供
-	private String machine_SN=machineIP; //数控系统ID，沈阳高精没有提供数控系统ID，暂用IP代替ID
+	final private String machine_SN ;//=machineIP; //数控系统ID，沈阳高精没有提供数控系统ID，暂用IP代替ID
 	private AlarmFilterList   alarmFilterList =null; //报警信息缓存过滤对象
+	
+	private GJApiFunction gjApiFunction =null;
 	
 	public GJDataCollectThread(String ip){
 		this(ip,0);
@@ -68,10 +70,13 @@ import android.util.Log;
 	
 	@Override
 	public void run() {
-
-		dnc.main.connectToNC(machineIP);  //连接到机床
+		dnc.main dncmain =new dnc.main();
+		
+		gjApiFunction =new GJApiFunction(dncmain);
+//		dnc.main.connectToNC(machineIP);  //连接到机床
+		dncmain.connectToNC(machineIP);
 		//必须先连接机床才能检测到nml文件
-		if(dnc.main.status_nml==null){ //检查是否存在nml配置文件
+		if(dncmain.status_nml==null){   //检查是否存在nml配置文件
 			Log.d(TAG,"高精找不到nml配置文件");			
 		}
 		
@@ -79,13 +84,13 @@ import android.util.Log;
 			
 			if(!dnc.main.getConnnectState()){ //检测连接状态
 				//未连接，重新连接				
-				dnc.main.connectToNC(machineIP);  //连接到机床
+				dncmain.connectToNC(machineIP);  //连接到机床
 				
 				//必须先连接机床才能检测到nml文件
 //				if(dnc.main.status_nml==null){ //检查是否存在nml配置文件
 //					Log.d(TAG,"找不到nml配置文件");			
 //				}			
-				if(dnc.main.getConnnectState()  && dnc.main.status_nml!=null){ 
+				if(dnc.main.getConnnectState()  && dncmain.status_nml!=null){ 
 //					hadconnected=true;
 					sendMsg2Main("高精连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS); //					
 				}else{
@@ -93,19 +98,19 @@ import android.util.Log;
 					Log.d(TAG,"找不到nml配置文件");
 					 //连接失败，一分钟后再连接
 					try{
-						Thread.sleep(1000*10);
+						Thread.sleep(1000*60);
 					}catch(Exception e){
 						e.printStackTrace();
 					}
 				}
 			}else{ //已经连接上机床
 				//已连接,采集数据
-				dnc.main.updateStatus();//更新本地数据
-				if(dnc.main.msg != null)//有数据更新
+				dncmain.updateStatus();//更新本地数据
+				if(dncmain.msg != null)//有数据更新
                 {
 					//采集数据
 					daq();  //采集数据，发送到service去处理						
-					dnc.main.msg=null;//清空msg标志
+					dncmain.msg=null;//清空msg标志
                 }else{
                 	Log.i(TAG,"dnc.main.msg为空！");
                 }				
@@ -119,9 +124,9 @@ import android.util.Log;
 			} 	
 		}//end while()
 		
-		/*if(dnc.main.getConnnectState()){
-			dnc.main.disconnectToNC();	//空指针异常		
-		}*/
+		if(dnc.main.getConnnectState()){
+			dncmain.disconnectToNC();	//空指针异常		
+		}
 				
 	} //end run()
 		
@@ -136,13 +141,13 @@ import android.util.Log;
 		{
 //			DaqData.setCncid(machineIP); //用IP地址代替机床的ID
 			//注册信息
-			DataReg dataReg = GJApiFunction.getDataReg();//获取注册信息					
+			DataReg dataReg = gjApiFunction.getDataReg();//获取注册信息					
 			dataReg.setTime(strTime);		//设置采集的时间戳
 			dataReg.setId(machine_SN);      //设置ID号
 
 //			sendMsg2Main(dataReg, HandleMsgTypeMcro.MSG_REG);//初始化成功
 			
-			DataLog datalog=GJApiFunction.getDataLog();//获取登录信息
+			DataLog datalog=gjApiFunction.getDataLog();//获取登录信息
 			datalog.setId(machine_SN);
 			datalog.setTime(strTime);
 			
@@ -158,7 +163,7 @@ import android.util.Log;
 			StringBuilder  sbalram=new StringBuilder();//报警信息
 			
 			//采集报警信息
-			LinkedList<DataAlarm> listDataAlarm =GJApiFunction.getDataAlarm();
+			LinkedList<DataAlarm> listDataAlarm =gjApiFunction.getDataAlarm();
 			for (DataAlarm dataAlarm : listDataAlarm) {
 				dataAlarm.setId(machine_SN);//设置数控系统ID
 				dataAlarm.setTime(strTime);//设置采集的时间戳
@@ -172,7 +177,7 @@ import android.util.Log;
 			}
 			
 			//采集运行信息
-			DataRun dataRun = GJApiFunction.getDataRun();
+			DataRun dataRun =  gjApiFunction .getDataRun();
 			dataRun.setId(machine_SN); //设置数控系统ID
 			dataRun.setTime(strTime); //加时间戳
 			sendMsg2Main(dataRun,HandleMsgTypeMcro.MSG_RUN,count);

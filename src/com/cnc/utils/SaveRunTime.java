@@ -8,18 +8,18 @@ import android.preference.PreferenceManager;
 
 public class SaveRunTime {
 	
-	static SharedPreferences pref=PreferenceManager.getDefaultSharedPreferences(MyApplication.getContext());
+	private static SharedPreferences preff=PreferenceManager.getDefaultSharedPreferences(MyApplication.getContext());
 
 	public static  void  saveOnTime(String key,long n){
-		long pretime =pref.getLong(key, 0);
+		long pretime =preff.getLong(key, 0);
 		
-		SharedPreferences.Editor  editor =pref.edit();
+		SharedPreferences.Editor  editor =preff.edit();
 		editor.putLong(key, n+pretime);
 		editor.apply();		
 	}
 	
 	public static Long getOnTime(String key){
-		return  pref.getLong(key, 0);		
+		return  preff.getLong(key, 0);		
 	}
 	
 

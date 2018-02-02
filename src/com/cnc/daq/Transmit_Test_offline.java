@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 import java.util.Date;
 import java.util.Properties;
 
@@ -66,8 +67,11 @@ public class Transmit_Test_offline implements Runnable{
 			
 			Log.i(tag,delaytime.toString());
 
-			
-			res = Post.sendData(path, JsonUtil.object2Json(generalData));
+			try {
+				res = Post.sendData(path, JsonUtil.object2Json(generalData));
+			} catch (SocketTimeoutException e1) {
+				e1.printStackTrace();
+			}
 			//判断是否发送成功						
 			if(resultofPost.equals(res))
 			{

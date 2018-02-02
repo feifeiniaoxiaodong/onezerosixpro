@@ -46,8 +46,8 @@ public class MainActivity extends Activity {
 	final String TAG="mainactivity";
 	static Handler  mainActivityHandler=null;
 	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");//时间戳格式
-	SharedPreferences pref;	
-	SharedPreferences.Editor editor ;
+	private SharedPreferences pref;	
+	private SharedPreferences.Editor editor ;
 	ExecutorService exec=null;
 	
 	Map<String, ItemViewHolder>  viewmapgGsk=new HashMap<>();
@@ -92,11 +92,13 @@ public class MainActivity extends Activity {
 	
 	//开启各种任务
 	private void startTask(){
+
 		new Thread(){
 			public void run() {
 				//开启发送线程
 				if(dataTransmitThread==null){
 					dataTransmitThread=new DataTransmitThread();
+//					new Thread(dataTransmitThread).start();
 					exec.execute(dataTransmitThread);
 					Log.d(TAG,"开启了数据发送线程");
 				}
@@ -108,14 +110,18 @@ public class MainActivity extends Activity {
 					e.printStackTrace();
 				}
 				
-				startDefaultThread(); //开启上次关机时开启的线程
+				runOnUiThread(new Runnable() {				
+					@Override
+					public void run() {
+						startDefaultThread(); //开启上次关机时开启的线程						
+					}
+				});
 				
 				//设置定时开关任务
-				Timer timer=new Timer(true);
-				timer.scheduleAtFixedRate(new startTask(), 1000*60, 1000*60*30);//每隔半小时执行一次任务
-				timer.scheduleAtFixedRate(new stopTask(), 1000*60, 1000*60*30);
-				
-				
+				Timer timer=new Timer(false);
+				timer.scheduleAtFixedRate(new startTask(), 1000*60, 1000*60*55);//每隔55分钟执行一次任务
+				timer.scheduleAtFixedRate(new stopTask(), 1000*60, 1000*60*55);
+								
 			} //end run
 			
 		}.start();		
@@ -191,8 +197,7 @@ public class MainActivity extends Activity {
 				break;
 			default:
 				break;
-			}
-	
+			}	
 		}
 	}
 	
@@ -203,14 +208,14 @@ public class MainActivity extends Activity {
 							
 		//华中线程
 		String preipHz = pref.getString("huazhong", null);
-		if(preipHz!=null && !preipHz.trim().equals("") && currentHZDcObj==null){
+		if(preipHz!=null && !preipHz.trim().equals("") ){
 			//开启线程
 			startHzThread(preipHz);
 		}
 			
 		//高精
 		String preipGj=pref.getString("gaojing", null);
-		if(preipGj!=null && !preipGj.equals("") && currentGjDcObj==null){
+		if(preipGj!=null && !preipGj.equals("") ){
 			startGjThread(preipGj);
 		}
 		
@@ -220,8 +225,8 @@ public class MainActivity extends Activity {
 			if(str!=null && !"".equals(str.trim())){
 				no=str.substring(0, str.indexOf(':'));
 				preNoip=pref.getString(no, null);
-				Object obj =mapgskThreadobj.get(no);
-				if(preNoip!=null && obj==null){ //开启该线程时应保证该线程还未开启
+				
+				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
 					startGskThread(preNoip);//开启广数数据采集线程				
 				}
 			}
@@ -518,17 +523,21 @@ public class MainActivity extends Activity {
 			 itemHuazhong.getIp().setText("IP:"+ip);
 			 
 			 if(ip!=null && !"".equals(ip)){
+				if(currentHZDcObj!=null){
+					currentHZDcObj.stopCollect(); //终止之前的线程
+				}
 				currentHZDcObj=new HzDataCollectThread(ip);
-				current_HZ_NoIP=spinItem_NOIP; 
+//				current_HZ_NoIP=spinItem_NOIP; 
 				exec.execute(currentHZDcObj);//开启线程				
 
 				itemHuazhong.getBtstart().setEnabled(false);
 				itemHuazhong.getBtstop().setEnabled(true);
-				Log.d(TAG,"开启了华中数据采集线程");
+								
+				Log.d(TAG,"startHzThread开启了华中数据采集线程");
 			 }
 		}else{
 			 currentHZDcObj=null;
-			 current_HZ_NoIP=null;
+//			 current_HZ_NoIP=null;
 			 itemHuazhong.getNo().setText("No:");
 			 itemHuazhong.getIp().setText("IP:");
 		}
@@ -543,16 +552,17 @@ public class MainActivity extends Activity {
 		
 		if(currentHZDcObj!=null){
 			currentHZDcObj.stopCollect(); //关闭数据采集线程
-			current_HZ_NoIP=null;
+//			current_HZ_NoIP=null;
 			currentHZDcObj=null;
+
 			itemHuazhong.getBtstart().setEnabled(true);
 			itemHuazhong.getBtstop().setEnabled(false);
-			Log.d(TAG,"关闭了华中数据采集线程");
+		
+			Log.d(TAG,"stopHzThread关闭了华中数据采集线程");
 			if(repref){
 				editor =pref.edit();
 				editor.remove("huazhong");
-				editor.apply();	
-				
+				editor.apply();					
 			}		
 		}
 	}
@@ -568,17 +578,21 @@ public class MainActivity extends Activity {
 			 itemGaojing.getIp().setText("IP:"+ip);
 			 
 			 if(ip!=null && !"".equals(ip)){
-				currentGjDcObj=new GJDataCollectThread(ip);					
-				current_Gj_NoIP=spinItem_NOIP; 
+				if(currentGjDcObj!=null){
+					currentGjDcObj.stopCollect(); //终止之前线程
+				}
+				currentGjDcObj=new GJDataCollectThread(ip);	
+//				new Thread(currentGjDcObj).start();
+//				current_Gj_NoIP=spinItem_NOIP; 
 				exec.execute(currentGjDcObj);//开启线程	
 				
 				itemGaojing.getBtstart().setEnabled(false);
 				itemGaojing.getBtstop().setEnabled(true);
-				Log.d(TAG,"开启了高精数据采集线程");
+				Log.d(TAG,"startGjThread开启了高精数据采集线程");
 			 }
 		}else{
 			currentGjDcObj=null;
-			current_Gj_NoIP=null;
+//			current_Gj_NoIP=null;
 			itemGaojing.getNo().setText("No:");
 			itemGaojing.getIp().setText("IP:");			
 		}
@@ -592,12 +606,14 @@ public class MainActivity extends Activity {
 	private void stopGjThread(boolean repref){
 		if(currentGjDcObj!=null){
 			currentGjDcObj.stopCollect(); //关闭数据采集线程
-			current_Gj_NoIP=null;
+//			current_Gj_NoIP=null;
 			currentGjDcObj=null;
-			
+
+		
 			itemGaojing.getBtstart().setEnabled(true);
 			itemGaojing.getBtstop().setEnabled(false);
-			Log.d(TAG,"关闭了高精数据采集线程");
+			
+			Log.d(TAG,"stopGjThread关闭了高精数据采集线程");
 			if( repref){
 				editor =pref.edit();
 				editor.remove("gaojing");
@@ -613,6 +629,10 @@ public class MainActivity extends Activity {
 			ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
 			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
 			 if(ip!=null && ip.startsWith("192.168.188.")){
+				 if(mapgskThreadobj.get(no) instanceof GSKDataCollectThread){   //如果在开启线程已经有线程打开，则关闭之前的线程重新开启新的线程
+					 ((GSKDataCollectThread)mapgskThreadobj.get(no)).stopCollect();
+					 mapgskThreadobj.remove(no);
+				 }
 				 GSKDataCollectThread gskobj=new GSKDataCollectThread(ip,no);
 				 mapgskThreadobj.put(no, gskobj);
 				 exec.execute(gskobj);
@@ -630,14 +650,16 @@ public class MainActivity extends Activity {
 	private void stopGskThread(String spinItem_NOIP, boolean repref){
 		String no=null;
 		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
-//			String ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
+
 			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
 			 GSKDataCollectThread gskobj=(GSKDataCollectThread) mapgskThreadobj.get(no) ; //停止线程
 			 if(gskobj !=null){
 				 gskobj.stopCollect();
 				 mapgskThreadobj.remove(no);
+				
 				 viewmapgGsk.get(no).getBtstart().setEnabled(true);
 				 viewmapgGsk.get(no).getBtstop().setEnabled(false);
+						
 				 if(repref){
 					 editor =pref.edit();
 					 editor.remove(no);
@@ -686,12 +708,14 @@ public class MainActivity extends Activity {
 			
 			String time=formatter.format(Calendar.getInstance().getTime());
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
-			if( hour== 7 ){
+//			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
+			if( hour==7 ){   //7点上线
 				//开启发送线程
 				if(dataTransmitThread==null){
 					dataTransmitThread=new DataTransmitThread();
+//					new Thread(dataTransmitThread).start();
 					exec.execute(dataTransmitThread);
-					Log.d(TAG,"开启了数据发送线程");
+					Log.d(TAG,"startTask开启了数据发送线程");
 				}
 								
 				try {
@@ -700,11 +724,15 @@ public class MainActivity extends Activity {
 					e.printStackTrace();
 				}
 				
-				startDefaultThread(); //开启上次关机时开启的线程
+				runOnUiThread(new Runnable() {					
+					@Override
+					public void run() {						
+						startDefaultThread(); //开启上次关机时开启的线程
+					}
+				});				
 			}
-			Log.d(TAG,"执行了定时启动任务");
-		}//end run
-		
+			Log.d(TAG,"startTask执行了定时启动任务");
+		}//end run		
 	}
 
 	//定时任务，数据采集和发送都下线
@@ -715,23 +743,28 @@ public class MainActivity extends Activity {
 			
 			String time=formatter.format(Calendar.getInstance().getTime());
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
-			if( hour== 18 ){
+//			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
+			if( hour>=18  ){  //6点下线
 				
-				offLineAllDatacollectThread(); //定时下线数据采集线程
-				
+				runOnUiThread(new Runnable() {					
+					@Override
+					public void run() {						
+						offLineAllDatacollectThread(); //定时下线数据采集线程
+					}
+				});
+								
 				try {
-					Thread.sleep(1000*60*5); //五分钟后再停止数据发送线程
+					Thread.sleep(1000*60*3); //3分钟后再停止数据发送线程
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+				//关闭数据发送线程，停止数据发送
 				if(dataTransmitThread !=null && dataTransmitThread.getIsCountinueRun()){
-					dataTransmitThread.setIsCountinueRun(false); //关闭数据发送线程，停止数据发送
+					dataTransmitThread.setIsCountinueRun(false);
 					dataTransmitThread=null;
 				}
 			}
-			Log.d(TAG,"执行了定时下线任务");						
+			Log.d(TAG,"stopTask执行了定时下线任务");						
 		}		
 	}
 }

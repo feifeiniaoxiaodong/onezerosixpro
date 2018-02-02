@@ -43,7 +43,7 @@ public class GJApiNum {
 	
 	
 	//login information 
-	public static final int  TOTAL_RUN_TIME=2539; //累计运行时间，double
+	public static final int  TOTAL_RUN_TIME=2539; //累计运行时间，double，上电时间
 	public static final int  TOTAL_PROCESS_TIME=2532; //累计加工时间  ,double
 
 }
