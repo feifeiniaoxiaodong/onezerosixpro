@@ -256,8 +256,8 @@ public class DataRun {
 		this.time = time;
 	}
 	
-	@Override
-	public String toString() {
+	
+	public String toString2() {
 		return "DataRun [id=" + id + ", cas=" + cas + ", ccs=" + ccs
 				+ ", aload=" + aload + ", aspd1=" + aspd1 + ", aspd2=" + aspd2
 				+ ", aspd3=" + aspd3 + ", aspd4=" + aspd4 + ", aspd5=" + aspd5
@@ -269,6 +269,20 @@ public class DataRun {
 				+ ", pd=" + pd + ", pn=" + pn + ", ps=" + ps + ", pl=" + pl
 				+ ", pm=" + pm + ", time=" + time + "]";
 	}
+	
+	@Override
+	public String toString(){
+		
+		String s="\n"+" 主轴实际转速=" + cas + ", 主轴指令转速=" + ccs  + ", 主轴负载电流=" + aload  + "\n"
+				+ " 轴1转速=" + aspd1 + ", 轴2转速=" + aspd2+ ", 轴3转速=" + aspd3	+ "\n"	
+				+  " 轴1实际位置=" + apst1 + ", 轴2实际位置=" + apst2+ ", 轴3实际位置=" + apst3 + "\n"
+				+ " 轴1指令位置=" + cpst1+ ", 轴2指令位置=" + cpst2+ ", 轴3指令位置=" + cpst3   + "\n"
+				+" 轴1负载电流=" + load1 + ", 轴2负载电流=" + load2+ ", 轴3负载电流=" + load3   + "\n"		
+				+ " 程序编号=" + pd + ", 程序名=" + pn + ", 运行行=" + pl  + "\n"
+				+ " 代码运行状态=" + ps  +", 时间=" + time ;
+		return s;
+	}
+		
 	
 	
 }

@@ -119,8 +119,8 @@ public class MainActivity extends Activity {
 				
 				//设置定时开关任务
 				Timer timer=new Timer(false);
-				timer.scheduleAtFixedRate(new startTask(), 1000*60*60*4, 1000*60*60*4);//每隔55分钟执行一次任务
-				timer.scheduleAtFixedRate(new stopTask(), 1000*60*60*2, 1000*60*60*4); //测试，自动上线和下线会不会导致闪退
+				timer.scheduleAtFixedRate(new startTask(), 1000*60*7, 1000*60*12);//每隔55分钟执行一次任务
+				timer.scheduleAtFixedRate(new stopTask(), 1000*60*1, 1000*60*12); //测试，自动上线和下线会不会导致闪退
 								
 			} //end run
 			
@@ -709,7 +709,7 @@ public class MainActivity extends Activity {
 			String time=formatter.format(Calendar.getInstance().getTime());
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
 //			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
-			if( hour==7 ){   //7点上线
+//			if( hour==7 ){   //7点上线
 				//开启发送线程
 				if(dataTransmitThread==null){
 					dataTransmitThread=new DataTransmitThread();
@@ -730,7 +730,7 @@ public class MainActivity extends Activity {
 						startDefaultThread(); //开启上次关机时开启的线程
 					}
 				});				
-			}
+//			}
 			Log.d(TAG,"startTask执行了定时启动任务");
 		}//end run		
 	}
@@ -744,7 +744,7 @@ public class MainActivity extends Activity {
 			String time=formatter.format(Calendar.getInstance().getTime());
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
 //			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
-			if( hour>=18  ){  //6点下线
+//			if( hour>=18  ){  //6点下线
 				
 				runOnUiThread(new Runnable() {					
 					@Override
@@ -754,7 +754,7 @@ public class MainActivity extends Activity {
 				});
 								
 				try {
-					Thread.sleep(1000*60*3); //3分钟后再停止数据发送线程
+					Thread.sleep(1000*30); //3分钟后再停止数据发送线程
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -763,7 +763,7 @@ public class MainActivity extends Activity {
 					dataTransmitThread.setIsCountinueRun(false);
 					dataTransmitThread=null;
 				}
-			}
+//			}
 			Log.d(TAG,"stopTask执行了定时下线任务");						
 		}		
 	}
