@@ -18,6 +18,7 @@ import com.cnc.daqnew.HzDataCollectThread;
 import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
 import com.cnc.gaojing.GJDataCollectThread;
+import com.cnc.test.TestGJMultiThread;
 import com.example.wei.gsknetclient_studio.GSKDataCollectThread;
 
 import android.annotation.SuppressLint;
@@ -90,7 +91,7 @@ public class MainActivity extends Activity {
 	}
 	
 	
-	//开启各种任务
+	//开机任务
 	private void startTask(){
 
 		new Thread(){
@@ -124,8 +125,7 @@ public class MainActivity extends Activity {
 				
 				timer.scheduleAtFixedRate(new startTask(), 1000*60*5, 1000*60*55*1);//每隔55分钟执行一次任务
 				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*55*1); //测试，自动上线和下线会不会导致闪退
-				
-								
+						
 			} //end run
 			
 		}.start();		
@@ -523,17 +523,14 @@ public class MainActivity extends Activity {
 					currentHZDcObj.stopCollect(); //终止之前的线程
 				}
 				currentHZDcObj=new HzDataCollectThread(ip);
-//				current_HZ_NoIP=spinItem_NOIP; 
 				exec.execute(currentHZDcObj);//开启线程				
 
 				itemHuazhong.getBtstart().setEnabled(false);
-				itemHuazhong.getBtstop().setEnabled(true);
-								
+				itemHuazhong.getBtstop().setEnabled(true);								
 				Log.d(TAG,"startHzThread开启了华中数据采集线程");
 			 }
 		}else{
 			 currentHZDcObj=null;
-//			 current_HZ_NoIP=null;
 			 itemHuazhong.getNo().setText("NO:");
 			 itemHuazhong.getIp().setText("IP:");
 		}
@@ -548,7 +545,6 @@ public class MainActivity extends Activity {
 		
 		if(currentHZDcObj!=null){
 			currentHZDcObj.stopCollect(); //关闭数据采集线程
-//			current_HZ_NoIP=null;
 			currentHZDcObj=null;
 
 			itemHuazhong.getBtstart().setEnabled(true);
@@ -578,8 +574,6 @@ public class MainActivity extends Activity {
 					currentGjDcObj.stopCollect(); //终止之前线程
 				}
 				currentGjDcObj=new GJDataCollectThread(ip);	
-//				new Thread(currentGjDcObj).start();
-//				current_Gj_NoIP=spinItem_NOIP; 
 				exec.execute(currentGjDcObj);//开启线程	
 				
 				itemGaojing.getBtstart().setEnabled(false);
@@ -588,7 +582,6 @@ public class MainActivity extends Activity {
 			 }
 		}else{
 			currentGjDcObj=null;
-//			current_Gj_NoIP=null;
 			itemGaojing.getNo().setText("NO:");
 			itemGaojing.getIp().setText("IP:");			
 		}
@@ -602,9 +595,7 @@ public class MainActivity extends Activity {
 	private void stopGjThread(boolean repref){
 		if(currentGjDcObj!=null){
 			currentGjDcObj.stopCollect(); //关闭数据采集线程
-//			current_Gj_NoIP=null;
 			currentGjDcObj=null;
-
 		
 			itemGaojing.getBtstart().setEnabled(true);
 			itemGaojing.getBtstop().setEnabled(false);
@@ -698,7 +689,6 @@ public class MainActivity extends Activity {
 
 	//定时启动任务，开始数据的采集和发送
 	class  startTask extends TimerTask{
-	
 		@Override
 		public void run() {
 			
@@ -709,17 +699,14 @@ public class MainActivity extends Activity {
 				//开启发送线程
 				if(dataTransmitThread==null){
 					dataTransmitThread=new DataTransmitThread();
-//					new Thread(dataTransmitThread).start();
 					exec.execute(dataTransmitThread);
 					Log.d(TAG,"startTask开启了数据发送线程");
-				}
-								
+				}								
 			/*	try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
-				}*/
-				
+				}*/				
 				runOnUiThread(new Runnable() {					
 					@Override
 					public void run() {						

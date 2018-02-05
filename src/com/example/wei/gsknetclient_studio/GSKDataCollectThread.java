@@ -49,7 +49,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     */
    
     private long clientnum=0;  //操作句柄,为native类对象地址
-    private String machineIP="192.168.188.128";
+    final private String machineIP;
     int port=5000;
     int res=0;
     int linked=0; //连接状态
@@ -147,7 +147,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     		DataBHSAMPLE_STATIC bhSample=getBeiHangInfo();//获取运行信息、报警信息、登录登出信息集合
     		
 //    		String tp = GSKNativeApi.GSKRM_GetCNCTypeName(clientnum);//数控系统型号，有待测试 ===>乱码
-    		String tp = "25i";
+    		final String tp = "25i";
     		
     		if(dataVersion!=null && bhSample!=null){
     			
@@ -162,16 +162,16 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 					DaqData.getListDataReg().add(dataReg);
 				}
     			
-    			DataLog dataLog=new DataLog(machine_SN, 
-    										bhSample.getRuntime(), //累计运行时间
-    										bhSample.getOntime(),  //累计加工时间
+    			DataLog dataLog=new DataLog(machine_SN,
+    										bhSample.getOntime(), //累计开机时间
+    										bhSample.getRuntime(), //累计加工时间
     										timeStr);
     			synchronized(LogLock.class){
 					DaqData.getListDataLog().add(dataLog);
 				}
     			boolGetMacInfo=true;
     			
-    			UiDataNo uiDataNo=new UiDataNo("",machineIP,machine_SN , DaqData.getAndroidId());
+    			UiDataNo uiDataNo=new UiDataNo("","",machine_SN , DaqData.getAndroidId());
     			uiDataNo.setThreadlabel(threadlabel); //thread label
     			sendMsg(mainActivityHandler,uiDataNo,HandleMsgTypeMcro.GSK_UINO,0,0); //发送消息到活动，显示IP地址信息    			
     		}		

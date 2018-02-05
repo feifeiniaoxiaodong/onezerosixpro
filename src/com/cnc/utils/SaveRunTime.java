@@ -6,6 +6,7 @@ import com.cnc.daq.MyApplication;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+//保存开机时间和运行时间到本地
 public class SaveRunTime {
 	
 	private static SharedPreferences preff=PreferenceManager.getDefaultSharedPreferences(MyApplication.getContext());
@@ -21,6 +22,4 @@ public class SaveRunTime {
 	public static Long getOnTime(String key){
 		return  preff.getLong(key, 0);		
 	}
-	
-
 }

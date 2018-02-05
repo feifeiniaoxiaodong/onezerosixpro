@@ -23,6 +23,8 @@ import com.cnc.domain.UiDataNo;
 import com.cnc.gaojing.ndkapi.GJApiFunction;
 import com.cnc.service.DelMsgServie;
 import com.cnc.utils.AlarmFilterList;
+import com.cnc.utils.RegLock;
+import com.cnc.utils.SaveRunTime;
 
 //import android.annotation.SuppressLint;
 import java.text.SimpleDateFormat;
@@ -47,7 +49,7 @@ import android.util.Log;
 					 delMsgHandler =null,
 					 mainActivityHandler=null;
 	final private String  machineIP ;//= "192.168.188.132"; //机床的IP地址
-//	int    machinePort = 21;			  //机床端口号，高精不需要设置端口号
+//	int    machinePort ;			  //机床端口号，高精不需要设置端口号
 //	String  tp = "SYGJ-1000"; //数控系统型号，高精数控系统型号数控系统提供
 	final private String machine_SN ;//=machineIP; //数控系统ID，沈阳高精没有提供数控系统ID，暂用IP代替ID
 	private AlarmFilterList   alarmFilterList =null; //报警信息缓存过滤对象
@@ -71,9 +73,8 @@ import android.util.Log;
 	@Override
 	public void run() {
 		dnc.main dncmain =new dnc.main();
-		
+		//创建API工具类对象
 		gjApiFunction =new GJApiFunction(dncmain);
-//		dnc.main.connectToNC(machineIP);  //连接到机床
 		dncmain.connectToNC(machineIP);
 		//必须先连接机床才能检测到nml文件
 		if(dncmain.status_nml==null){   //检查是否存在nml配置文件
@@ -85,13 +86,8 @@ import android.util.Log;
 			if(!dnc.main.getConnnectState()){ //检测连接状态
 				//未连接，重新连接				
 				dncmain.connectToNC(machineIP);  //连接到机床
-				
-				//必须先连接机床才能检测到nml文件
-//				if(dnc.main.status_nml==null){ //检查是否存在nml配置文件
-//					Log.d(TAG,"找不到nml配置文件");			
-//				}			
+			
 				if(dnc.main.getConnnectState()  && dncmain.status_nml!=null){ 
-//					hadconnected=true;
 					sendMsg2Main("高精连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS); //					
 				}else{
 					sendMsg2Main("高精连接机床失败", HandleMsgTypeMcro.MSG_LFAILURE); //
@@ -124,8 +120,14 @@ import android.util.Log;
 			} 	
 		}//end while()
 		
+		//本地保存累计加工时间和开机时间
+		DataLog datalog=gjApiFunction.getDataLog();//获取登录信息
+		SaveRunTime.saveOnTime(machineIP+"ontime", datalog.getOntime()); //保存本次开机时间累加到本地，以秒为单位保存,使用IP地址作为主键
+		SaveRunTime.saveOnTime(machineIP+"runtime", datalog.getRuntime());//保存本次开机的加工时间累加到本地
+		
+		//退出线程时断开连接，释放资源
 		if(dnc.main.getConnnectState()){
-			dncmain.disconnectToNC();	//空指针异常		
+			dncmain.disconnectToNC();		
 		}
 				
 	} //end run()
@@ -144,15 +146,19 @@ import android.util.Log;
 			DataReg dataReg = gjApiFunction.getDataReg();//获取注册信息					
 			dataReg.setTime(strTime);		//设置采集的时间戳
 			dataReg.setId(machine_SN);      //设置ID号
-
-//			sendMsg2Main(dataReg, HandleMsgTypeMcro.MSG_REG);//初始化成功
+			synchronized(RegLock.class){   //加锁同步，同一时刻只能有一个线程修改list中的数据
+				DaqData.getListDataReg().add(dataReg);
+			}
 			
-			DataLog datalog=gjApiFunction.getDataLog();//获取登录信息
-			datalog.setId(machine_SN);
-			datalog.setTime(strTime);
-			
-			DaqData.getListDataLog().add(datalog); //保存登录信息
-			DaqData.getListDataReg().add(dataReg); //保存注册信息
+			long ontime=SaveRunTime.getOnTime(machineIP+"ontime");//开机时间
+			long runtime=SaveRunTime.getOnTime(machineIP+"runtime");//加工时间			
+			DataLog datalog=new DataLog(machine_SN,
+					ontime,  
+					runtime,
+					strTime);								
+			synchronized(Log.class){   //加锁同步，同一时刻只能有一个线程修改list中的数据
+				DaqData.getListDataLog().add(datalog); //保存登录信息
+			}
 			
 			UiDataNo uiDataNo=new UiDataNo("",machineIP,machine_SN , DaqData.getAndroidId());
 			sendMsg(mainActivityHandler,uiDataNo,HandleMsgTypeMcro.GAOJING_UINO,0,0); //发送消息到活动，显示IP地址信息

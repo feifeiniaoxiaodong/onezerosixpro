@@ -1,4 +1,4 @@
-package com.cnc.daq;
+package com.cnc.test;
 
 import java.io.IOException;
 import java.io.InputStream;

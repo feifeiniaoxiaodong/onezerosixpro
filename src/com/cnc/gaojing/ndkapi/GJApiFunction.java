@@ -37,7 +37,7 @@ public class GJApiFunction {
 	 * @return
 	 */
 	public   LinkedList<DataAlarm>  getDataAlarm(){
-		LinkedList<DataAlarm> alarmlist=new LinkedList<DataAlarm>(); //新建报警信息列表对象
+		LinkedList<DataAlarm> alarmlist=new LinkedList<DataAlarm>(); //报警信息列表
 		
 		String  alarmNo,  	//报警号
 				alarmNum,	//报警号索引
