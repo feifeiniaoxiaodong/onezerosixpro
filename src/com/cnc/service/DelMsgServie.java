@@ -28,7 +28,7 @@ public class DelMsgServie extends Service {
 	
 	static final String TAG="DelMsgServie";
 	private static Handler handlerService =null;
-	DataDealBinder dataDealBinder =new DataDealBinder();
+//	DataDealBinder dataDealBinder =new DataDealBinder();
 	
 	//服务首次创建的时候调用
 	@Override
@@ -47,25 +47,24 @@ public class DelMsgServie extends Service {
 				Looper.loop();	
 			};			
 		}.start();
-		Log.d(TAG, "onCreate");
+		Log.d(TAG, "service onCreate");
 		super.onCreate();
 	}
 	
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.d(TAG, "onStartCommand");
+		Log.d(TAG, "service onStartCommand");
 		return super.onStartCommand(intent, flags, startId);
 	}
 
 	@Override
 	public IBinder onBind(Intent arg0) {		
-		return dataDealBinder;
+		return null;
 	}
 	
 	@Override
-	public void onDestroy() {
-		// TODO Auto-generated method stub
+	public void onDestroy() {		
 		reStartService(); //重启服务
 		super.onDestroy();
 	}
@@ -84,7 +83,7 @@ public class DelMsgServie extends Service {
 	static class ServiceHandler   extends Handler {
 		
 		@SuppressLint("SimpleDateFormat") 
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
+		private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 		int count = 1;	//记录采集的次数
 		@Override
 		public void handleMessage(Message msg) {
@@ -150,7 +149,7 @@ public class DelMsgServie extends Service {
 		}
 		
 		private void showMacInfo(DataReg dataReg) {
-			// TODO Auto-generated method stub
+			
 			Log.d(TAG, "macInfo.SN_NUM::" + dataReg.getId());
 			Log.d(TAG, "macInfo.VER::" + dataReg.getVer());
 			Log.d(TAG, "macInfo.TIME::" + dataReg.getTime());		
@@ -166,18 +165,18 @@ public class DelMsgServie extends Service {
 	
 	
 	
-	Map<String ,Runnable >  map =new HashMap<>();
+/*	Map<String ,Runnable >  map =new HashMap<>();
 	
 	//绑定服务允许的操作
 	public  class DataDealBinder extends Binder{
 		//开启华中数控采集线程
 		public  void startHzThread(String ip){
-			startHzThread(ip,21);
+			//startHzThread(ip,21);
 		}
 		public  void startHzThread(String ip,int port){
 			
 		}
 	
-	}
+	}*/
 
 }

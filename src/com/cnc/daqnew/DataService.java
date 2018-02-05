@@ -20,7 +20,6 @@ import android.util.Log;
 /**
  * ·þÎñ
  * @author wei
- *
  */
 public class DataService extends Service {
 

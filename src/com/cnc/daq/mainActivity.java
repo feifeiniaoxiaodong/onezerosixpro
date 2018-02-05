@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
 	String [] gskIpArray=null; //gsk ip list
 	String current_Gsk_NoIP = null;			//guangzhou shu kong 
 	GSKDataCollectThread  currentGskDcobj_1=null;
-	Map<String ,Runnable>  mapgskThreadobj=new HashMap<>();
+	Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -103,12 +103,12 @@ public class MainActivity extends Activity {
 					Log.d(TAG,"开启了数据发送线程");
 				}
 								
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				try {
+//					Thread.sleep(1000);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 				
 				runOnUiThread(new Runnable() {				
 					@Override
@@ -119,8 +119,12 @@ public class MainActivity extends Activity {
 				
 				//设置定时开关任务
 				Timer timer=new Timer(false);
-				timer.scheduleAtFixedRate(new startTask(), 1000*60*60*4, 1000*60*60*4);//每隔55分钟执行一次任务
-				timer.scheduleAtFixedRate(new stopTask(), 1000*60*60*2, 1000*60*60*4); //测试，自动上线和下线会不会导致闪退
+//				timer.scheduleAtFixedRate(new startTask(), 1000*60*5, 1000*60*6*1);//每隔55分钟执行一次任务
+//				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*6*1); //测试，自动上线和下线会不会导致闪退
+				
+				timer.scheduleAtFixedRate(new startTask(), 1000*60*5, 1000*60*55*1);//每隔55分钟执行一次任务
+				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*55*1); //测试，自动上线和下线会不会导致闪退
+				
 								
 			} //end run
 			
@@ -129,15 +133,16 @@ public class MainActivity extends Activity {
 		
 	@SuppressLint("HandlerLeak") 
 	class mainHandler extends Handler{
-		String strlabel=null;
-		ItemViewHolder itemViewHolder=null;
+		
 		@Override
 		public void handleMessage(Message msg) {
+			String strlabel=null;
+			ItemViewHolder itemViewHolder=null;
+			
 			switch (msg.what) {
 			case HandleMsgTypeMcro.HUAZHONG_UINO:         //huazhong cncid and android id
 				UiDataNo uidatano=(UiDataNo)msg.obj;
-//				itemHuazhong.getNo().setText(uidatano.getNo());
-//				itemHuazhong.getIp().setText(uidatano.getIp());
+
 				itemHuazhong.getIdcnc().setText(uidatano.getIdcnc());
 				itemHuazhong.getIdandroid().setText(uidatano.getIdandroid());				
 				break;
@@ -158,7 +163,7 @@ public class MainActivity extends Activity {
 				break;
 			case HandleMsgTypeMcro.GSK_UINO: 			//gsk
 				UiDataNo gskdatano=(UiDataNo)msg.obj;
-				 strlabel =gskdatano.getThreadlabel();
+				strlabel =gskdatano.getThreadlabel();
 				if(strlabel!=null){
 					itemViewHolder=viewmapgGsk.get(strlabel);
 					itemViewHolder.getIdcnc().setText(gskdatano.getIdcnc());
@@ -173,15 +178,7 @@ public class MainActivity extends Activity {
 				itemViewHolder.getRuninfo().setText(gskUiDataAlarmRun.getRuninfo());
 						
 				break;				
-			case HandleMsgTypeMcro.GSK02:
-				break;
-			case HandleMsgTypeMcro.GSK03:
-				break;
-			case HandleMsgTypeMcro.GSK04:
-				break;
-			case HandleMsgTypeMcro.GSK05:
-				break;
-				
+			
 			//处理数据发送信息
 			case HandleMsgTypeMcro.MSG_DELAYTIME://延时时间
 				String str =(String )msg.obj;
@@ -195,8 +192,7 @@ public class MainActivity extends Activity {
 				String strcache =(String)msg.obj;
 				cachenum.setText("cacheNum:"+strcache+"条");
 				break;
-			default:
-				break;
+			default:{}				
 			}	
 		}
 	}
@@ -519,7 +515,7 @@ public class MainActivity extends Activity {
 		if(spinItem_NOIP!=null && !"".equals(spinItem_NOIP)){
 			 ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
 			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
-			 itemHuazhong.getNo().setText("No:"+no);
+			 itemHuazhong.getNo().setText("NO:"+no);
 			 itemHuazhong.getIp().setText("IP:"+ip);
 			 
 			 if(ip!=null && !"".equals(ip)){
@@ -538,7 +534,7 @@ public class MainActivity extends Activity {
 		}else{
 			 currentHZDcObj=null;
 //			 current_HZ_NoIP=null;
-			 itemHuazhong.getNo().setText("No:");
+			 itemHuazhong.getNo().setText("NO:");
 			 itemHuazhong.getIp().setText("IP:");
 		}
 
@@ -574,7 +570,7 @@ public class MainActivity extends Activity {
 		if(spinItem_NOIP!=null && !"".equals(spinItem_NOIP)){
 			 ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
 			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
-			 itemGaojing.getNo().setText("No:"+no);
+			 itemGaojing.getNo().setText("NO:"+no);
 			 itemGaojing.getIp().setText("IP:"+ip);
 			 
 			 if(ip!=null && !"".equals(ip)){
@@ -593,7 +589,7 @@ public class MainActivity extends Activity {
 		}else{
 			currentGjDcObj=null;
 //			current_Gj_NoIP=null;
-			itemGaojing.getNo().setText("No:");
+			itemGaojing.getNo().setText("NO:");
 			itemGaojing.getIp().setText("IP:");			
 		}
 
@@ -652,7 +648,7 @@ public class MainActivity extends Activity {
 		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
 
 			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
-			 GSKDataCollectThread gskobj=(GSKDataCollectThread) mapgskThreadobj.get(no) ; //停止线程
+			 GSKDataCollectThread gskobj= mapgskThreadobj.get(no) ; //停止线程
 			 if(gskobj !=null){
 				 gskobj.stopCollect();
 				 mapgskThreadobj.remove(no);
@@ -682,8 +678,8 @@ public class MainActivity extends Activity {
 				no=str.substring(0, str.indexOf(':'));
 				ip=str.substring(str.indexOf(':')+1);
 				itemViewHolder=viewmapgGsk.get(no);
-				itemViewHolder.getNo().setText(no);
-				itemViewHolder.getIp().setText(ip);
+				itemViewHolder.getNo().setText("NO:"+no);
+				itemViewHolder.getIp().setText("IP:"+ip);
 			}
 		}
 	}
@@ -709,7 +705,7 @@ public class MainActivity extends Activity {
 			String time=formatter.format(Calendar.getInstance().getTime());
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
 //			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
-//			if( hour==7 ){   //7点上线
+			if( hour==7 ){   //7点上线
 				//开启发送线程
 				if(dataTransmitThread==null){
 					dataTransmitThread=new DataTransmitThread();
@@ -718,11 +714,11 @@ public class MainActivity extends Activity {
 					Log.d(TAG,"startTask开启了数据发送线程");
 				}
 								
-				try {
+			/*	try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
-				}
+				}*/
 				
 				runOnUiThread(new Runnable() {					
 					@Override
@@ -730,7 +726,7 @@ public class MainActivity extends Activity {
 						startDefaultThread(); //开启上次关机时开启的线程
 					}
 				});				
-//			}
+			}
 			Log.d(TAG,"startTask执行了定时启动任务");
 		}//end run		
 	}
@@ -743,8 +739,8 @@ public class MainActivity extends Activity {
 			
 			String time=formatter.format(Calendar.getInstance().getTime());
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
-//			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
-//			if( hour>=18  ){  //6点下线
+			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
+			if( hour>=18  ){  //6点下线
 				
 				runOnUiThread(new Runnable() {					
 					@Override
@@ -753,17 +749,18 @@ public class MainActivity extends Activity {
 					}
 				});
 								
-				try {
+			/*	try {
 					Thread.sleep(1000*30); //3分钟后再停止数据发送线程
 				} catch (InterruptedException e) {
 					e.printStackTrace();
-				}
+				}*/
+				
 				//关闭数据发送线程，停止数据发送
 				if(dataTransmitThread !=null && dataTransmitThread.getIsCountinueRun()){
 					dataTransmitThread.setIsCountinueRun(false);
 					dataTransmitThread=null;
 				}
-//			}
+			}
 			Log.d(TAG,"stopTask执行了定时下线任务");						
 		}		
 	}

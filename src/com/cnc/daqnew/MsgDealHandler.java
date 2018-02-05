@@ -136,7 +136,6 @@ public class MsgDealHandler extends Handler {
      }//end handleMessage(Message msg)
      
 	
-	
  	//±®æØ¥¶¿ÌDataAlarm dataAlarm
  	private void alarmHandle ( DataAlarm dataAlarm){ 	
  		DBService.getInstanceDBService().saveAlarmData(dataAlarm);		

@@ -17,7 +17,7 @@ public class Post {
 	
 	//发送数据到服务器端，需要发送的数据都是提前转化为json格式的字符串，已经提前处理好了
 	public static String sendData(String path,String data) throws SocketTimeoutException {
-		// TODO Auto-generated method stub
+		
 		String res=null;
 		String upData = "data=" + data;
 		byte[] entity = null;

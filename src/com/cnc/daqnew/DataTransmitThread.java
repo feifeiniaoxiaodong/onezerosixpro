@@ -96,7 +96,7 @@ public class DataTransmitThread implements Runnable{
 					generalData.setDid(DataType.DataReg); //注册信息
 					if(dataReg.getId()!=null) {
 						 generalData.setDt(JsonUtil.object2Json(dataReg));
-		                 try {
+		                try {
 							res = Post.sendData(path, JsonUtil.object2Json(generalData));//发送注册信息
 						} catch (SocketTimeoutException e) {							
 							e.printStackTrace();
@@ -383,7 +383,7 @@ public class DataTransmitThread implements Runnable{
 		handler.sendMessage(msg);
 	}
 	
-	
+	//计算发送速率
 	 private String speed(long time,long len){		 
 		 String result="";
 		 if(time>0){
@@ -452,11 +452,11 @@ public class DataTransmitThread implements Runnable{
 		return path;
 	}
 	
-	
+	//停止数据发送线程
 	public void setIsCountinueRun(boolean flag){
 		this.isCountinueRun=flag;
 	}
-	
+	//获取数据发送线程的状态
 	public boolean getIsCountinueRun(){
 		return isCountinueRun;
 	}

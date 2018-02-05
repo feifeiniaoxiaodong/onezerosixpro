@@ -37,14 +37,9 @@ public class DaqData {
 					dataAlarm1.getCtt().equals(dataAlarm2.getCtt())&&
 					dataAlarm1.getId().equals(dataAlarm2.getId()))  //比较机床ID，区分不同机床的报警信息
 			{	
-				Log.d(TAG,"alarm 比较相同");
-				Log.d(TAG, dataAlarm1.toString()  + "======"+dataAlarm2.toString());
-				same = true;
-				return same;
+				return true;
 			}
-		}	
-		Log.d(TAG,"alarm 比较不同");
-		Log.d(TAG, dataAlarm1.toString()  + "======"+dataAlarm2.toString());
+		}					
 		return same;
 	}
 	
