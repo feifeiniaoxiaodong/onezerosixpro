@@ -132,9 +132,6 @@ public class DataVersion {
         Log.i("JNITest","硬件版本:"+this.getHardVersion());       //保留
         //Log.i("JNITest","硬件序号:"+this.getHardWareNumber());   //保留,没有内容
         Log.i("JNITest","软件序号："+this.getSoftWareNumber());  //保留
-
     }
-
-
 
 }

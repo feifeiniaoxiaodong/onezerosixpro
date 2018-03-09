@@ -108,11 +108,11 @@ public class GJApiFunction {
 		
 		datarun.setCas((float)dncmian.getStatusDoubleVal(GJApiNum.SPINDLE_ACT_SPEED));//主轴实际速度
 		datarun.setCcs((float)dncmian.getStatusDoubleVal(GJApiNum.SPINDLE_COM_SPEED));//主轴指令速度
-		datarun.setAload((float)dncmian.getStatusDoubleVal(GJApiNum.SPINDLE_LOAD_CURRENT));//主轴负载电流
-		
-		datarun.setAspd1((float)dncmian.getStatusDoubleVal(GJApiNum.FEEDAXIS_ACT_SPEED_X)); //进给轴实际转速X
-		datarun.setAspd2((float)dncmian.getStatusDoubleVal(GJApiNum.FEEDAXIS_ACT_SPEED_Y)); //进给轴实际转速Y
-		datarun.setAspd3((float)dncmian.getStatusDoubleVal(GJApiNum.FEEDAXIS_ACT_SPEED_Z)); //进给轴实际转速Z
+		datarun.setAload((float)dncmian.getStatusDoubleVal(GJApiNum.SPINDLE_LOAD_CURRENT)/100);//主轴负载电流
+		// 
+		datarun.setAspd1((float)(dncmian.getStatusDoubleVal(GJApiNum.FEEDAXIS_ACT_SPEED_X)*6)); //进给轴实际转速X，由轴进给速度转化为轴转速，单位r/min
+		datarun.setAspd2((float)(dncmian.getStatusDoubleVal(GJApiNum.FEEDAXIS_ACT_SPEED_Y)*6)); //进给轴实际转速Y
+		datarun.setAspd3((float)(dncmian.getStatusDoubleVal(GJApiNum.FEEDAXIS_ACT_SPEED_Z)*6)); //进给轴实际转速Z
 //		datarun.setAspd1((float)dncmian.getStatusDoubleVal(GJApiNum.FEEDAXIS_ACT_SPEED)); //进给轴实际转速X
 		datarun.setAspd2(0); //进给轴实际转速Y
 		datarun.setAspd3(0); //进给轴实际转速Z

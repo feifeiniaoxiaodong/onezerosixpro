@@ -45,7 +45,7 @@ public class HncTools {
 		//主轴指令速度 （转速）
 		dataRun.setCcs((float)HncAPI.HNCChannelGetValueDouble(HncChannel.HNC_CHAN_CMD_SPDL_SPEED, channel, 0, clientNo));
 		//主轴负载电流,华中的主轴是第五个轴
-		dataRun.setAload((float)HncAPI.HNCAxisGetValueDouble(HncAxis.HNC_AXIS_LOAD_CUR, 5, clientNo));
+		dataRun.setAload((float)HncAPI.HNCAxisGetValueDouble(HncAxis.HNC_AXIS_LOAD_CUR, 5, clientNo)/10);
 		
 		//轴1实际速度, i=0,X轴；i=1,Y轴；i=2,Z轴；
 		dataRun.setAspd1((float)HncAPI.HNCAxisGetValueDouble(HncAxis.HNC_AXIS_ACT_VEL, AxisType.X, clientNo));

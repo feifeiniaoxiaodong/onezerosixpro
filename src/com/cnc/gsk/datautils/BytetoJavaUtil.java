@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.cnc.gsk.data.domain.DataAxisInfo;
 import com.cnc.gsk.data.domain.DataBHSAMPLE_STATIC;
 import com.cnc.gsk.data.domain.DataVersion;
 
@@ -112,8 +113,8 @@ public class BytetoJavaUtil {
 
     }*/
 
-    /*//获取轴信息
-    public  DataAxisInfo batoJavaaxis(byte[] axisba){
+    //获取轴信息
+    public static DataAxisInfo batoJavaaxis(byte[] axisba){
 
         if(axisba.length!= 280){
             Log.i("AxisTest","轴信息字节流长度错误！");
@@ -149,7 +150,7 @@ public class BytetoJavaUtil {
         axisobj.setJ(J);
 
         return  axisobj;
-    }*/
+    }
 
 
     /*//获取运行信息

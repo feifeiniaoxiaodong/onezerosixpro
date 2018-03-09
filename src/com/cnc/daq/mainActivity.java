@@ -49,30 +49,30 @@ public class MainActivity extends Activity {
 	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");//时间戳格式
 	private SharedPreferences pref;	
 	private SharedPreferences.Editor editor ;
-	ExecutorService exec=null;
+	static ExecutorService exec=null;
 	
-	Map<String, ItemViewHolder>  viewmapgGsk=new HashMap<>();
+	static Map<String, ItemViewHolder>  viewmapgGsk=new HashMap<>();
 	
-	ItemViewHolder itemHuazhong =null,
-					itemGaojing=null;
+	static ItemViewHolder itemHuazhong ,
+					itemGaojing;
 	
-	TextView  cachenum , delay ,sendnum ,packsize ,speed ;
+	static TextView  cachenum , delay ,sendnum ,packsize ,speed ;
 	
 //	Map<String, Runnable> threadmap=new HashMap<>();
-	DataTransmitThread dataTransmitThread=null; //数据发送线程
-	String  currentSpinSelItem_Hz=null,
+	static DataTransmitThread dataTransmitThread=null; //数据发送线程
+	static String  currentSpinSelItem_Hz=null,
 			currentSpinSelItem_Gj=null;
 	
-	String current_HZ_NoIP = null;		//Huazhong
-	HzDataCollectThread currentHZDcObj=null;
+	static String current_HZ_NoIP = null;		//Huazhong
+	static HzDataCollectThread currentHZDcObj=null;
 	
-	String current_Gj_NoIP= null;
-	GJDataCollectThread currentGjDcObj=null;//Gaojing
+	static String current_Gj_NoIP= null;
+	static GJDataCollectThread currentGjDcObj=null;//Gaojing
 	
 	String [] gskIpArray=null; //gsk ip list
-	String current_Gsk_NoIP = null;			//guangzhou shu kong 
-	GSKDataCollectThread  currentGskDcobj_1=null;
-	Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
+//	String current_Gsk_NoIP = null;			//guangzhou shu kong 
+//	GSKDataCollectThread  currentGskDcobj_1=null;
+	static Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

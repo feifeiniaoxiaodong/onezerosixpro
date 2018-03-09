@@ -15,6 +15,7 @@ import com.cnc.domain.DataReg;
 import com.cnc.domain.DataRun;
 import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
+import com.cnc.gsk.data.domain.DataAxisInfo;
 import com.cnc.gsk.data.domain.DataBHSAMPLE_STATIC;
 import com.cnc.gsk.data.domain.DataVersion;
 import com.cnc.gsk.data.domain.Mcronum;
@@ -211,11 +212,11 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 			    float cpstx[]=bhSample.getCpst();//进给轴实际位置
 			    float loadx[]=bhSample.getLoad();//负载电流
 				
-				DataRun dataRun=new DataRun(machine_SN, bhSample.getCas(), bhSample.getCcs(), bhSample.getAload(), 
-						aspdx[1], aspdx[2], aspdx[3], aspdx[4], aspdx[5],      //实际转速
-						cpstx[1], cpstx[2], cpstx[3], cpstx[4], cpstx[5], 		//实际位置
-						apstx[1], apstx[2], apstx[3], apstx[4], apstx[5], 		//指令位置
-						loadx[1], loadx[2], loadx[3], loadx[4], loadx[5], 		//负载电流
+				DataRun dataRun=new DataRun(machine_SN, bhSample.getCas(), bhSample.getCcs(), bhSample.getAload()/10, 
+						aspdx[0], aspdx[1], aspdx[2], aspdx[3], aspdx[4],      //实际转速
+						cpstx[0], cpstx[1], cpstx[2], cpstx[3], cpstx[4], 		//实际位置
+						apstx[0], apstx[1], apstx[2], apstx[3], apstx[4], 		//指令位置
+						loadx[0]/10000, loadx[1]/10000, loadx[2]/10000, loadx[3]/10000, loadx[4]/10000, 		//负载电流
 						bhSample.getPrognum(), //运行程序编号
 						bhSample.getProgname(), //程序名
 						bhSample.getRunstatus(),//代码运行状态
@@ -223,6 +224,8 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 						bhSample.getGcmode(),					   //通道模态
 						timeStr) ;    			 //时间戳
 				sendMsg2Main(dataRun,HandleMsgTypeMcro.MSG_RUN,count);
+				
+//				getAxisInfo();
 				
 				count++;//采集次数记录
 				if(count == Integer.MAX_VALUE)//达到最大值的时候记得清零
@@ -271,6 +274,17 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
         return dataBeiHang;
     }
     
+    private void getAxisInfo(){
+        DataAxisInfo axis=null;      //轴信息类
+        //读取轴信息字节流
+        byte[] tmpbytes=GSKNativeApi.GSKRM_GetAxisInfo(clientnum);
+        if(tmpbytes!=null) {
+            axis = BytetoJavaUtil.batoJavaaxis(tmpbytes);    //处理字节流信息
+            axis.loginfor();//打印信息
+        } else{
+            Log.i("JNITest","读回的字节流为空！");
+        }
+    }
        
 	//发送消息到主线程
 	private void sendMsg2Main(Object obj, int what) {	
