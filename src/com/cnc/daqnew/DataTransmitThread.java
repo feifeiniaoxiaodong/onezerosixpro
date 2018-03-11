@@ -11,15 +11,20 @@ import java.util.Date;
 import java.util.Properties;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.cnc.DataBaseService.DBService;
 import com.cnc.DataBaseService.DataAlarmPlus;
 import com.cnc.DataBaseService.DataRunPlus;
+import com.cnc.broadcast.BroadcastAction;
+import com.cnc.broadcast.BroadcastType;
 import com.cnc.daq.DaqData;
 import com.cnc.daq.MainActivity;
+import com.cnc.daq.MyApplication;
 import com.cnc.domain.DataDelayTime;
 import com.cnc.domain.DataLog;
 import com.cnc.domain.DataReg;
@@ -54,10 +59,12 @@ public class DataTransmitThread implements Runnable{
 	private DBService dbservice=null;     		//SQLite数据库操作对象
 	private Handler   daqActvityHandler=null;  //Activity的Handler
    	private Handler   mainActivityHandler =null;
-	
-	int[]   keys={1,5,10,15,30,50,60,70,80,90,100};
+	//单次发送数据条数
+	int[]   keys={1,5,10,15,30,50,60,70,80,90,100,120,140,160,180,200,220,240,260,280,300};
 	int  	pointer=0,
 			len=keys.length;
+	
+	private static int nMsgSend=5 ; //单次发送数据条数，随着延时时间的变化进行动态调整
 	
 	public DataTransmitThread(){
 		dbservice=DBService.getInstanceDBService();
@@ -83,8 +90,7 @@ public class DataTransmitThread implements Runnable{
 //		String sPath=getPath(HandleMsgTypeMcro.SERVICES_YANG); //初始化远端服务器地址
 		if(sPath!=null){
 			path=sPath;
-		}
-		
+		}		
 		while(isCountinueRun) //如果注册信息与运行信息有消息，那就一直发送
 		{
 			synchronized(RegLock.class){
@@ -141,7 +147,8 @@ public class DataTransmitThread implements Runnable{
 			sendAlarmInfo();
 			
 			//发送运行信息
-			sendRunInfo();						
+//			sendRunInfo();	
+			sendRunInfoZhi();
 			//发送间隔
 			try {
 				Thread.sleep(500);
@@ -180,8 +187,7 @@ public class DataTransmitThread implements Runnable{
 			else if(resultofExcep.equals(res)){	//发送失败
 //				login = false;			//发送失败就需要重新发送注册信息
 				Log.d(TAG, "发送报警信息失败！");
-			}
-			
+			}			
 			//发送延时时间
 			sendDelayTime(delayTime);			
 		}	
@@ -202,12 +208,56 @@ public class DataTransmitThread implements Runnable{
 		//发送特定条数的运行信息
 		if(countRun>= keys[pointer = (pointer)%len] ){
 			delayTime=getDataDelayTimeObj(DataType.DataDelay,countRun); //获取一个延时信息对象
-			sendNumRunInfo(keys[pointer],delayTime);  //发送指定条数的运行信息到服务器	
-			++pointer;					
-		}
-		//发送延时时间，到服务器
-		sendDelayTime(delayTime);
+			  
+			if(sendNumRunInfo(keys[pointer],delayTime)){//发送指定条数的运行信息到服务器	
+				//发送延时时间，到服务器
+				sendDelayTime(delayTime);				
+			}
+			++pointer;
+		}		
 	}
+	
+	/**
+	 * 动态调整发送运行信息的条数
+	 * 根据delaytime,即:回路响应时间RTT,来调整单次发送数据条数
+	 * 阈值设置为500ms
+	 * if RTT < ＝300 , nMsgSend + 10 ; 
+	 * else  if( 300 < RTT <=500)  nMsgSend +5 ;
+	 * else if( 500 <RTT <700 )  nMsgSend -5 ;
+	 * else  nMsgSend -10;
+	 * 
+	 * 如果进行多线程发送的话需要对该方法进行同步,因为函数有访问共享资源
+	 * @add by wei 
+	 * @time 2018/03/11
+	 */
+	private void sendRunInfoZhi(){
+		DataDelayTime  delayTimeObj=null;//延时时间对象
+ 				
+		long countRun=dbservice.getCountRunInfo();//检查SQLite数据库中运行信息的条数,本地缓存信息条数
+		
+		sendMsg2Main(countRun+"",HandleMsgTypeMcro.MSG_COUNTRUN);//发送给UI的Handler,需要改为广播发送
+		
+		//发送特定条数的运行信息，可以根据发送延时进行动态调整		
+		if(countRun>=nMsgSend){
+			delayTimeObj=getDataDelayTimeObj(DataType.DataDelay,countRun); //获取一个延时信息对象
+			if(sendNumRunInfo(nMsgSend,delayTimeObj)){//发送指定条数的运行信息到远程服务器	
+				//数据发送成功
+				sendDelayTime(delayTimeObj);//发送延时时间，到服务器
+				long delay=delayTimeObj.getDelaytime();//本次数据发送延时时间
+				if(delay<=300) { nMsgSend+=10*5;}
+				else if( 300<delay && delay<=400) { nMsgSend+=5*5;}
+				else if(400<delay && delay<=700) {nMsgSend -=5;}
+				else { nMsgSend-=10;}
+				
+			}else{
+				//发送失败,减小单次发送的数据量
+				if(nMsgSend>10){  
+					nMsgSend-=5; //防止发送数据为0条
+				}
+			}
+		}			
+	}
+	
 	
 	/**
 	 * 发送延时时间
@@ -224,10 +274,10 @@ public class DataTransmitThread implements Runnable{
 			String res = null;
 			try {
 				res = Post.sendData(path,JsonUtil.object2Json(generalData));
-			} catch (SocketTimeoutException e) {
-				// TODO Auto-generated catch block
+			} catch (SocketTimeoutException e) {				
 				e.printStackTrace();
-			}//发送数据			
+			}//发送数据	
+			
 			//判断是否发送成功						
 			if(resultofPost.equals(res)){							
 				Log.d(TAG, "发送计时信息成功！");
@@ -251,7 +301,7 @@ public class DataTransmitThread implements Runnable{
 	 * @param n	：要发送的数据条数
 	 * @param delayTime ：记录发送延时的对象
 	 */
-	private void sendNumRunInfo(int n,DataDelayTime delayTime){		
+	private boolean sendNumRunInfo(int n,DataDelayTime delayTime){		
 			
 		StringBuilder  strRun=new StringBuilder(1024*100);
 		
@@ -278,20 +328,21 @@ public class DataTransmitThread implements Runnable{
 				dbservice.deleteRunInfo(dataRunPlus.getId(), dataRunPlus.getIdEnd());//发送信息成功后，从数据库中删除该条信息
 				
 				Log.d(TAG, "成功发送"+n+"条运行信息！" );
+				if(delayTime!=null){
+					delayTime.setNumofmsg(n); //本次发送的信息条数
+					sendBroadCast(BroadcastAction.SendThreadToUi_MSGSEND,BroadcastType.SENDCOUNT,n+""); //发送广播，显示本次成功发送数据条数
+				}
+				return true;
 			}
 			else if(resultofExcep.equals(result)){
 //				login = false;
 				Log.d(TAG, "发送"+n+"条运行信息失败！");
+				return false;
 			}
-			
-			if(delayTime!=null){
-				delayTime.setNumofmsg(n); //本次发送的信息条数
-			}
-		
-		}else{
-			Log.d(TAG, "读回的运行信息条数与期望不符！！！");
-			return ;
 		}
+			
+		Log.d(TAG, "读回的运行信息条数与期望不符！！！");
+		return false;		
 	}
 	
 	//发送数据，测试延时时间
@@ -309,8 +360,7 @@ public class DataTransmitThread implements Runnable{
 		String  strJson=JsonUtil.object2Json(generalData); //本次发送的字符串
 		long  countBytes=strJson.getBytes().length + 5;  //文本长度(byte)
 		 
-		beforeSecond=System.currentTimeMillis();; //发送之前时刻
-			
+		beforeSecond=System.currentTimeMillis();; //发送之前时刻			
 		try {
 			response = Post.sendData(path,strJson ); //发送数据
 		} catch (SocketTimeoutException e) {		
@@ -318,20 +368,20 @@ public class DataTransmitThread implements Runnable{
 		}
 		afterSecond=System.currentTimeMillis();; //发送之后时刻
 				
-		timePeriod=afterSecond-beforeSecond; //计算发送所用时长
+		timePeriod=afterSecond-beforeSecond; //计算发送所用时长,ms，回路响应时间RTT
 		
-		long speedn=countBytes*1000/timePeriod; //发送速率 ，单位  B/s
+		long speedn=countBytes*1000/timePeriod; //发送速率 ，单位  Byte/s
 		
 		if(delayTime!=null){    //设置延时对象的各项参数
-			delayTime.setDelaytime(timePeriod);   //延时时间
-			delayTime.setPackagesize( countBytes ); //包大小
-			delayTime.setSpeed(speedn);			  //发送速度
+			delayTime.setDelaytime(timePeriod);   //延时时间,ms
+			delayTime.setPackagesize( countBytes ); //包大小,Bytes
+			delayTime.setSpeed(speedn);			  //发送速度,Bytes/s
 		}
 		
 //		String str="用时:"+ timePeriod+"ms;"+ "数据大小: "+countBytes +"bytes;"+"发送速率:"+speed(timePeriod,countBytes);
 		StringBuilder strb=new StringBuilder();
 		strb.append(timePeriod+"ms").append(":");
-		strb.append(countBytes+"bytes").append(":");
+		strb.append(countBytes+"Bytes").append(":");
 		strb.append(speed(timePeriod,countBytes));
 		sendMsg2Main(strb.toString(),HandleMsgTypeMcro.MSG_DELAYTIME);//在主页面显示本次发送的延时和速度参数
 		
@@ -381,6 +431,15 @@ public class DataTransmitThread implements Runnable{
 		msg.arg1 = arg1;
 		msg.arg2 = arg2;
 		handler.sendMessage(msg);
+	}
+	
+	//发送本地广播
+	private void sendBroadCast(String action,String key,String value){
+		Intent intent=new Intent();
+		intent.setAction(action);
+		intent.putExtra(key, value);
+		LocalBroadcastManager.getInstance(MyApplication.getContext())
+							.sendBroadcast(intent);
 	}
 	
 	//计算发送速率

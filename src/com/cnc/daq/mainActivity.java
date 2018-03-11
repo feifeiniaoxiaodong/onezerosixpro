@@ -12,6 +12,9 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.text.SimpleDateFormat;
+
+import com.cnc.broadcast.BroadcastAction;
+import com.cnc.broadcast.BroadcastType;
 import com.cnc.daqnew.DataTransmitThread;
 import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.daqnew.HzDataCollectThread;
@@ -23,6 +26,10 @@ import com.example.wei.gsknetclient_studio.GSKDataCollectThread;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 
 import android.nfc.cardemulation.OffHostApduService;
@@ -30,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -44,6 +52,7 @@ import android.widget.Toast;
 
 
 public class MainActivity extends Activity {
+	
 	final String TAG="mainactivity";
 	static Handler  mainActivityHandler=null;
 	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");//时间戳格式
@@ -73,6 +82,7 @@ public class MainActivity extends Activity {
 //	String current_Gsk_NoIP = null;			//guangzhou shu kong 
 //	GSKDataCollectThread  currentGskDcobj_1=null;
 	static Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
+	LocalBroadcastManager localBroadcastManager =null; //本地广播
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +95,12 @@ public class MainActivity extends Activity {
 		gskIpArray =getResources().getStringArray(R.array.gskip);   //广数ip地址
 		
 		initViewMap();
+		//注册本地广播
+		localBroadcastManager=LocalBroadcastManager.getInstance(MyApplication.getContext());
+		IntentFilter filter=new IntentFilter();
+	    filter.addAction(BroadcastAction.SendThreadToUi_MSGSEND);
+	    filter.addAction(BroadcastAction.SendThread_LocalInfoNUm);
+		localBroadcastManager.registerReceiver(new LocalReceiver(), filter);
 		
 		startTask(); //开启数据采集和发送线程
 
@@ -124,7 +140,7 @@ public class MainActivity extends Activity {
 //				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*6*1); //测试，自动上线和下线会不会导致闪退
 				
 				timer.scheduleAtFixedRate(new startTask(), 1000*60*5, 1000*60*55*1);//每隔55分钟执行一次任务
-				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*55*1); //测试，自动上线和下线会不会导致闪退
+				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*55*1); //
 						
 			} //end run
 			
@@ -751,6 +767,31 @@ public class MainActivity extends Activity {
 			Log.d(TAG,"stopTask执行了定时下线任务");						
 		}		
 	}
+	
+	
+	
+	//本地广播接收器
+	class  LocalReceiver extends BroadcastReceiver{  	         
+		@Override  
+         public void onReceive(Context context,Intent intent){ 
+			 
+//             Toast.makeText(context,"这是本地广播接收器",Toast.LENGTH_SHORT).show();
+             if(intent==null) return ;        
+			 String action=intent.getAction();
+			 Bundle	 bundle= intent.getExtras();
+			
+             if(action.equals(BroadcastAction.SendThreadToUi_MSGSEND)){
+            	 String sendofmsg=bundle.getString(BroadcastType.SENDCOUNT);
+            	 sendnum.setText("本次发送数据:"+sendofmsg+"条");//显示已发送数据
+            	 
+             }else if(action.equals(BroadcastAction.SendThread_LocalInfoNUm)){             	 
+	            	 //显示本地数据库中信息数量	            	
+	            	 cachenum.setText("本地缓存数据:"+bundle.getString(BroadcastType.MSGLOCAL)+"条");
+	          }
+        }   
+     }		  
+      
+	
 }
 
 

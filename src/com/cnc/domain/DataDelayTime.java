@@ -15,7 +15,7 @@ public class DataDelayTime {
 	private long    numofmsgunsent ;  //未发送的本地数据条数
 	private long    delaytime;  // 延时时间，单位 ms
 	private long    packagesize; //数据包大小（有用数据），单位 KB
-	private double  speed ;     //速率
+	private double  speed ;     //速率  
 	private String  ts; //时间戳
 	
 	

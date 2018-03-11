@@ -439,9 +439,7 @@ public class DBService{
 		long result = cursor.getLong(0);
 		cursor.close();
 		return result;
-	}
-
-	
+	}	
 /*******************************************************************************/
 
 }

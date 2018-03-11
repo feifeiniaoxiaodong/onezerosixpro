@@ -196,7 +196,7 @@ import android.util.Log;
 			UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
 			sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.GAOJING_UIALARM	, 0, 0);
 		}
-	}    //end daq()
+	}//end daq()
 		
 	/**
 	 * 发送消息到主线程
