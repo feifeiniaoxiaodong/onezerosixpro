@@ -1,4 +1,4 @@
-package com.cnc.DataBaseService;
+package com.cnc.databaseservice;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

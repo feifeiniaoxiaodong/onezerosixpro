@@ -11,14 +11,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.cnc.gsk.data.domain.DataAxisInfo;
-import com.cnc.gsk.data.domain.DataBHSAMPLE_STATIC;
-import com.cnc.gsk.data.domain.DataVersion;
+import com.cnc.gsk.domain.DataAxisInfo;
+import com.cnc.gsk.domain.DataBHSAMPLE_STATIC;
+import com.cnc.gsk.domain.DataVersion;
 
 /**
+ * guang shu
+ * parse data bytes to information object
  * Created by wei on 2017/4/17.
  */
-
 public class BytetoJavaUtil {
 
     //BytedealUtil  byteutil=new BytedealUtil(); //字节处理工具类

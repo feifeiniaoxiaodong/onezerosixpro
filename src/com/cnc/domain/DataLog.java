@@ -1,7 +1,7 @@
 package com.cnc.domain;
 
 /**
- * 登录和登出信息类
+ * 标准登录和登出信息类
  * @author wei
  *
  */

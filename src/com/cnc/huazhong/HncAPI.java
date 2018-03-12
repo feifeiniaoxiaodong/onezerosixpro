@@ -181,10 +181,4 @@ public class HncAPI {
 //	public static native String HNCChannelGetValueString(int type, int channel,int index, int clientNo);
 	
 	
-	
-	
-	
-	
-	
-	
 }

@@ -122,8 +122,6 @@ public class DaqData {
 	public static List<DataReg> getListDataReg() {
 		return listDataReg;
 	}
-
-
 	public static List<DataLog> getListDataLog() {
 		return listDataLog;
 	}

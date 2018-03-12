@@ -29,14 +29,14 @@
         </activity>
         
         <!-- 注册服务 -->
-        <service android:name="com.cnc.daqnew.DataService" ></service>
+        <service android:name="com.cnc.mainservice.DataService" ></service>
         
         <service android:name=".daqService" ></service>
         
-        <service android:name="com.cnc.service.DelMsgServie"></service>
+        <service android:name="com.cnc.mainservice.DelMsgServie"></service>
 
         <!-- 注册广播接收者，监听启动广播 -->
-        <receiver android:name=".BootBroadcastReceiver" android:exported="true" >
+        <receiver android:name="com.cnc.broadcast.BootBroadcastReceiver" android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

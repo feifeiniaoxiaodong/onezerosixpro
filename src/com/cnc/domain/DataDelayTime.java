@@ -3,6 +3,7 @@ package com.cnc.domain;
 
 /**
  * 延时时间数据对象
+ * 测试用，不在标准中
  * @author wei
  *	
  */

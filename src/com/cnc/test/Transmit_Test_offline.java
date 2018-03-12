@@ -14,7 +14,7 @@ import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataDelayTime;
 import com.cnc.domain.DataType;
 import com.cnc.domain.GeneralData;
-import com.cnc.netService.Post;
+import com.cnc.net.service.Post;
 import com.cnc.utils.JsonUtil;
 
 public class Transmit_Test_offline implements Runnable{

@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 /**
+ * 沈阳高精
  * 提供了两个工具函数根据报警ID号，从properties文件中获取报警信息
  * @author wei
  *

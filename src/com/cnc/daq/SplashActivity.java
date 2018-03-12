@@ -1,7 +1,7 @@
 package com.cnc.daq;
 
-import com.cnc.daqnew.DataTransmitThread;
-import com.cnc.service.DelMsgServie;
+import com.cnc.mainservice.DelMsgServie;
+import com.cnc.net.datasend.DataTransmitThread;
 
 import android.app.Activity;
 import android.content.Intent;

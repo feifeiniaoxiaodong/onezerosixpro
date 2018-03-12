@@ -14,11 +14,12 @@ import com.cnc.domain.DataLog;
 import com.cnc.domain.DataReg;
 import com.cnc.domain.DataRun;
 
-import com.cnc.domain.gaojing.DataVersion;
+import com.cnc.gaojing.domain.DataVersion;
 import com.cnc.utils.JsonUtil;
 
 
-/*
+/**
+ * 沈阳高精
  * 从机床读取数据工具类
  */
 public class GJApiFunction {

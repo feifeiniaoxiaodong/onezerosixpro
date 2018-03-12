@@ -1,7 +1,7 @@
 package com.cnc.domain;
 
 /**
- * 数据类型
+ * 标准数据类型
  * @author wei
  *
  */
@@ -14,7 +14,9 @@ public class DataType {
 	public static final  byte  DataDelay=6; //延时时间,自己添加，标准里面没这个类型
 	
 	public static final String  pathResource="/com/cnc/resources/source.properties"; //服务器地址和机床IP地址常量
-		
+
+	
+	
 }
 
 
