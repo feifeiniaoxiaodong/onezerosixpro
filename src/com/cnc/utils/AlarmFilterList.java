@@ -13,7 +13,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.cnc.daq.DaqData;
-import com.cnc.databaseservice.DBService;
+import com.cnc.db.service.DBService;
 import com.cnc.domain.DataAlarm;
 import com.cnc.net.datasend.HandleMsgTypeMcro;
 

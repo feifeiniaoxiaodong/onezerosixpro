@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.cnc.daq.DaqData;
-import com.cnc.databaseservice.DBService;
+import com.cnc.db.service.DBService;
 import com.example.wei.gsknetclient_studio.GSKDataCollectThread;
 
 

@@ -30,6 +30,7 @@ import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.LogLock;
 import com.cnc.utils.RegLock;
 import com.cnc.utils.SaveRunTime;
+import com.cnc.utils.TimeUtil;
 /**
  * 华中数据采集子线程
  * @author wei
@@ -53,7 +54,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	private final String tp = "HNC-818A";//数控系统型号
 	String machine_SN=null;//数控系统ID
 
-	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
+//	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 	private AlarmFilterList   alarmFilterList =null; //报警信息缓存过滤对象
 	
 	/*static {  
@@ -132,7 +133,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	 */
 	private void daq() 
 	{	//开始采集信息的各种事件		
-		String strTime = formatter.format(new Date());//时间戳
+		String strTime = TimeUtil.getTimestamp();
 		
 		if(!boolGetMacInfo)   //如果没有获得过机床的基本信息
 		{

@@ -25,6 +25,7 @@ import com.cnc.net.datasend.HandleMsgTypeMcro;
 import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.RegLock;
 import com.cnc.utils.SaveRunTime;
+import com.cnc.utils.TimeUtil;
 
 //import android.annotation.SuppressLint;
 import java.text.SimpleDateFormat;
@@ -45,8 +46,8 @@ import android.util.Log;
 	boolean boolGetMacInfo = false; //标识是否得到机床的基本信息	
 	int     count = 1;     //存储运行信息的id,标识这是第几次采集信息
 	boolean hadconnected =false ;   //连接状态标志	
-	private Handler  
-					 delMsgHandler =null,
+	 
+	private Handler delMsgHandler =null,
 					 mainActivityHandler=null;
 	final private String  machineIP ;//= "192.168.188.132"; //机床的IP地址
 //	int    machinePort ;			  //机床端口号，高精不需要设置端口号
@@ -68,7 +69,7 @@ import android.util.Log;
 		this.alarmFilterList=new AlarmFilterList(delMsgHandler);
 	}
 		
-	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
+//	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 	
 	@Override
 	public void run() {
@@ -136,8 +137,8 @@ import android.util.Log;
 	 * 数据采集函数
 	 */
 	private void daq() {
-		
-		String strTime = formatter.format(new Date());//开始采集信息的各种事件，时间戳
+		//开始采集信息的各种事件，时间戳
+		String strTime = TimeUtil.getTimestamp();
 		
 		if(!boolGetMacInfo)   //如果没有获得过机床的基本信息
 		{

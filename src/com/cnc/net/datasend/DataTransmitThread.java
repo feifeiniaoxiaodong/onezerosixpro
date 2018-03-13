@@ -23,9 +23,9 @@ import com.cnc.broadcast.BroadcastType;
 import com.cnc.daq.DaqData;
 import com.cnc.daq.MainActivity;
 import com.cnc.daq.MyApplication;
-import com.cnc.databaseservice.DBService;
-import com.cnc.databaseservice.DataAlarmPlus;
-import com.cnc.databaseservice.DataRunPlus;
+import com.cnc.db.service.DBService;
+import com.cnc.db.service.DataAlarmPlus;
+import com.cnc.db.service.DataRunPlus;
 import com.cnc.domain.DataDelayTime;
 import com.cnc.domain.DataLog;
 import com.cnc.domain.DataReg;
@@ -36,6 +36,7 @@ import com.cnc.net.service.Post;
 import com.cnc.utils.JsonUtil;
 import com.cnc.utils.LogLock;
 import com.cnc.utils.RegLock;
+import com.cnc.utils.TimeUtil;
 
 /**
  * 数据发送线程
@@ -182,15 +183,19 @@ public class DataTransmitThread implements Runnable{
 			if(resultofPost.equals(res))
 			{
 				dbservice.deleteAlarmData(dataAlarmPlus.id);//发送信息成功后，从数据库中删除该条信息
-				Log.d(TAG, "发送报警信息成功！");						
+				Log.d(TAG, "发送报警信息成功！");
+				//发送延时时间
+				if(delayTime!=null){
+					sendDelayTime(delayTime);
+				}
 			}
 			else /*if(resultofExcep.equals(res))*/{	//发送失败
 //				login = false;			//发送失败就需要重新发送注册信息
 				Log.d(TAG, "发送报警信息失败！");
 //				Toast.makeText(MyApplication.getContext(),"发送报警信息失败!", Toast.LENGTH_SHORT).show();
 			}			
-			//发送延时时间
-			sendDelayTime(delayTime);			
+			
+						
 		}	
 	}
 	
@@ -210,7 +215,9 @@ public class DataTransmitThread implements Runnable{
 			  
 			if(sendNumRunInfo(keys[pointer],delayTimeObj)){//发送指定条数的运行信息到服务器	
 				//发送延时时间，到服务器
-				sendDelayTime(delayTimeObj);
+				if(delayTimeObj!=null){
+					sendDelayTime(delayTimeObj);
+				}				
 				
 				//界面显示发送参数,在这统一发送运行信息参数
 				if(delayTimeObj!=null){
@@ -239,10 +246,8 @@ public class DataTransmitThread implements Runnable{
 	 */
 	private void sendRunInfoZhi(){
 		DataDelayTime  delayTimeObj=null;//延时时间对象
- 				
+ 		if(nMsgSend<1) nMsgSend =5;	//防止发送速率变为0	
 		long countRun=dbservice.getCountRunInfo();//检查SQLite数据库中运行信息的条数,本地缓存信息条数
-
-//		sendMsg2Main(countRun+"",HandleMsgTypeMcro.MSG_COUNTRUN);//发送给UI的Handler,需要改为广播发送
 		
 		//发送特定条数的运行信息，可以根据发送延时进行动态调整		
 		if(countRun>=nMsgSend){
@@ -252,10 +257,10 @@ public class DataTransmitThread implements Runnable{
 				sendDelayTime(delayTimeObj);//发送延时时间，到服务器
 				//根据延时时间调整下次数据发送条数
 				long delay=delayTimeObj.getDelaytime();//本次数据发送延时时间
-				if(delay<=300) { nMsgSend+=10*5;}
-				else if( 300<delay && delay<=400) { nMsgSend+=5*5;}
-				else if(400<delay && delay<=700) {nMsgSend -=5;}
-				else { nMsgSend-=10;}
+				if(delay<=300) { nMsgSend+=15;}
+				else if( 300<delay && delay<=400) { nMsgSend+=10;}
+				else if(400<delay && delay<=700) {nMsgSend -=10;}
+				else { nMsgSend-=25;}
 				
 				//界面显示发送参数,在这统一发送运行信息参数
 				if(delayTimeObj!=null){
@@ -266,19 +271,17 @@ public class DataTransmitThread implements Runnable{
 				}
 			
 			}else{
-							
-//				Toast.makeText(new MainActivity().getApplicationContext(), "发送"+nMsgSend+"条运行信息失败",Toast.LENGTH_SHORT ).show();
-				
+				//发送失败			
 				sendBroadCast(BroadcastAction.SendThread_PARAMALL,
 						BroadcastType.MSGLOCAL,"本地缓存数据:"+delayTimeObj.getNumofmsgunsent()+"条",
 						BroadcastType.SENDCOUNT,"发送:"+nMsgSend+"条数据",
 						BroadcastType.SENDSPEED,"RTT延时:"+delayTimeObj.getDelaytime()+"ms");
 				//发送失败,减小单次发送的数据量
 				if(nMsgSend>10){  
-					nMsgSend-=10; //防止发送数据为0条
+					nMsgSend-=25; //防止发送数据为0条
 				}
 			}
-		}else{
+		}else{ //数据条数较少
 			sendBroadCast(BroadcastAction.SendThread_PARAMALL,
 					BroadcastType.MSGLOCAL,"本地缓存数据:"+countRun+"条",
 					BroadcastType.SENDCOUNT,"",
@@ -330,7 +333,7 @@ public class DataTransmitThread implements Runnable{
 	 * @param delayTime ：记录发送延时的对象
 	 */
 	private boolean sendNumRunInfo(int n,DataDelayTime delayTime){		
-			
+		if(n<1)  return false;	
 		StringBuilder  strRun=new StringBuilder(1024*100);
 		
 		DataRunPlus dataRunPlus = dbservice.findNumRowRunInfo(n);	//从本地数据库中读取n条运行数据	
@@ -414,9 +417,8 @@ public class DataTransmitThread implements Runnable{
 	
 	private DataDelayTime getDataDelayTimeObj(int dataType, long nOfInfoUnsent ,long nOfInfoSent){
 		
-		@SuppressLint("SimpleDateFormat") 
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
-		String dateStamp=formatter.format(new Date()); //时间戳
+		
+		String dateStamp=TimeUtil.getTimestamp(); //时间戳
 		
 		DataDelayTime  delaytemp=new DataDelayTime();
 
@@ -432,8 +434,7 @@ public class DataTransmitThread implements Runnable{
 	
 	
 
-	//发送本地广播消息
-	
+	//发送本地广播消息	
 	private void sendBroadCast(String action,String ... args){
 		Intent intent =new Intent();
 		intent.setAction(action);
@@ -442,8 +443,7 @@ public class DataTransmitThread implements Runnable{
 			intent.putExtra(args[i], args[i+1]);
 		}
 		LocalBroadcastManager.getInstance(MyApplication.getContext())
-							 .sendBroadcast(intent);
-		
+							 .sendBroadcast(intent);	
 	}
 	
 		 

@@ -26,6 +26,7 @@ import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.JsonUtil;
 import com.cnc.utils.LogLock;
 import com.cnc.utils.RegLock;
+import com.cnc.utils.TimeUtil;
 
 import android.annotation.SuppressLint;
 import android.os.Handler;
@@ -64,7 +65,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 	private String machine_SN=null;//数控系统ID
 
 	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
+//	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 	private AlarmFilterList   alarmFilterList =null; //报警信息缓存过滤对象
 	
 	public GSKDataCollectThread(String ip,String threadlabel){	
@@ -140,7 +141,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
        
     //采集数据
     private void getDaq(){ 
-    	String timeStr=formatter.format(new Date());//时间戳   	
+    	String timeStr=TimeUtil.getTimestamp();//时间戳   	
     	//采集注册信息 和登入登出信息
     	if(!boolGetMacInfo){
     		
@@ -224,14 +225,12 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 						bhSample.getGcmode(),					   //通道模态
 						timeStr) ;    			 //时间戳
 				sendMsg2Main(dataRun,HandleMsgTypeMcro.MSG_RUN,count);
-				
-//				getAxisInfo();
-				
+							
 				count++;//采集次数记录
 				if(count == Integer.MAX_VALUE)//达到最大值的时候记得清零
 					count = 1;
 				
-				//发送到主线程
+				//发送运行和报警信息到主线程
 				UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
 				uiDataAlarmRun.setThreadlabel(threadlabel);//thread label
 				sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.GSK_UIALARM	, 0, 0);

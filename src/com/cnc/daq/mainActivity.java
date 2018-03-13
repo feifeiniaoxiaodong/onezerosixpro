@@ -139,8 +139,7 @@ public class MainActivity extends Activity {
 				timer.scheduleAtFixedRate(new startTask(), 1000*60*5, 1000*60*55*1);//每隔55分钟执行一次任务
 				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*55*1); //
 						
-			} //end run
-			
+			} //end run			
 		}.start();		
 	}
 		
@@ -190,9 +189,7 @@ public class MainActivity extends Activity {
 				itemViewHolder.getAlarm().setText(gskUiDataAlarmRun.getAlarminfo());
 				itemViewHolder.getRuninfo().setText(gskUiDataAlarmRun.getRuninfo());
 						
-				break;				
-			
-
+				break;						
 			default:{}				
 			}	
 		}
@@ -234,69 +231,7 @@ public class MainActivity extends Activity {
 		return mainActivityHandler;
 	}
 		
-	class ItemViewHolder{
-		TextView  no,ip,
-				 idcnc,
-				 idandroid,
-				 alarm,
-				 runinfo;
-		Spinner   spinner;
-		Button    btstart ,btstop;
-
-		public ItemViewHolder() {		
-		}
-
-		public ItemViewHolder(TextView no, TextView ip, TextView idcnc,
-				TextView idandroid, TextView alarm, TextView runinfo,
-				Spinner spinner, Button btstart, Button btstop) {
-			
-			this.no = no;
-			this.ip = ip;
-			this.idcnc = idcnc;
-			this.idandroid = idandroid;
-			this.alarm = alarm;
-			this.runinfo = runinfo;
-			this.spinner = spinner;
-			this.btstart = btstart;
-			this.btstop = btstop;
-		}
-
-		public TextView getIp() {
-			return ip;
-		}
-
-		public TextView getNo() {
-			return no;
-		}
-
-		public TextView getIdcnc() {
-			return idcnc;
-		}
-
-		public TextView getIdandroid() {
-			return idandroid;
-		}
-
-		public TextView getAlarm() {
-			return alarm;
-		}
-
-		public TextView getRuninfo() {
-			return runinfo;
-		}
-
-		public Spinner getSpinner() {
-			return spinner;
-		}
-
-		public Button getBtstart() {
-			return btstart;
-		}
-
-		public Button getBtstop() {
-			return btstop;
-		}	
-	}
+	
 	
 
 	//init all view  components id
@@ -482,6 +417,7 @@ public class MainActivity extends Activity {
 			}
 		});	
 		
+		/*<<<<==================================>>>>*/
 		//广数 click event 
 		for(int i=0;i< gskIpArray.length;i++){
 			String no;
@@ -752,13 +688,11 @@ public class MainActivity extends Activity {
 	}
 	
 	
-	
 	//本地广播接收器
 	class  LocalReceiver extends BroadcastReceiver{  	         
 		@Override  
          public void onReceive(Context context,Intent intent){ 
-			 
-//             Toast.makeText(context,"这是本地广播接收器",Toast.LENGTH_SHORT).show();
+
              if(intent==null) return ;        
 			 String action=intent.getAction();
 			 Bundle	 bundle= intent.getExtras();
@@ -774,8 +708,7 @@ public class MainActivity extends Activity {
 	        	  }
 	        	  if(!"".equals(strspeed)){
 	        		  speed.setText(strspeed);
-	        	  }
-	        	  
+	        	  }	        	  
 	          }
         }   
      }

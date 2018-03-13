@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import com.cnc.daq.DaqData;
-import com.cnc.databaseservice.DBService;
+import com.cnc.db.service.DBService;
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataReg;
 import com.cnc.domain.DataRun;

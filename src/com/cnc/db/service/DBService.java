@@ -1,4 +1,4 @@
-package com.cnc.databaseservice;
+package com.cnc.db.service;
 
 import java.util.ArrayList;
 import java.util.List;

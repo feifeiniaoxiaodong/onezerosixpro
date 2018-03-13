@@ -46,7 +46,6 @@ public class SplashActivity extends Activity {
 					e.printStackTrace();
 				}
 				//开启主活动	
-//				Intent intent=new Intent(SplashActivity.this , DaqActivity.class );
 				Intent intent=new Intent(SplashActivity.this , MainActivity.class );
 				startActivity(intent);
 				SplashActivity.this.finish();
