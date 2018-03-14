@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -73,6 +74,8 @@ import android.util.Log;
 	
 	@Override
 	public void run() {
+		
+		long  starttime=0; //线程开启时间			
 		dnc.main dncmain =new dnc.main();
 		//创建API工具类对象
 		gjApiFunction =new GJApiFunction(dncmain);
@@ -81,7 +84,7 @@ import android.util.Log;
 		if(dncmain.status_nml==null){   //检查是否存在nml配置文件
 			Log.d(TAG,"高精找不到nml配置文件");			
 		}
-		
+		starttime=Calendar.getInstance().getTimeInMillis(); //记录下线程开启的时间
 		while(threadflag){
 			
 			if(!dnc.main.getConnnectState()){ //检测连接状态
@@ -101,6 +104,7 @@ import android.util.Log;
 					}
 				}
 			}else{ //已经连接上机床
+				
 				//已连接,采集数据
 				dncmain.updateStatus();//更新本地数据
 				if(dncmain.msg != null)//有数据更新
@@ -122,9 +126,13 @@ import android.util.Log;
 		}//end while()
 		
 		//本地保存累计加工时间和开机时间
-		DataLog datalog=gjApiFunction.getDataLog();//获取登录信息
-		SaveRunTime.saveOnTime(machineIP+"ontime", datalog.getOntime()); //保存本次开机时间累加到本地，以秒为单位保存,使用IP地址作为主键
-		SaveRunTime.saveOnTime(machineIP+"runtime", datalog.getRuntime());//保存本次开机的加工时间累加到本地
+//		DataLog datalog=gjApiFunction.getDataLog();//获取登录信息
+//		SaveRunTime.saveOnTime(machineIP+"ontime", datalog.getOntime()); //保存本次开机时间累加到本地，以秒为单位保存,使用IP地址作为主键
+//		SaveRunTime.saveOnTime(machineIP+"runtime", datalog.getRuntime());//保存本次开机的加工时间累加到本地
+		starttime=Calendar.getInstance().getTimeInMillis()-starttime;
+		SaveRunTime.saveOnTime(machineIP+"ontime", starttime/1000);
+//		SaveRunTime.saveOnTime(machineIP+"runtime",  starttime/1000);
+		
 		
 		//退出线程时断开连接，释放资源
 		if(dnc.main.getConnnectState()){
@@ -152,7 +160,8 @@ import android.util.Log;
 			}
 			
 			long ontime=SaveRunTime.getOnTime(machineIP+"ontime");//开机时间
-			long runtime=SaveRunTime.getOnTime(machineIP+"runtime");//加工时间			
+//			long runtime=SaveRunTime.getOnTime(machineIP+"runtime");//加工时间	
+			long runtime=ontime;
 			DataLog datalog=new DataLog(machine_SN,
 					ontime,  
 					runtime,

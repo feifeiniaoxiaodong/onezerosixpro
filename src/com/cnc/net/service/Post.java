@@ -39,6 +39,7 @@ public class Post {
 		}
 		return res;
 	}
+	
 	//发送字节流函数
 	private static String sendPOSTRequest(String path, byte[] entity) throws Exception{		
 		HttpURLConnection conn = (HttpURLConnection) new URL(path).openConnection();    //建立http连接
@@ -47,6 +48,7 @@ public class Post {
 		conn.setRequestMethod("POST"); //传输方式post
 		conn.setDoOutput(true);		//允许对外输出数据，即http传输中的实际内容
 		conn.setDoInput(true);   //允许读取数据		
+		conn.setRequestProperty("Connection", "Keep-Alive");
 		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); //
 		conn.setRequestProperty("Content-Length", String.valueOf(entity.length));	//这两个http请求头
 		OutputStream outStream = (OutputStream) conn.getOutputStream();//通过输出流可以传输更多的数据
@@ -60,12 +62,12 @@ public class Post {
 			if(outStream!=null){
 				outStream.close();
 			}
-			if(conn!=null){
-				conn.disconnect(); //断开连接 ，add  by  wei
-			}
-			
+//			if(conn!=null){
+//				conn.disconnect(); //断开连接 ，add  by  wei
+//			}			
 			return rtnStr;
 		}
+		
 		return null;  //发送失败 ，返回空
 	}
 	
