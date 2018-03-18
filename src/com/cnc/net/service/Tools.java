@@ -5,6 +5,7 @@ import com.cnc.huazhong.nctime;
 import android.text.format.Time;
 
 //工具类
+@SuppressWarnings("deprecation")
 public class Tools {	
 	
 	//最后一个字母是N的，表示时间中没有包含星期几这一项
@@ -68,7 +69,7 @@ public class Tools {
 	
 	/*
 	 * 这个函数用于和华中数控系统中的本地数据相匹配
-	 */
+	 */	
 	public static String getTimeNow(Time t)  //获取现在的时间，字符串类型
 	{		
 		t.setToNow(); // 取得系统时间。

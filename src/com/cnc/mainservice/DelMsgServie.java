@@ -50,8 +50,7 @@ public class DelMsgServie extends Service {
 		Log.d(TAG, "service onCreate");
 		super.onCreate();
 	}
-	
-	
+		
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.d(TAG, "service onStartCommand");
@@ -80,6 +79,7 @@ public class DelMsgServie extends Service {
 		return handlerService;
 	}
 		
+	//数据处理Handler类
 	class ServiceHandler   extends Handler {
 		
 		@SuppressLint("SimpleDateFormat") 

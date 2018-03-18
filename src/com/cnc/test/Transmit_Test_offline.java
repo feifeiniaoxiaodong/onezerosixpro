@@ -67,11 +67,11 @@ public class Transmit_Test_offline implements Runnable{
 			
 			Log.i(tag,delaytime.toString());
 
-			try {
+//			try {
 				res = Post.sendData(path, JsonUtil.object2Json(generalData));
-			} catch (SocketTimeoutException e1) {
-				e1.printStackTrace();
-			}
+//			} catch (SocketTimeoutException e1) {
+//				e1.printStackTrace();
+//			}
 			//判断是否发送成功						
 			if(resultofPost.equals(res))
 			{
