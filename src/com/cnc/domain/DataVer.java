@@ -1,6 +1,10 @@
 package com.cnc.domain;
 
-//版本信息
+/**
+ * 标准版本信息
+ * @author wei
+ *
+ */
 public class DataVer {
 	private String NCK_VER;
 	private String DRV_VER;

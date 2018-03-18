@@ -1,6 +1,10 @@
 package com.cnc.domain;
 
-//运行信息
+/**
+ * 标准运行信息
+ * @author wei
+ *
+ */
 public class DataRun {
 	private String id;     //数控系统ID（标识唯一NC）    
     private float cas;     //主轴实际转速    

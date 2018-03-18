@@ -19,11 +19,10 @@ public class GJApiNum {
 	
 	public static final int  FEEDAXIS_ACT_SPEED=2028; //进给轴实际速度,double
 	
-	public static final int  FEEDAXIS_ACT_SPEED_X=2580; //进给轴实际速度,x,double
-	public static final int  FEEDAXIS_ACT_SPEED_Y=2581; //进给轴实际速度,y,double
+	public static final int  FEEDAXIS_ACT_SPEED_X=2580; //进给轴实际速度,x,double  #参数号对应着xyz轴进给速度，单位mm/s ,需要转化为轴转速
+	public static final int  FEEDAXIS_ACT_SPEED_Y=2581; //进给轴实际速度,y,double  #轴进给速度=螺距*转速/机械传动比，数控系统参数中可以查找，螺距为10mm,机械传动比1。
 	public static final int  FEEDAXIS_ACT_SPEED_Z=2582; //进给轴实际速度,z,double
-	
-	
+		
 	public static final int  FEEDAXIS_ACT_POSITION_X=2094;//进给轴实际位置,x,double
 	public static final int  FEEDAXIS_ACT_POSITION_Y=2096;//进给轴实际位置,y,double
 	public static final int  FEEDAXIS_ACT_POSITION_Z=2098;//进给轴实际位置,Z,double

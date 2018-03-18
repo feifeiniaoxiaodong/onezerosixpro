@@ -1,7 +1,7 @@
 package com.cnc.domain;
 
 /**
- * 注册信息类
+ * 标准注册信息类
  * @author wei
  *
  */

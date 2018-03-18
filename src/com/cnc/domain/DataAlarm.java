@@ -1,6 +1,10 @@
 package com.cnc.domain;
 
-//报警信息
+/**
+ * 标准报警信息
+ * @author wei
+ *
+ */
 public class DataAlarm {
 	private String id;    //数控系统ID（标识唯一NC）    
     private byte f;  //报警时间标志位 0：表示报警发生时间 1：表示报警消除时间    

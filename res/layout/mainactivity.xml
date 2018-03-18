@@ -26,6 +26,7 @@
                android:layout_marginTop="50dp"
                android:layout_marginLeft="10dp"
                android:text="华中数控"
+               android:background="@color/gray"
                android:textSize="20sp"/>
            
            <include  android:id="@+id/huazhong"
@@ -37,6 +38,7 @@
                 android:layout_marginTop="100dp"
                android:layout_marginLeft="10dp"
                android:text="沈阳高精数控"
+               android:background="@color/gray"
                android:textSize="20sp"/>
            
           <include  android:id="@+id/gaojing"
@@ -48,6 +50,7 @@
                  android:layout_marginTop="100dp"
                android:layout_marginLeft="10dp"
                android:text="广州数控"
+               android:background="@color/gray"
                android:textSize="20sp"/>
                
           <include  android:id="@+id/gsk1"

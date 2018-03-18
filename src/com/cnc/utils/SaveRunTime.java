@@ -15,7 +15,7 @@ public class SaveRunTime {
 		long pretime =preff.getLong(key, 0);
 		
 		SharedPreferences.Editor  editor =preff.edit();
-		editor.putLong(key, n+pretime);
+		editor.putLong(key, n+pretime); //对时间进行累加
 		editor.apply();		
 	}
 	

@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 /**
+ * 沈阳高精
  * 提供了两个工具函数根据报警ID号，从properties文件中获取报警信息
  * @author wei
  *
@@ -18,8 +19,8 @@ public class AlarmResources {
 	private static final String strPLC="/com/gaojing/resources/alarms/plcalarms.properties";
 	
 	/**
-	 * 根据运动报警号获取报警信息
-	 * @param alramid:运动报警号
+	 * 根据报警号在本地查找对应的报警信息
+	 * @param alramid:报警号
 	 * @return
 	 */
 	public static  String  getAlarmInfoById(String alarmType,String alramId){

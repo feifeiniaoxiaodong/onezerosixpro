@@ -7,24 +7,26 @@ import java.util.List;
 
 import com.cnc.daq.DaqData;
 import com.cnc.daq.MainActivity;
-import com.cnc.daqnew.DataCollectInter;
-import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataLog;
 import com.cnc.domain.DataReg;
 import com.cnc.domain.DataRun;
 import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
-import com.cnc.gsk.data.domain.DataBHSAMPLE_STATIC;
-import com.cnc.gsk.data.domain.DataVersion;
-import com.cnc.gsk.data.domain.Mcronum;
 import com.cnc.gsk.datautils.BytetoJavaUtil;
-import com.cnc.netService.HncTools;
-import com.cnc.service.DelMsgServie;
+import com.cnc.gsk.domain.DataAxisInfo;
+import com.cnc.gsk.domain.DataBHSAMPLE_STATIC;
+import com.cnc.gsk.domain.DataVersion;
+import com.cnc.gsk.domain.Mcronum;
+import com.cnc.huazhong.dc.DataCollectInter;
+import com.cnc.huazhong.dc.HncTools;
+import com.cnc.mainservice.DelMsgServie;
+import com.cnc.net.datasend.HandleMsgTypeMcro;
 import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.JsonUtil;
 import com.cnc.utils.LogLock;
 import com.cnc.utils.RegLock;
+import com.cnc.utils.TimeUtil;
 
 import android.annotation.SuppressLint;
 import android.os.Handler;
@@ -63,7 +65,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 	private String machine_SN=null;//数控系统ID
 
 	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
+//	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 	private AlarmFilterList   alarmFilterList =null; //报警信息缓存过滤对象
 	
 	public GSKDataCollectThread(String ip,String threadlabel){	
@@ -139,7 +141,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
        
     //采集数据
     private void getDaq(){ 
-    	String timeStr=formatter.format(new Date());//时间戳   	
+    	String timeStr=TimeUtil.getTimestamp();//时间戳   	
     	//采集注册信息 和登入登出信息
     	if(!boolGetMacInfo){
     		
@@ -211,11 +213,11 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 			    float cpstx[]=bhSample.getCpst();//进给轴实际位置
 			    float loadx[]=bhSample.getLoad();//负载电流
 				
-				DataRun dataRun=new DataRun(machine_SN, bhSample.getCas(), bhSample.getCcs(), bhSample.getAload(), 
-						aspdx[1], aspdx[2], aspdx[3], aspdx[4], aspdx[5],      //实际转速
-						cpstx[1], cpstx[2], cpstx[3], cpstx[4], cpstx[5], 		//实际位置
-						apstx[1], apstx[2], apstx[3], apstx[4], apstx[5], 		//指令位置
-						loadx[1], loadx[2], loadx[3], loadx[4], loadx[5], 		//负载电流
+				DataRun dataRun=new DataRun(machine_SN, bhSample.getCas(), bhSample.getCcs(), bhSample.getAload()/10, 
+						aspdx[0], aspdx[1], aspdx[2], aspdx[3], aspdx[4],      //实际转速
+						cpstx[0], cpstx[1], cpstx[2], cpstx[3], cpstx[4], 		//实际位置
+						apstx[0], apstx[1], apstx[2], apstx[3], apstx[4], 		//指令位置
+						loadx[0]/10000, loadx[1]/10000, loadx[2]/10000, loadx[3]/10000, loadx[4]/10000, 		//负载电流
 						bhSample.getPrognum(), //运行程序编号
 						bhSample.getProgname(), //程序名
 						bhSample.getRunstatus(),//代码运行状态
@@ -223,12 +225,12 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 						bhSample.getGcmode(),					   //通道模态
 						timeStr) ;    			 //时间戳
 				sendMsg2Main(dataRun,HandleMsgTypeMcro.MSG_RUN,count);
-				
+							
 				count++;//采集次数记录
 				if(count == Integer.MAX_VALUE)//达到最大值的时候记得清零
 					count = 1;
 				
-				//发送到主线程
+				//发送运行和报警信息到主线程
 				UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
 				uiDataAlarmRun.setThreadlabel(threadlabel);//thread label
 				sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.GSK_UIALARM	, 0, 0);
@@ -271,6 +273,17 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
         return dataBeiHang;
     }
     
+    private void getAxisInfo(){
+        DataAxisInfo axis=null;      //轴信息类
+        //读取轴信息字节流
+        byte[] tmpbytes=GSKNativeApi.GSKRM_GetAxisInfo(clientnum);
+        if(tmpbytes!=null) {
+            axis = BytetoJavaUtil.batoJavaaxis(tmpbytes);    //处理字节流信息
+            axis.loginfor();//打印信息
+        } else{
+            Log.i("JNITest","读回的字节流为空！");
+        }
+    }
        
 	//发送消息到主线程
 	private void sendMsg2Main(Object obj, int what) {	

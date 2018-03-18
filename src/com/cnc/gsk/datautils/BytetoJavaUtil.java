@@ -11,13 +11,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.cnc.gsk.data.domain.DataBHSAMPLE_STATIC;
-import com.cnc.gsk.data.domain.DataVersion;
+import com.cnc.gsk.domain.DataAxisInfo;
+import com.cnc.gsk.domain.DataBHSAMPLE_STATIC;
+import com.cnc.gsk.domain.DataVersion;
 
 /**
+ * guang shu
+ * parse data bytes to information object
  * Created by wei on 2017/4/17.
  */
-
 public class BytetoJavaUtil {
 
     //BytedealUtil  byteutil=new BytedealUtil(); //字节处理工具类
@@ -112,8 +114,8 @@ public class BytetoJavaUtil {
 
     }*/
 
-    /*//获取轴信息
-    public  DataAxisInfo batoJavaaxis(byte[] axisba){
+    //获取轴信息
+    public static DataAxisInfo batoJavaaxis(byte[] axisba){
 
         if(axisba.length!= 280){
             Log.i("AxisTest","轴信息字节流长度错误！");
@@ -149,7 +151,7 @@ public class BytetoJavaUtil {
         axisobj.setJ(J);
 
         return  axisobj;
-    }*/
+    }
 
 
     /*//获取运行信息

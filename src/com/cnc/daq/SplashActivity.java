@@ -1,7 +1,7 @@
 package com.cnc.daq;
 
-import com.cnc.daqnew.DataTransmitThread;
-import com.cnc.service.DelMsgServie;
+import com.cnc.mainservice.DelMsgServie;
+import com.cnc.net.datasend.DataTransmitThread;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -46,7 +46,6 @@ public class SplashActivity extends Activity {
 					e.printStackTrace();
 				}
 				//开启主活动	
-//				Intent intent=new Intent(SplashActivity.this , DaqActivity.class );
 				Intent intent=new Intent(SplashActivity.this , MainActivity.class );
 				startActivity(intent);
 				SplashActivity.this.finish();

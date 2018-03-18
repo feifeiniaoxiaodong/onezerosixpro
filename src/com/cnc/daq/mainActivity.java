@@ -12,17 +12,24 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.text.SimpleDateFormat;
-import com.cnc.daqnew.DataTransmitThread;
-import com.cnc.daqnew.HandleMsgTypeMcro;
-import com.cnc.daqnew.HzDataCollectThread;
+
+import com.cnc.broadcast.BroadcastAction;
+import com.cnc.broadcast.BroadcastType;
 import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
 import com.cnc.gaojing.GJDataCollectThread;
+import com.cnc.huazhong.dc.HzDataCollectThread;
+import com.cnc.net.datasend.DataTransmitThread;
+import com.cnc.net.datasend.HandleMsgTypeMcro;
 import com.cnc.test.TestGJMultiThread;
 import com.example.wei.gsknetclient_studio.GSKDataCollectThread;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 
 import android.nfc.cardemulation.OffHostApduService;
@@ -30,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -44,36 +52,37 @@ import android.widget.Toast;
 
 
 public class MainActivity extends Activity {
+	
 	final String TAG="mainactivity";
 	static Handler  mainActivityHandler=null;
 	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");//时间戳格式
 	private SharedPreferences pref;	
 	private SharedPreferences.Editor editor ;
-	ExecutorService exec=null;
+	static ExecutorService exec=null;
 	
-	Map<String, ItemViewHolder>  viewmapgGsk=new HashMap<>();
+	static Map<String, ItemViewHolder>  viewmapgGsk=new HashMap<>();
 	
-	ItemViewHolder itemHuazhong =null,
-					itemGaojing=null;
+	static ItemViewHolder itemHuazhong ,
+					itemGaojing;
 	
-	TextView  cachenum , delay ,sendnum ,packsize ,speed ;
+	static TextView  cachenum  ,sendnum  ,speed ;
 	
 //	Map<String, Runnable> threadmap=new HashMap<>();
-	DataTransmitThread dataTransmitThread=null; //数据发送线程
-	String  currentSpinSelItem_Hz=null,
+	static DataTransmitThread dataTransmitThread=null; //数据发送线程
+	static String  currentSpinSelItem_Hz=null,
 			currentSpinSelItem_Gj=null;
 	
-	String current_HZ_NoIP = null;		//Huazhong
-	HzDataCollectThread currentHZDcObj=null;
+	static String current_HZ_NoIP = null;		//Huazhong
+	static HzDataCollectThread currentHZDcObj=null;
 	
-	String current_Gj_NoIP= null;
-	GJDataCollectThread currentGjDcObj=null;//Gaojing
+	static String current_Gj_NoIP= null;
+	static GJDataCollectThread currentGjDcObj=null;//Gaojing
 	
 	String [] gskIpArray=null; //gsk ip list
-	String current_Gsk_NoIP = null;			//guangzhou shu kong 
-	GSKDataCollectThread  currentGskDcobj_1=null;
-	Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
-	
+
+	static Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
+	LocalBroadcastManager localBroadcastManager =null; //本地广播
+	LocalReceiver localReceiver=null;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		
@@ -85,9 +94,20 @@ public class MainActivity extends Activity {
 		gskIpArray =getResources().getStringArray(R.array.gskip);   //广数ip地址
 		
 		initViewMap();
+		//注册本地广播
+		localBroadcastManager=LocalBroadcastManager.getInstance(this);
+		IntentFilter filter=new IntentFilter(BroadcastAction.SendThread_PARAMALL); 
+		localReceiver=new LocalReceiver();
+		localBroadcastManager.registerReceiver(localReceiver, filter);
 		
 		startTask(); //开启数据采集和发送线程
-
+	}
+	
+	@Override
+	protected void onDestroy() {
+		
+		super.onDestroy();	
+		localBroadcastManager.unregisterReceiver(localReceiver);//取消注册广播
 	}
 	
 	
@@ -103,13 +123,6 @@ public class MainActivity extends Activity {
 					exec.execute(dataTransmitThread);
 					Log.d(TAG,"开启了数据发送线程");
 				}
-								
-//				try {
-//					Thread.sleep(1000);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
 				
 				runOnUiThread(new Runnable() {				
 					@Override
@@ -124,10 +137,9 @@ public class MainActivity extends Activity {
 //				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*6*1); //测试，自动上线和下线会不会导致闪退
 				
 				timer.scheduleAtFixedRate(new startTask(), 1000*60*5, 1000*60*55*1);//每隔55分钟执行一次任务
-				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*55*1); //测试，自动上线和下线会不会导致闪退
+				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*55*1); //
 						
-			} //end run
-			
+			} //end run			
 		}.start();		
 	}
 		
@@ -177,21 +189,7 @@ public class MainActivity extends Activity {
 				itemViewHolder.getAlarm().setText(gskUiDataAlarmRun.getAlarminfo());
 				itemViewHolder.getRuninfo().setText(gskUiDataAlarmRun.getRuninfo());
 						
-				break;				
-			
-			//处理数据发送信息
-			case HandleMsgTypeMcro.MSG_DELAYTIME://延时时间
-				String str =(String )msg.obj;
-				String[] strs= str.split(":");
-				delay.setText("delay: "+strs[0]); //
-				packsize.setText("packSize:"+strs[1]);
-				speed.setText("speed:"+strs[2]); 
-				
-				break;
-			case HandleMsgTypeMcro.MSG_COUNTRUN: //CacheNum
-				String strcache =(String)msg.obj;
-				cachenum.setText("cacheNum:"+strcache+"条");
-				break;
+				break;						
 			default:{}				
 			}	
 		}
@@ -233,69 +231,7 @@ public class MainActivity extends Activity {
 		return mainActivityHandler;
 	}
 		
-	class ItemViewHolder{
-		TextView  no,ip,
-				 idcnc,
-				 idandroid,
-				 alarm,
-				 runinfo;
-		Spinner   spinner;
-		Button    btstart ,btstop;
-
-		public ItemViewHolder() {		
-		}
-
-		public ItemViewHolder(TextView no, TextView ip, TextView idcnc,
-				TextView idandroid, TextView alarm, TextView runinfo,
-				Spinner spinner, Button btstart, Button btstop) {
-			
-			this.no = no;
-			this.ip = ip;
-			this.idcnc = idcnc;
-			this.idandroid = idandroid;
-			this.alarm = alarm;
-			this.runinfo = runinfo;
-			this.spinner = spinner;
-			this.btstart = btstart;
-			this.btstop = btstop;
-		}
-
-		public TextView getIp() {
-			return ip;
-		}
-
-		public TextView getNo() {
-			return no;
-		}
-
-		public TextView getIdcnc() {
-			return idcnc;
-		}
-
-		public TextView getIdandroid() {
-			return idandroid;
-		}
-
-		public TextView getAlarm() {
-			return alarm;
-		}
-
-		public TextView getRuninfo() {
-			return runinfo;
-		}
-
-		public Spinner getSpinner() {
-			return spinner;
-		}
-
-		public Button getBtstart() {
-			return btstart;
-		}
-
-		public Button getBtstop() {
-			return btstop;
-		}	
-	}
+	
 	
 
 	//init all view  components id
@@ -307,10 +243,8 @@ public class MainActivity extends Activity {
 					itemGsk04=null,
 					itemGsk05=null;
 			
-		cachenum=(TextView)findViewById(R.id.txcachenum);
-		delay =(TextView)findViewById(R.id.txdelay);
-		sendnum=(TextView)findViewById(R.id.txsendno);
-		packsize=(TextView)findViewById(R.id.txpakagesize);
+		cachenum=(TextView)findViewById(R.id.txcachenum);		
+		sendnum=(TextView)findViewById(R.id.txsendno);		
 		speed=(TextView)findViewById(R.id.txspeed);
 	
 		Log.d(TAG,"initViewMap");
@@ -483,6 +417,7 @@ public class MainActivity extends Activity {
 			}
 		});	
 		
+		/*<<<<==================================>>>>*/
 		//广数 click event 
 		for(int i=0;i< gskIpArray.length;i++){
 			String no;
@@ -614,7 +549,7 @@ public class MainActivity extends Activity {
 		String ip=null,no=null;
 		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
 			ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
-			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
+			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));//作为 Thread label区分广数采集线程
 			 if(ip!=null && ip.startsWith("192.168.188.")){
 				 if(mapgskThreadobj.get(no) instanceof GSKDataCollectThread){   //如果在开启线程已经有线程打开，则关闭之前的线程重新开启新的线程
 					 ((GSKDataCollectThread)mapgskThreadobj.get(no)).stopCollect();
@@ -751,6 +686,33 @@ public class MainActivity extends Activity {
 			Log.d(TAG,"stopTask执行了定时下线任务");						
 		}		
 	}
+	
+	
+	//本地广播接收器
+	class  LocalReceiver extends BroadcastReceiver{  	         
+		@Override  
+         public void onReceive(Context context,Intent intent){ 
+
+             if(intent==null) return ;        
+			 String action=intent.getAction();
+			 Bundle	 bundle= intent.getExtras();
+			
+             if(action.equals(BroadcastAction.SendThread_PARAMALL)){
+	        	  //发送数据的所有参数
+	        	  cachenum.setText(bundle.getString(BroadcastType.MSGLOCAL)); //显示本地数据库中缓存数据条数
+	        	  
+	        	  String strsendcount=bundle.getString(BroadcastType.SENDCOUNT);//显示已发送数据条数
+	        	  String strspeed=bundle.getString(BroadcastType.SENDSPEED); //发送速率
+	        	  if( !"".equals(strsendcount)){
+	        		  sendnum.setText(strsendcount); 
+	        	  }
+	        	  if(!"".equals(strspeed)){
+	        		  speed.setText(strspeed);
+	        	  }	        	  
+	          }
+        }   
+     }
+	
 }
 
 

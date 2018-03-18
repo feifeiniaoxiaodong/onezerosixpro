@@ -4,15 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Properties;
 
-import com.cnc.daq.DaqActivity;
+//import com.cnc.daq.DaqActivity;
 import com.cnc.daq.DaqData;
 import com.cnc.daq.MainActivity;
-import com.cnc.daqnew.DataCollectInter;
-import com.cnc.daqnew.HandleMsgTypeMcro;
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataLog;
 import com.cnc.domain.DataReg;
@@ -21,10 +20,13 @@ import com.cnc.domain.DataType;
 import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
 import com.cnc.gaojing.ndkapi.GJApiFunction;
-import com.cnc.service.DelMsgServie;
+import com.cnc.huazhong.dc.DataCollectInter;
+import com.cnc.mainservice.DelMsgServie;
+import com.cnc.net.datasend.HandleMsgTypeMcro;
 import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.RegLock;
 import com.cnc.utils.SaveRunTime;
+import com.cnc.utils.TimeUtil;
 
 //import android.annotation.SuppressLint;
 import java.text.SimpleDateFormat;
@@ -45,8 +47,8 @@ import android.util.Log;
 	boolean boolGetMacInfo = false; //标识是否得到机床的基本信息	
 	int     count = 1;     //存储运行信息的id,标识这是第几次采集信息
 	boolean hadconnected =false ;   //连接状态标志	
-	private Handler  
-					 delMsgHandler =null,
+	 
+	private Handler delMsgHandler =null,
 					 mainActivityHandler=null;
 	final private String  machineIP ;//= "192.168.188.132"; //机床的IP地址
 //	int    machinePort ;			  //机床端口号，高精不需要设置端口号
@@ -68,10 +70,12 @@ import android.util.Log;
 		this.alarmFilterList=new AlarmFilterList(delMsgHandler);
 	}
 		
-	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
+//	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");//时间戳格式
 	
 	@Override
 	public void run() {
+		
+		long  starttime=0; //线程开启时间			
 		dnc.main dncmain =new dnc.main();
 		//创建API工具类对象
 		gjApiFunction =new GJApiFunction(dncmain);
@@ -80,7 +84,7 @@ import android.util.Log;
 		if(dncmain.status_nml==null){   //检查是否存在nml配置文件
 			Log.d(TAG,"高精找不到nml配置文件");			
 		}
-		
+		starttime=Calendar.getInstance().getTimeInMillis(); //记录下线程开启的时间
 		while(threadflag){
 			
 			if(!dnc.main.getConnnectState()){ //检测连接状态
@@ -100,6 +104,7 @@ import android.util.Log;
 					}
 				}
 			}else{ //已经连接上机床
+				
 				//已连接,采集数据
 				dncmain.updateStatus();//更新本地数据
 				if(dncmain.msg != null)//有数据更新
@@ -121,9 +126,13 @@ import android.util.Log;
 		}//end while()
 		
 		//本地保存累计加工时间和开机时间
-		DataLog datalog=gjApiFunction.getDataLog();//获取登录信息
-		SaveRunTime.saveOnTime(machineIP+"ontime", datalog.getOntime()); //保存本次开机时间累加到本地，以秒为单位保存,使用IP地址作为主键
-		SaveRunTime.saveOnTime(machineIP+"runtime", datalog.getRuntime());//保存本次开机的加工时间累加到本地
+//		DataLog datalog=gjApiFunction.getDataLog();//获取登录信息
+//		SaveRunTime.saveOnTime(machineIP+"ontime", datalog.getOntime()); //保存本次开机时间累加到本地，以秒为单位保存,使用IP地址作为主键
+//		SaveRunTime.saveOnTime(machineIP+"runtime", datalog.getRuntime());//保存本次开机的加工时间累加到本地
+		starttime=Calendar.getInstance().getTimeInMillis()-starttime;
+		SaveRunTime.saveOnTime(machineIP+"ontime", starttime/1000);
+//		SaveRunTime.saveOnTime(machineIP+"runtime",  starttime/1000);
+		
 		
 		//退出线程时断开连接，释放资源
 		if(dnc.main.getConnnectState()){
@@ -136,8 +145,8 @@ import android.util.Log;
 	 * 数据采集函数
 	 */
 	private void daq() {
-		
-		String strTime = formatter.format(new Date());//开始采集信息的各种事件，时间戳
+		//开始采集信息的各种事件，时间戳
+		String strTime = TimeUtil.getTimestamp();
 		
 		if(!boolGetMacInfo)   //如果没有获得过机床的基本信息
 		{
@@ -151,7 +160,8 @@ import android.util.Log;
 			}
 			
 			long ontime=SaveRunTime.getOnTime(machineIP+"ontime");//开机时间
-			long runtime=SaveRunTime.getOnTime(machineIP+"runtime");//加工时间			
+//			long runtime=SaveRunTime.getOnTime(machineIP+"runtime");//加工时间	
+			long runtime=ontime;
 			DataLog datalog=new DataLog(machine_SN,
 					ontime,  
 					runtime,
@@ -196,7 +206,7 @@ import android.util.Log;
 			UiDataAlarmRun uiDataAlarmRun=new UiDataAlarmRun(sbalram.toString(), dataRun.toString());
 			sendMsg(mainActivityHandler, uiDataAlarmRun, HandleMsgTypeMcro.GAOJING_UIALARM	, 0, 0);
 		}
-	}    //end daq()
+	}//end daq()
 		
 	/**
 	 * 发送消息到主线程

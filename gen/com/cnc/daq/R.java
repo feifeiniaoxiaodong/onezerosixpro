@@ -115,6 +115,13 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
     }
     public static final class color {
         public static final int black_overlay=0x7f050000;
+        public static final int gray=0x7f050001;
+        /**  灰色 
+         */
+        public static final int lightslategray=0x7f050002;
+        /**  亮蓝灰 
+         */
+        public static final int lightsteelblue=0x7f050003;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -142,7 +149,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int tab05_unsel=0x7f02000b;
     }
     public static final class id {
-        public static final int action_settings=0x7f070022;
+        public static final int action_settings=0x7f070020;
         public static final int alarm=0x7f07000a;
         public static final int bottom=0x7f070002;
         public static final int bt2=0x7f070010;
@@ -173,10 +180,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int textview=0x7f070013;
         public static final int top=0x7f070005;
         public static final int txcachenum=0x7f07001d;
-        public static final int txdelay=0x7f07001e;
-        public static final int txpakagesize=0x7f070020;
-        public static final int txsendno=0x7f07001f;
-        public static final int txspeed=0x7f070021;
+        public static final int txsendno=0x7f07001e;
+        public static final int txspeed=0x7f07001f;
     }
     public static final class layout {
         public static final int cncinfoitem=0x7f030000;

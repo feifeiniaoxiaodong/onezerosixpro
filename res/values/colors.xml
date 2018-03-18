@@ -1,5 +1,8 @@
 <resources>
 
     <color name="black_overlay">#66000000</color>
+     <color name="gray">#808080</color> <!-- 灰色 -->
+      <color name="lightslategray">#778899</color> <!-- 亮蓝灰 -->
+     <color name="lightsteelblue">#b0c4de</color> <!-- 亮钢兰色 -->
 
 </resources>

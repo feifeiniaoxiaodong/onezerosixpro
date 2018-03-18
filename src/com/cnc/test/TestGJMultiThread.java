@@ -14,9 +14,7 @@ public class TestGJMultiThread {
 		@Override
 		public void run() {
 			new Thread( new GJDataCollectThread("192.168.188.132")).start();
-//			new Thread( new GJDataCollectThread("192.168.188.131")).start();
-			
-			
+//			new Thread( new GJDataCollectThread("192.168.188.131")).start();	
 		}
 		
 	}).start();

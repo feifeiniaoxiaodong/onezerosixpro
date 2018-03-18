@@ -114,11 +114,13 @@ public class BytedealUtil {
         int   len=bytes.length;
         if(len>4)  throw new IllegalArgumentException("输入的字节数组长度大于4！");
 
-        for (int i = 0,j=0; i < len; i++) {
+       /* for (int i = 0,j=0; i < len; i++) {
             j=8*i;
             tmpint |=( ((int) bytes[i] <<j)&(0xff<<j));
-        }
-        return tmpint;
+        }*/
+        
+        return (0xff& (int)bytes[0]) | (0xff00 & (int)bytes[1]<<8) |(0xff0000 & (int)bytes[2]<<16)|(0xff000000 & (int)bytes[3]<<24) ;
+//        return tmpint;
     }
 
     //根据8个字节得到长整形数据

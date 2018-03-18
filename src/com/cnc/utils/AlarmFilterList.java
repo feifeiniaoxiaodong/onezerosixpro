@@ -12,10 +12,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.cnc.DataBaseService.DBService;
 import com.cnc.daq.DaqData;
-import com.cnc.daqnew.HandleMsgTypeMcro;
+import com.cnc.db.service.DBService;
 import com.cnc.domain.DataAlarm;
+import com.cnc.net.datasend.HandleMsgTypeMcro;
 
 //报警信息存储、过滤工具类
 public class AlarmFilterList {
@@ -63,10 +63,11 @@ public class AlarmFilterList {
 				//遍历当前的报警列表 ，检查报警是否解除
 				for(DataAlarm tmpAlarm: nowAlarmList){
 					if(whetherNewAlarm(tmpAlarm, collectAlarmList)){ //如果当前报警列表中的报警信息在新采集到的列表中找不到，说明报警消除了
-						nowAlarmList.remove(tmpAlarm); 				//则从当前报警信息列表中移除该条报警信息，设置报警消除标志和时间戳，保存到数据库，准备发送到服务器
+						 				//则从当前报警信息列表中移除该条报警信息，设置报警消除标志和时间戳，保存到数据库，准备发送到服务器
 						tmpAlarm.setF((byte)1);
 						tmpAlarm.setTime(stampTime);
-						handleAlarmItem(tmpAlarm);//保存报警信息						
+						handleAlarmItem(tmpAlarm);//保存报警信息	
+						nowAlarmList.remove(tmpAlarm);
 					}
 				}			
 			}
