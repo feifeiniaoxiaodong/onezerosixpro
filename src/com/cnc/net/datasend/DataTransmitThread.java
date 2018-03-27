@@ -79,7 +79,6 @@ public class DataTransmitThread implements Runnable{
 //		path=getPath("path"); //初始化远端服务器地址
 	}*/
 
-
 	//只要这个线程打开就一直向外发送信息，不用登录和注册都可以发送运行信息和报警信息
 //	@Override
 	public void run() {
