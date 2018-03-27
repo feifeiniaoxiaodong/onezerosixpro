@@ -152,8 +152,7 @@ public class DelMsgServie extends Service {
 			Log.d(TAG,count + "--" + dataRun.getId()+ "::" + dataRun.getTime());		
 		}
 		
-		private void showMacInfo(DataReg dataReg) {
-			
+		private void showMacInfo(DataReg dataReg) {			
 			Log.d(TAG, "macInfo.SN_NUM::" + dataReg.getId());
 			Log.d(TAG, "macInfo.VER::" + dataReg.getVer());
 			Log.d(TAG, "macInfo.TIME::" + dataReg.getTime());		

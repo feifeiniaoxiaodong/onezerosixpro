@@ -151,7 +151,7 @@ public class DataTransmitThread implements Runnable{
 			sendRunInfoZhi();
 			//发送间隔
 			try {
-				Thread.sleep(500);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {				
 				e.printStackTrace();
 			}			
@@ -221,7 +221,7 @@ public class DataTransmitThread implements Runnable{
 				//界面显示发送参数,在这统一发送运行信息参数
 				if(delayTimeObj!=null){
 					sendBroadCast(BroadcastAction.SendThread_PARAMALL,
-							BroadcastType.MSGLOCAL,"本地缓存数据:"+delayTimeObj.getNumofmsgunsent()+"条",
+							
 							BroadcastType.SENDCOUNT,"发送:"+delayTimeObj.getNumofmsg()+"条数据",
 							BroadcastType.SENDSPEED,"发送速率:"+Post.speed(delayTimeObj.getDelaytime(), delayTimeObj.getPackagesize()));
 				}

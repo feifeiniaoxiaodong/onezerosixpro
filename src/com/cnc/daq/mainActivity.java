@@ -662,7 +662,7 @@ public class MainActivity extends Activity {
 			String time=formatter.format(Calendar.getInstance().getTime());
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
 			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
-			if( hour>=18  ){  //6点下线
+			if( hour>=18 ){  //6点下线
 				
 				runOnUiThread(new Runnable() {					
 					@Override
@@ -714,9 +714,9 @@ public class MainActivity extends Activity {
 	        	  if(strspeed!=null && !"".equals(strspeed)){
 	        		  speed.setText(strspeed);
 	        		  if(strspeedcolor!=null && strspeedcolor.equals("red")){
-	        			  speed.setTextColor(R.color.red); //把字体变为红色
+	        			  speed.setTextColor(getResources().getColor(R.color.red)); //把字体变为红色
 	        		  }else{
-	        			  speed.setTextColor(R.color.black);
+	        			  speed.setTextColor(getResources().getColor(R.color.black));
 	        		  }	        		  
 	        	  }	 	        	  
 	          }
