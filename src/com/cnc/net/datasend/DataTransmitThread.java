@@ -246,8 +246,8 @@ public class DataTransmitThread implements Runnable{
 	private void sendRunInfoZhi(){
 		DataDelayTime  delayTimeObj=null;//延时时间对象
  		if(nMsgSend<1) nMsgSend =5;	//防止发送速率变为0	
-		long countRun=dbservice.getCountRunInfo();//检查SQLite数据库中运行信息的条数,本地缓存信息条数
-		
+//		long countRun=dbservice.getCountRunInfo();//检查SQLite数据库中运行信息的条数,本地缓存信息条数
+		long countRun=DaqData.getCacheinfocount();
 		//发送特定条数的运行信息，可以根据发送延时进行动态调整		
 		if(countRun>=nMsgSend){
 			delayTimeObj=getDataDelayTimeObj(DataType.DataDelay,countRun); //获取一个延时信息对象
@@ -264,7 +264,7 @@ public class DataTransmitThread implements Runnable{
 				//界面显示发送参数,在这统一发送运行信息参数
 				if(delayTimeObj!=null){
 					sendBroadCast(BroadcastAction.SendThread_PARAMALL,
-							BroadcastType.MSGLOCAL,"本地缓存数据:"+delayTimeObj.getNumofmsgunsent()+"条",
+							
 							BroadcastType.SENDCOUNT,"发送:"+delayTimeObj.getNumofmsg()+"条数据",
 							BroadcastType.SENDSPEED,"发送速率:"+Post.speed(delayTimeObj.getDelaytime(), delayTimeObj.getPackagesize()));
 				}
@@ -272,23 +272,21 @@ public class DataTransmitThread implements Runnable{
 			}else{
 				//发送失败			
 				sendBroadCast(BroadcastAction.SendThread_PARAMALL,
-						BroadcastType.MSGLOCAL,"本地缓存数据:"+delayTimeObj.getNumofmsgunsent()+"条",
+						
 						BroadcastType.SENDCOUNT,"发送:"+nMsgSend+"条数据",
-						BroadcastType.SENDSPEED,"RTT延时:"+delayTimeObj.getDelaytime()+"ms");
+						BroadcastType.SENDSPEED,"用时:"+delayTimeObj.getDelaytime()+"ms,发送失败",
+						BroadcastType.SENDColor,"red");
 				//发送失败,减小单次发送的数据量
 				if(nMsgSend>10){  
 					nMsgSend-=25; //防止发送数据为0条
 				}
 			}
-		}else{ //数据条数较少
+		}/*else{ //数据条数较少
 			sendBroadCast(BroadcastAction.SendThread_PARAMALL,
-					BroadcastType.MSGLOCAL,"本地缓存数据:"+countRun+"条",
-					BroadcastType.SENDCOUNT,"",
-					BroadcastType.SENDSPEED,"");
-		}
+					BroadcastType.MSGLOCAL,"本地缓存数据:"+countRun+"条");					
+		}*/
 	}
-	
-	
+		
 	/**
 	 * 发送延时时间
 	 * @param dt
@@ -303,7 +301,7 @@ public class DataTransmitThread implements Runnable{
 			
 			String res = null;
 //			try {
-				res = Post.sendData(path,JsonUtil.object2Json(generalData));
+			res = Post.sendData(path,JsonUtil.object2Json(generalData));
 //			} catch (SocketTimeoutException e) {				
 //				e.printStackTrace();
 //			}//发送数据	
@@ -388,7 +386,7 @@ public class DataTransmitThread implements Runnable{
 		 
 		beforeSecond=System.currentTimeMillis();; //发送之前时刻			
 //		try {
-			response = Post.sendData(path,strJson ); //发送数据
+		response = Post.sendData(path,strJson ); //发送数据
 //		} catch (SocketTimeoutException e) {		
 //			e.printStackTrace();
 //		}

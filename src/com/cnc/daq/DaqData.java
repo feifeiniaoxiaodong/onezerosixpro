@@ -19,7 +19,7 @@ public class DaqData {
 	private static String androidId=null;	//android系统的ID号
 //	private static DataReg dataReg = null; //注册信息
 //	private static DataLog dataLog =null;   //登录和登出信息
-	
+	private static long    cacheinfocount=0; //本地缓存数据量
 
 	private static LinkedList<DataAlarm> listDataAlarm = new LinkedList<DataAlarm>();//储存报警信息
 	
@@ -43,6 +43,8 @@ public class DaqData {
 		return same;
 	}
 	
+	
+	
 //	public static String getCncid() {
 //		return cncid;
 //	}
@@ -50,6 +52,15 @@ public class DaqData {
 //	public static void setCncid(String cncid) {
 //		DaqData.cncid = cncid;
 //	}
+
+	public synchronized static long getCacheinfocount() {
+		return cacheinfocount;
+	}
+
+	public synchronized static void setCacheinfocount(long cacheinfocount) {
+		DaqData.cacheinfocount = cacheinfocount;
+	}
+
 
 	public static String getAndroidId() {
 		return androidId;

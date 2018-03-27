@@ -11,6 +11,7 @@ import com.cnc.db.service.DBService;
 import com.cnc.domain.DataAlarm;
 import com.cnc.domain.DataReg;
 import com.cnc.domain.DataRun;
+import com.cnc.net.datasend.CheckSQliteinfocount;
 import com.cnc.net.datasend.HandleMsgTypeMcro;
 
 import android.annotation.SuppressLint;
@@ -47,6 +48,9 @@ public class DelMsgServie extends Service {
 				Looper.loop();	
 			};			
 		}.start();
+		
+		new Thread( new CheckSQliteinfocount()).start(); //本地数据库检测线程
+		
 		Log.d(TAG, "service onCreate");
 		super.onCreate();
 	}

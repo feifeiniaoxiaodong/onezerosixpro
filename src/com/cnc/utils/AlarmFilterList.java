@@ -86,7 +86,6 @@ public class AlarmFilterList {
 		this.handler.sendMessage(msg);//·¢ËÍÏûÏ¢
 	}
 
-
 	public List<DataAlarm> getNowAlarmList() {
 		return nowAlarmList;
 	}

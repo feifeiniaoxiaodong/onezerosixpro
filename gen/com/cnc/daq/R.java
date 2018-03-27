@@ -114,14 +114,26 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int tab_textViewUnSelColor=0x7f010003;
     }
     public static final class color {
-        public static final int black_overlay=0x7f050000;
-        public static final int gray=0x7f050001;
+        public static final int black=0x7f050000;
+        /**  黑色 
+         */
+        public static final int black_overlay=0x7f050001;
+        public static final int gray=0x7f050002;
         /**  灰色 
          */
-        public static final int lightslategray=0x7f050002;
+        public static final int lightslategray=0x7f050003;
         /**  亮蓝灰 
          */
-        public static final int lightsteelblue=0x7f050003;
+        public static final int lightsteelblue=0x7f050004;
+        /**  中海蓝 
+         */
+        public static final int limegreen=0x7f050006;
+        /**  亮钢兰色 
+         */
+        public static final int mediumseagreen=0x7f050005;
+        /**  橙绿色 
+         */
+        public static final int red=0x7f050007;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
