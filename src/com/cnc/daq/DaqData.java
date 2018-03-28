@@ -26,6 +26,8 @@ public class DaqData {
 	private static List<DataReg>  listDataReg= Collections.synchronizedList( new ArrayList<DataReg>());
 	private static List<DataLog>  listDataLog=  Collections.synchronizedList(new ArrayList<DataLog>());
 	
+	
+	
 	/*
 	 * 比较报警信息是否相同，如果相同则返回true
 	 */
@@ -42,9 +44,7 @@ public class DaqData {
 		}					
 		return same;
 	}
-	
-	
-	
+		
 //	public static String getCncid() {
 //		return cncid;
 //	}
@@ -130,11 +130,75 @@ public class DaqData {
 		return newAlarm;
 	}
 
-	public static List<DataReg> getListDataReg() {
-		return listDataReg;
+	/**
+	 * 注册信息和日志信息列表的存储没有使用线程同步，此处没有必须用，原因：
+	 * 1、list已经是同步队列，满足使用需求
+	 * 2、各采集线程只需要向队列中存数据
+	 * 3、数据发送线程中 先取队列头部数据，再删除该数据，这两个操作在同一线程中顺序进行，不存在数据删完取不到数据的情况
+	 * 如果有多个发送线程共同对队列的数据取和删的话，就需要增加互斥锁
+	 */
+	
+	/**
+	 * 获取当前的注册信息
+	 * @return DataReg对象，没有返回null
+	 */
+	public static DataReg  getDataReg(){
+		DataReg dataReg=null;
+		
+		if( !listDataReg.isEmpty()){
+			dataReg=listDataReg.get(0);
+		}
+		
+		return dataReg;
 	}
-	public static List<DataLog> getListDataLog() {
-		return listDataLog;
+	/**
+	 * 保存注册信息到队列
+	 * @param dataReg
+	 */
+	public static void saveDataReg(DataReg dataReg){
+		if(dataReg instanceof DataReg){
+			listDataReg.add(dataReg);
+		}		
 	}
+	/**
+	 * 删除已成功发送的注册信息
+	 */
+	public static void delDataReg(DataReg dataReg){
+		if(dataReg instanceof DataReg){
+			listDataReg.remove(dataReg);
+		}
+	}
+	
+	/**
+	 * 获取日志信息
+	 * @return 没有返回null
+	 */
+	public static DataLog getDataLog(){
+		DataLog dataLog=null;
+		if(! listDataLog.isEmpty()){
+			dataLog=listDataLog.get(0);
+		}
+		return dataLog;
+	}
+	/**
+	 * 保存日志信息到队列
+	 * @param dataLog
+	 */
+	public static void saveDataLog(DataLog dataLog){
+		if(dataLog instanceof DataLog){
+			listDataLog.add(dataLog);
+		}
+	}
+	/**
+	 * 移除成功发送的日志信息
+	 * @param dataLog
+	 */
+	public static void delDataLog(DataLog dataLog){
+		if(dataLog instanceof DataLog){
+			listDataLog.remove(dataLog);
+		}
+	}
+	
+	
 
 }

@@ -155,10 +155,10 @@ import android.util.Log;
 			DataReg dataReg = gjApiFunction.getDataReg();//获取注册信息					
 			dataReg.setTime(strTime);		//设置采集的时间戳
 			dataReg.setId(machine_SN);      //设置ID号
-			synchronized(RegLock.class){   //加锁同步，同一时刻只能有一个线程修改list中的数据
+			/*synchronized(RegLock.class){   //加锁同步，同一时刻只能有一个线程修改list中的数据
 				DaqData.getListDataReg().add(dataReg);
-			}
-			
+			}*/
+			DaqData.saveDataReg(dataReg); //保存注册信息
 			long ontime=SaveRunTime.getOnTime(machineIP+"ontime");//开机时间
 //			long runtime=SaveRunTime.getOnTime(machineIP+"runtime");//加工时间	
 			long runtime=ontime;
@@ -166,9 +166,10 @@ import android.util.Log;
 					ontime,  
 					runtime,
 					strTime);								
-			synchronized(Log.class){   //加锁同步，同一时刻只能有一个线程修改list中的数据
+			/*synchronized(Log.class){   //加锁同步，同一时刻只能有一个线程修改list中的数据
 				DaqData.getListDataLog().add(datalog); //保存登录信息
-			}
+			}*/
+			DaqData.saveDataLog(datalog);//保存登录信息
 			
 			UiDataNo uiDataNo=new UiDataNo("",machineIP,machine_SN , DaqData.getAndroidId());
 			sendMsg(mainActivityHandler,uiDataNo,HandleMsgTypeMcro.GAOJING_UINO,0,0); //发送消息到活动，显示IP地址信息

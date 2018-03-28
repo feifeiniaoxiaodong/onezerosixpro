@@ -93,55 +93,46 @@ public class DataTransmitThread implements Runnable{
 		}		
 		while(isCountinueRun) //如果注册信息与运行信息有消息，那就一直发送
 		{
-			synchronized(RegLock.class){
-				//发送注册信息
-				if(!DaqData.getListDataReg().isEmpty()){
-					
-					DataReg dataReg= DaqData.getListDataReg().get(0); 
-					GeneralData generalData = new GeneralData();
-					generalData.setDid(DataType.DataReg); //注册信息
-					if(dataReg.getId()!=null) {
-						 generalData.setDt(JsonUtil.object2Json(dataReg));
-//		                try {
-							res = Post.sendData(path, JsonUtil.object2Json(generalData));//发送注册信息
-//						} catch (SocketTimeoutException e) {							
-//							e.printStackTrace();
-//						}	
-	                    if(resultofPost.equals(res))
-	                    {
-	                    	DaqData.getListDataReg().remove(0);
-	                        Log.d(TAG, "注册成功");
-	                    }
-	                    else {
-	                        Log.d(TAG,"注册失败！");
-	                    }						
-					}					
+
+			DataReg dataReg=null;
+			if((dataReg=DaqData.getDataReg()) instanceof DataReg){
+
+				GeneralData generalData = new GeneralData();
+				generalData.setDid(DataType.DataReg); //注册信息
+				if(dataReg.getId()!=null) {
+					generalData.setDt(JsonUtil.object2Json(dataReg));
+					res = Post.sendData(path, JsonUtil.object2Json(generalData));//发送注册信息					
+                    if(resultofPost.equals(res))
+                    {
+                    	DaqData.delDataReg(dataReg);
+                        Log.d(TAG, "注册成功");
+                    }
+                    else {
+                        Log.d(TAG,"注册失败！");
+                    }						
+				}					
+			}
+
+			DataLog dataLog=null;		
+			if((dataLog=DaqData.getDataLog()) instanceof DataLog){
+				
+				GeneralData generalData2 = new GeneralData();
+				generalData2.setDid(DataType.DataLog); //数据类型->登录登出信息
+				if(dataLog.getId()!=null){
+					generalData2.setDt(JsonUtil.object2Json(dataLog));
+					res = Post.sendData(path, JsonUtil.object2Json(generalData2));//发送登录登出信息
+
+                    if(resultofPost.equals(res))
+                    {
+                    	DaqData.delDataLog(dataLog);
+                        Log.d(TAG, "登录登出成功");
+                    }
+                    else {
+                        Log.d(TAG,"登录登出失败！");
+                    }	
 				}
 			}
 			
-			synchronized(LogLock.class){
-				if(!DaqData.getListDataLog().isEmpty()){
-					DataLog dataLog=DaqData.getListDataLog().get(0);
-					GeneralData generalData2 = new GeneralData();
-					generalData2.setDid(DataType.DataLog); //数据类型->登录登出信息
-					if(dataLog.getId()!=null){
-						generalData2.setDt(JsonUtil.object2Json(dataLog));
-//		                try {
-							res = Post.sendData(path, JsonUtil.object2Json(generalData2));//发送登录登出信息
-//						} catch (SocketTimeoutException e) {							
-//							e.printStackTrace();
-//						}	
-	                    if(resultofPost.equals(res))
-	                    {
-	                    	DaqData.getListDataLog().remove(0);
-	                        Log.d(TAG, "登录登出成功");
-	                    }
-	                    else {
-	                        Log.d(TAG,"登录登出失败！");
-	                    }	
-					}
-				}
-			}
 											
 			//报警信息										
 			sendAlarmInfo();

@@ -150,19 +150,19 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 			macChannel = HncAPI.HNCSystemGetValueInt(HncSystem.HNC_SYS_ACTIVE_CHAN, Client);//机床的通道信息
 			dataReg.setTime(strTime);		//设置采集的时间戳
 			dataReg.setTp(tp);   			//数控系统型号
-			synchronized(RegLock.class){   //加锁同步，同一时刻只能有一个线程修改list中的数据
+			/*synchronized(RegLock.class){   //加锁同步，同一时刻只能有一个线程修改list中的数据
 				DaqData.getListDataReg().add(dataReg);
-			}
-			
+			}*/
+			DaqData.saveDataReg(dataReg);
 			long ontime=SaveRunTime.getOnTime(machineIP);//累计运行时长			
 			DataLog dataLog=new DataLog(machine_SN,
 					ontime,
 					ontime,
 					strTime);//华中数控不提供“累计加工时间”和“累计运行时间”
-			synchronized(LogLock.class){  //加锁同步
+		/*	synchronized(LogLock.class){  //加锁同步
 				DaqData.getListDataLog().add(dataLog);
-			}
-			
+			}*/
+			DaqData.saveDataLog(dataLog);
 			UiDataNo uiDataNo=new UiDataNo("","",machine_SN , DaqData.getAndroidId());
 			sendMsg(mainHander,uiDataNo,HandleMsgTypeMcro.HUAZHONG_UINO,0,0); //发送消息到活动，显示IP地址信息
 					
