@@ -12,12 +12,12 @@ public class DataBHSAMPLE_STATIC {
      float cas;		// 主轴实际速度
     float ccs;		//主轴指令速度
     float aload;	//主轴负载电流
-    float aspd[NET_AXIS_NUM];// 进给轴实际�?�度
-    float apst[NET_AXIS_NUM];// 进给轴指令位�?
-    float cpst[NET_AXIS_NUM];// 进给轴实际位�?
-    float load[NET_AXIS_NUM];// 进给轴负载电�?
-    char progname[20];		//当前程序�?
-    char runstatus[60];		// G代码运行状�??
+    float aspd[NET_AXIS_NUM];// 进给轴实际速度
+    float apst[NET_AXIS_NUM];// 进给轴指令位置
+    float cpst[NET_AXIS_NUM];// 进给轴实际位置
+    float load[NET_AXIS_NUM];// 进给轴负载电流
+    char progname[20];		//当前程序名
+    char runstatus[60];		// G代码运行状态
     char almhead[16][20];// 报警消除时间
     char almtime[16][38];// 报警发生时间
     char alminfor[16][70];// 报警信息内容
@@ -25,7 +25,7 @@ public class DataBHSAMPLE_STATIC {
     int ontime;// 累计加工时间
     int gclinenum;	// G代码行号
     short prognum;//G代码程序编号
-    short gcmode;	// G代码模�??
+    short gcmode;	// G代码模态
     short almflag;// 异常信号
     short reserved;
     //12+4*32+20+60+16*20+16*38+16*70+20=2288
@@ -34,22 +34,22 @@ public class DataBHSAMPLE_STATIC {
     float ccs;		//主轴指令速度
     float aload;	//主轴负载电流
 
-    float aspd[];//=new double[Mcronum.NET_AXIS_NUM];// 进给轴实际�?�度
-    float apst[];//=new double[Mcronum.NET_AXIS_NUM];// 进给轴指令位�?
-    float cpst[];//=new double[Mcronum.NET_AXIS_NUM];// 进给轴实际位�?
-    float load[];//=new double[Mcronum.NET_AXIS_NUM];// 进给轴负载电�?
-    String progname;		//当前程序�?
-    String runstatus;		// G代码运行状�??
+    float aspd[];//=new double[Mcronum.NET_AXIS_NUM];// 进给轴实际速度
+    float apst[];//=new double[Mcronum.NET_AXIS_NUM];// 进给轴指令位置
+    float cpst[];//=new double[Mcronum.NET_AXIS_NUM];// 进给轴实际位置
+    float load[];//=new double[Mcronum.NET_AXIS_NUM];// 进给轴负载电置
+    String progname;		//当前程序名
+    String runstatus;		// G代码运行状态
 
     String almhead[];// 报警编号
-    String almtime[];// 报警发生时间，读不出来显示�??20NULL�?
+    String almtime[];// 报警发生时间，读不出来显示NULL
     String alminfor[];// 报警信息内容,中文报警信息
 
     int runtime;// 累计运行时间
     int ontime; // 累计加工时间
     int gclinenum;	// G代码行号
     short prognum;// G代码程序编号
-    short gcmode;	// G代码模�??
+    short gcmode;	// G代码模态
     short almflag;// 异常信号
     short reserved;
 

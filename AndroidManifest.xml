@@ -8,6 +8,9 @@
         android:minSdkVersion="15"
         android:targetSdkVersion="19" />
 
+     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
@@ -33,7 +36,7 @@
         
         <service android:name=".daqService" ></service>
         
-        <service android:name="com.cnc.mainservice.DelMsgServie"></service>
+        <service android:name="com.cnc.mainservice.DelMsgService"></service>
 
         <!-- 注册广播接收者，监听启动广播 -->
         <receiver android:name="com.cnc.broadcast.BootBroadcastReceiver" android:exported="true" >

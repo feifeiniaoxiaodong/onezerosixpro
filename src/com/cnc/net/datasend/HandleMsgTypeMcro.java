@@ -17,7 +17,7 @@ public class HandleMsgTypeMcro {
 	    public static final int MSG_TEST = 19;//测试用标签
 	    
 	    
-	    //机床的IP地址路径
+	    //华中机床的IP地址路径
 	    public static final String HUAZHONG1_1="192.168.188.112";
 	    public static final String HUAZHONG1_2="192.168.188.114";
 	    public static final String HUAZHONG1_3="192.168.188.113";

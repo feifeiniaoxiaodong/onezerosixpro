@@ -20,8 +20,8 @@ import com.cnc.domain.DataType;
 import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
 import com.cnc.gaojing.ndkapi.GJApiFunction;
-import com.cnc.huazhong.dc.DataCollectInter;
-import com.cnc.mainservice.DelMsgServie;
+import com.cnc.huazhong.dc.CommonDataCollectThreadInterface;
+import com.cnc.mainservice.DelMsgService;
 import com.cnc.net.datasend.HandleMsgTypeMcro;
 import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.RegLock;
@@ -39,7 +39,7 @@ import android.util.Log;
  * @author wei
  *
  */
- public class GJDataCollectThread implements Runnable,DataCollectInter {
+ public class GJDataCollectThread implements Runnable,CommonDataCollectThreadInterface {
 
 	private final String TAG="DataCollectThread...";
 	 //线程循环执行标志，改为false时，线程退出循环，线程结束运行
@@ -49,7 +49,7 @@ import android.util.Log;
 	boolean hadconnected =false ;   //连接状态标志	
 	 
 	private Handler delMsgHandler =null,
-					 mainActivityHandler=null;
+					mainActivityHandler=null;
 	final private String  machineIP ;//= "192.168.188.132"; //机床的IP地址
 //	int    machinePort ;			  //机床端口号，高精不需要设置端口号
 //	String  tp = "SYGJ-1000"; //数控系统型号，高精数控系统型号数控系统提供
@@ -65,7 +65,7 @@ import android.util.Log;
 	public GJDataCollectThread(String ip,int port){
 		machineIP=ip;
 		machine_SN="G"+ip;
-		delMsgHandler=DelMsgServie.getHandlerService();
+		delMsgHandler=DelMsgService.getHandlerService();
 		mainActivityHandler=MainActivity.getMainActivityHandler();
 		this.alarmFilterList=new AlarmFilterList(delMsgHandler);
 	}

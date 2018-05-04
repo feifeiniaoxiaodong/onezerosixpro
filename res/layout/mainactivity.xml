@@ -18,7 +18,7 @@
            android:layout_height="wrap_content"
            android:fitsSystemWindows="true">
            
-          	<include layout="@layout/sendinfo"/>
+          <include layout="@layout/sendinfo"/>
      
            <TextView 
                android:layout_width="match_parent"
@@ -59,11 +59,35 @@
                    layout="@layout/cncinfoitem" />
           <include  android:id="@+id/gsk3"
                    layout="@layout/cncinfoitem" />
-         <include  android:id="@+id/gsk4"
+          <include  android:id="@+id/gsk4"
                    layout="@layout/cncinfoitem" />
-         <include  android:id="@+id/gsk5"
+          <include  android:id="@+id/gsk5"
                    layout="@layout/cncinfoitem" />
-           "
+          
+         <TextView 
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+                 android:layout_marginTop="100dp"
+               android:layout_marginLeft="10dp"
+               android:text="航天数控"
+               android:background="@color/gray"
+               android:textSize="20sp"/>
+         
+         <include android:id="@+id/hangtian1"
+               	   layout="@layout/cncinfoitem"/>
+         
+         <include android:id="@+id/hangtian2"
+               	   layout="@layout/cncinfoitem"/>
+         
+         <include android:id="@+id/hangtian3"
+               	   layout="@layout/cncinfoitem"/>
+         
+         <include android:id="@+id/hangtian4"
+               	   layout="@layout/cncinfoitem"/>
+         
+         <include android:id="@+id/hangtian5"
+               	   layout="@layout/cncinfoitem"/>
+                           
           
       </LinearLayout>
   
