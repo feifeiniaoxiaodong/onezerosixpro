@@ -43,7 +43,7 @@ public class GSKDataCollectThread implements Runnable ,CommonDataCollectThreadIn
   
     //线程循环执行标志，改为false时，线程退出循环，线程结束运行
     private volatile  boolean  threadflag=true;  
-    private static final String TAG="GSKDataCollect()...";
+    private static final String TAG="GSKDataCollectThread";
 /*    static {
         System.loadLibrary("gsknetw-lib");
     }

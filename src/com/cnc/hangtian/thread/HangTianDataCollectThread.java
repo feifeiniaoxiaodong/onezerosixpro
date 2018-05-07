@@ -54,11 +54,10 @@ public class HangTianDataCollectThread implements Runnable,
 	boolean boolGetMacInfo = false;					 //标识是否得到机床的基本信息
 	
 	
-
 	public HangTianDataCollectThread(String machineip, String threadlabel) {
 		
-//		String num = machineip.substring( machineip.lastIndexOf(".")+2);		
-//		cncNumber=(Integer.parseInt(num)%10)+1;
+		String num = machineip.substring( machineip.lastIndexOf(".")+1);		
+		cncNumber=(Integer.parseInt(num)%10)+1;
 		delMsgHandler =DelMsgService.getHandlerService();
 		this.threadLabel=threadlabel; 						
 		this.machineIP=machineip;	
@@ -111,7 +110,7 @@ public class HangTianDataCollectThread implements Runnable,
 			
 		}//end while
 		
-		//断开连接
+		//断开连接,造成闪退
 		/*try {
 			start.DeleteServer(cncNumber);
 		} catch (Exception e) {			
@@ -304,6 +303,12 @@ public class HangTianDataCollectThread implements Runnable,
 					"threadlabel",threadLabel,
 					 BroadcastType.HANGTAIN_ALARM, sbalram.toString());   	   		
     	}
+    	
+    	//发送到主界面显示
+		sendBroadCast(BroadcastAction.ACTION_HANGTIAN_RUN_ALARM,
+				"type" , BroadcastType.HANGTAIN_ALARM ,
+				"threadlabel",threadLabel,
+				 BroadcastType.HANGTAIN_ALARM,"暂无报警信息"); 
     	
 		//如果采集到的报警信息不为零或者已有的报警信息不为零，那么就要对报警信息进行分析
 		//对报警信息进行处理,必须要判断报警信息的来到是发生报警还是解除报警，这个分析过程留到主线程中

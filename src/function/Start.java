@@ -263,17 +263,8 @@ public class Start {
 		String s4 = String.valueOf(a[3]);
 		String s = s1+s2+s3+s4;
 		
-	/*	byte[] sbyte=null;
-		try {
-			sbyte = s.getBytes("gbk");
-		} catch (UnsupportedEncodingException e) {
-			
-			e.printStackTrace();
-		}
-		byte b1=sbyte[0];
-*/
 		switch(tag){
-		case 1 : Send(socket1, a);
+		case 1 : Send(socket1, s);
 				 while(!flag1){
 					 Thread.sleep(500);
 				 }
@@ -324,9 +315,9 @@ public class Start {
 		String s4 = String.valueOf(a[3]);
 		String s = s1+s2+s3+s4;
 		switch(tag){
-		case 1 : Send(socket1, a);
+		case 1 : Send(socket1, s);
 				 while(!flag1){
-					 Thread.sleep(5000);
+					 Thread.sleep(500);
 				 }
 				 flag1 = false;
 				 return sy1;
@@ -451,12 +442,12 @@ public class Start {
 	/**
 	 * 发送指令
 	 */
-	public boolean Send(Socket socket,char[] commands){
+	/*public boolean Send(Socket socket,char[] commands){
 		OutputStream outt=null;
 		OutputStreamWriter write=null;
 		try {
-			/*PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
-			out.print(commands);*/
+			PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
+			out.print(commands);
 //			out.flush();
 			
 			outt=socket.getOutputStream();
@@ -470,25 +461,9 @@ public class Start {
 			e.printStackTrace();
 			return false;
 		}
-	}
+	}*/
 	
-	/**
-	 * 发送指令
-	 */
-	public boolean Send(Socket socket,byte[] commands){
-		try {
-			
-			PrintWriter out = new PrintWriter(socket.getOutputStream());			
-			out.print(commands);
-			out.flush();
 
-			return true;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-	}
 	/**
 	 * 读取WARN报警文件  并put到HashMap
 	 */
