@@ -160,17 +160,18 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     										versionJson, //版本信息
     										timeStr);
     			
-    			synchronized(RegLock.class){
+    			/*synchronized(RegLock.class){
 					DaqData.getListDataReg().add(dataReg);
-				}
-    			
+				}*/
+    			DaqData.saveDataReg(dataReg);
     			DataLog dataLog=new DataLog(machine_SN,
     										bhSample.getOntime(), //累计开机时间
     										bhSample.getRuntime(), //累计加工时间
     										timeStr);
-    			synchronized(LogLock.class){
+    			/*synchronized(LogLock.class){
 					DaqData.getListDataLog().add(dataLog);
-				}
+				}*/
+    			DaqData.saveDataLog(dataLog);
     			boolGetMacInfo=true;
     			
     			UiDataNo uiDataNo=new UiDataNo("","",machine_SN , DaqData.getAndroidId());

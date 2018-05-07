@@ -8,5 +8,6 @@ public class BroadcastType {
 	 public final static String SENDCOUNT = "sendcount";//信息发送数量
 	 
 	 public final static String  SENDSPEED="sendspeed";//发送速度
+	 public final static String  SENDColor="sendcolor";//发送速度的字体颜色
 
 }

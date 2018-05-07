@@ -662,7 +662,7 @@ public class MainActivity extends Activity {
 			String time=formatter.format(Calendar.getInstance().getTime());
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
 			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
-			if( hour>=18  ){  //6点下线
+			if( hour>=18 ){  //6点下线
 				
 				runOnUiThread(new Runnable() {					
 					@Override
@@ -699,16 +699,26 @@ public class MainActivity extends Activity {
 			
              if(action.equals(BroadcastAction.SendThread_PARAMALL)){
 	        	  //发送数据的所有参数
-	        	  cachenum.setText(bundle.getString(BroadcastType.MSGLOCAL)); //显示本地数据库中缓存数据条数
-	        	  
-	        	  String strsendcount=bundle.getString(BroadcastType.SENDCOUNT);//显示已发送数据条数
-	        	  String strspeed=bundle.getString(BroadcastType.SENDSPEED); //发送速率
-	        	  if( !"".equals(strsendcount)){
+            	 String strlocalnum =bundle.getString(BroadcastType.MSGLOCAL);
+            	 if(strlocalnum!=null && !"".equals(strlocalnum)){
+            		  cachenum.setText(strlocalnum); //显示本地数据库中缓存数据条数
+            	 }
+	        	 	        	  
+	        	  String strsendcount=bundle.getString(BroadcastType.SENDCOUNT);//显示已发送数据条数	        	 	        	 
+	        	  if(strsendcount!=null &&  !"".equals(strsendcount)){
 	        		  sendnum.setText(strsendcount); 
 	        	  }
-	        	  if(!"".equals(strspeed)){
+	        	  
+	        	  String strspeed=bundle.getString(BroadcastType.SENDSPEED); //发送速率
+	        	  String strspeedcolor=bundle.getString(BroadcastType.SENDColor); //发送速率字体颜色
+	        	  if(strspeed!=null && !"".equals(strspeed)){
 	        		  speed.setText(strspeed);
-	        	  }	        	  
+	        		  if(strspeedcolor!=null && strspeedcolor.equals("red")){
+	        			  speed.setTextColor(getResources().getColor(R.color.red)); //把字体变为红色
+	        		  }else{
+	        			  speed.setTextColor(getResources().getColor(R.color.black));
+	        		  }	        		  
+	        	  }	 	        	  
 	          }
         }   
      }
