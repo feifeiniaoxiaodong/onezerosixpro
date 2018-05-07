@@ -163,6 +163,7 @@ public class HzDataCollectThread implements Runnable,CommonDataCollectThreadInte
 				DaqData.getListDataLog().add(dataLog);
 			}*/
 			DaqData.saveDataLog(dataLog);
+			
 			UiDataNo uiDataNo=new UiDataNo("","",machine_SN , DaqData.getAndroidId());
 			sendMsg(mainHander,uiDataNo,HandleMsgTypeMcro.HUAZHONG_UINO,0,0); //发送消息到活动，显示IP地址信息
 					
