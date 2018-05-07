@@ -63,7 +63,7 @@
                    layout="@layout/cncinfoitem" />
          <include  android:id="@+id/gsk5"
                    layout="@layout/cncinfoitem" />
-           "
+           
           
       </LinearLayout>
   
