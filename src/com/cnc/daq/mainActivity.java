@@ -1,28 +1,30 @@
 package com.cnc.daq;
 
-import java.text.ParsePosition;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+//import java.text.ParsePosition;
+//import java.util.ArrayList;
+//import java.util.Calendar;
+//import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
+//import java.util.List;
+//import java.util.Timer;
 import java.util.Map;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.text.SimpleDateFormat;
+//import java.text.SimpleDateFormat;
 
 import com.cnc.broadcast.BroadcastAction;
 import com.cnc.broadcast.BroadcastType;
 import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
 import com.cnc.gaojing.GJDataCollectThread;
-import com.cnc.hangtian.thread.HangTianDataCollectThread;
+//import com.cnc.hangtian.thread.HangTianDataCollectThread;
+import com.cnc.hangtian.thread.HangtianDataCollectThreadnew;
 import com.cnc.huazhong.dc.HzDataCollectThread;
 import com.cnc.net.datasend.DataTransmitThread;
 import com.cnc.net.datasend.HandleMsgTypeMcro;
-import com.cnc.test.TestGJMultiThread;
+//import com.cnc.test.TestGJMultiThread;
+import com.cnc.utils.TimeUtil;
 import com.example.wei.gsknetclient_studio.GSKDataCollectThread;
 
 import android.annotation.SuppressLint;
@@ -33,13 +35,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 
-import android.nfc.cardemulation.OffHostApduService;
+//import android.nfc.cardemulation.OffHostApduService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.format.DateFormat;
+//import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -56,7 +58,7 @@ public class MainActivity extends Activity {
 	
 	final String TAG="mainactivity";
 	static Handler  mainActivityHandler=null;
-	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");//时间戳格式
+//	private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");//时间戳格式
 	private SharedPreferences pref;	
 	private SharedPreferences.Editor editor ;
 	static ExecutorService exec=null;
@@ -83,7 +85,7 @@ public class MainActivity extends Activity {
 	String [] hangtianIpArray=null; //hangtian ip list
 	
 	static Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
-	static Map<String ,HangTianDataCollectThread> mapHangtianThreadObj=new HashMap<>();
+	static Map<String ,HangtianDataCollectThreadnew> mapHangtianThreadObj=new HashMap<>();
 	
 	LocalBroadcastManager localBroadcastManager =null; //本地广播
 	LocalReceiver localReceiver=null;
@@ -211,12 +213,12 @@ public class MainActivity extends Activity {
 			startHzThread(preipHz);
 		}
 			
-		//高精
+		//开启沈阳高精数据采集线程
 		String preipGj=pref.getString("gaojing", null);
 		if(preipGj!=null && !preipGj.equals("") ){
 			startGjThread(preipGj);
 		}
-		
+		//开启广州数控数据采集线程
 		for(int i=0;i<gskIpArray.length;i++){
 			String str= gskIpArray[i];
 			String no=null , preNoip=null;
@@ -718,7 +720,7 @@ public class MainActivity extends Activity {
 	
 	//航天数控
 	//开启航天数控数据采集线程
-	private void startHangtianThread(String spinItem_NOIP ){
+/*	private void startHangtianThread2(String spinItem_NOIP ){
 		String ip=null,no=null;
 		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
 			ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
@@ -741,10 +743,38 @@ public class MainActivity extends Activity {
 			editor.putString(no , spinItem_NOIP); //持久化保存
 			editor.apply();	
 		}
+	}*/
+	
+	//航天数控
+	//开启航天数控数据采集线程
+	private void startHangtianThread(String spinItem_NOIP ){
+		String ip=null,no=null ,threadlabel=null;
+		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
+			ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
+			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));//作为 Thread label区分广数采集线程
+			 threadlabel=no;
+			 if(ip!=null && ip.startsWith("192.168.188.")){
+				if( mapHangtianThreadObj.get(no) instanceof HangtianDataCollectThreadnew){
+					mapHangtianThreadObj.get(no).stopCollect();
+					mapHangtianThreadObj.remove(no);
+				}
+				
+				HangtianDataCollectThreadnew hangTianDataCollectThread=new HangtianDataCollectThreadnew(ip, threadlabel);
+				exec.execute(hangTianDataCollectThread);
+				mapHangtianThreadObj.put(no, hangTianDataCollectThread);
+				
+				viewmapgGsk.get(no).getBtstart().setEnabled(false);
+				viewmapgGsk.get(no).getBtstop().setEnabled(true);
+			 }
+			 
+			editor =pref.edit();
+			editor.putString(no , spinItem_NOIP); //持久化保存
+			editor.apply();	
+		}
 	}
 	
 	//关闭航天数控数据采集线程
-	private void stopHangtianThread(String spinItem_NOIP, boolean repref){
+/*	private void stopHangtianThread2(String spinItem_NOIP, boolean repref){
 		String no=null;
 		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
 
@@ -762,10 +792,33 @@ public class MainActivity extends Activity {
 					 editor.remove(no);
 					 editor.apply(); 
 				 }				 
-			 }
-			 
+			 }			 
+		}
+	}*/
+	
+	//关闭航天数控数据采集线程
+	private void stopHangtianThread(String spinItem_NOIP, boolean repref){
+		String no=null;
+		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
+
+			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
+			 HangtianDataCollectThreadnew hangTianDataCollectThreadObj= mapHangtianThreadObj.get(no);
+			 if(hangTianDataCollectThreadObj !=null){
+				 hangTianDataCollectThreadObj.stopCollect();
+				 mapHangtianThreadObj.remove(no);
+				
+				 viewmapgGsk.get(no).getBtstart().setEnabled(true);
+				 viewmapgGsk.get(no).getBtstop().setEnabled(false);
+						
+				 if(repref){
+					 editor =pref.edit();
+					 editor.remove(no);
+					 editor.apply(); 
+				 }				 
+			 }			 
 		}
 	}
+	
 	
 	//初始化航天数控界面
 	private void initHangtianviewIPandNo(){
@@ -813,7 +866,8 @@ public class MainActivity extends Activity {
 		@Override
 		public void run() {
 			
-			String time=formatter.format(Calendar.getInstance().getTime());
+//			String time=formatter.format(Calendar.getInstance().getTime());
+			String time=TimeUtil.getSimpleTime(); //获取时间戳
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
 //			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
 			if( hour==7 ){   //7点上线
@@ -824,7 +878,7 @@ public class MainActivity extends Activity {
 					Log.d(TAG,"startTask开启了数据发送线程");
 				}								
 			/*	try {
-					Thread.sleep(1000);
+					Thread.sleep(500);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}*/				
@@ -845,9 +899,10 @@ public class MainActivity extends Activity {
 		@Override
 		public void run() {
 			
-			String time=formatter.format(Calendar.getInstance().getTime());
+//			String time=formatter.format(Calendar.getInstance().getTime());
+			String time=TimeUtil.getSimpleTime();
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
-			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
+//			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
 			if( hour>=18 ){  //6点下线
 				
 				runOnUiThread(new Runnable() {					
@@ -857,7 +912,7 @@ public class MainActivity extends Activity {
 					}
 				});
 								
-			/*	try {
+		/*		try {
 					Thread.sleep(1000*30); //3分钟后再停止数据发送线程
 				} catch (InterruptedException e) {
 					e.printStackTrace();

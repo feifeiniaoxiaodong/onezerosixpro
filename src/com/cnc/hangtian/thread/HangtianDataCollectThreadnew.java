@@ -1,6 +1,5 @@
 package com.cnc.hangtian.thread;
 
-import java.io.IOException;
 import java.util.LinkedList;
 
 import android.content.Intent;
@@ -21,6 +20,10 @@ import com.cnc.domain.DataLog;
 import com.cnc.domain.DataReg;
 import com.cnc.domain.DataRun;
 import com.cnc.hangtian.alarmfile.FindAlarmByIdHangtian;
+import com.cnc.hangtian.dnc.driver.HangtianDNCDriver;
+import com.cnc.hangtian.domain.AlarmDataHangtian;
+import com.cnc.hangtian.domain.AxisDataHangtian;
+import com.cnc.hangtian.domain.SystemDataHangtian;
 import com.cnc.hangtian.domain.VersionHangtian;
 import com.cnc.huazhong.dc.CommonDataCollectThreadInterface;
 import com.cnc.mainservice.DelMsgService;
@@ -32,18 +35,20 @@ import com.cnc.utils.TimeUtil;
 import function.Start;
 
 /**
- * 航天数控数据采集线程
+ * 新航天数控数据采集线程
+ * 采用wei编写的数据采集DNC接口
+ * 
  * @author wei
  *
  */
-public class HangTianDataCollectThread implements Runnable,
-		CommonDataCollectThreadInterface {
-	
-	private final String TAG="HangTianDataCollectThread";
+public class HangtianDataCollectThreadnew implements Runnable,
+							CommonDataCollectThreadInterface{
+
+	private final String TAG="HangtianDataCollectThreadnew";
 	private volatile boolean threadRunningFlag=true;
 	int     count = 1;     //存储运行信息的id,标识这是第几次采集信息
-	private Start start=null;
-	private static int cncNumber=2;
+//	private Start start=null;
+//	private static int cncNumber=1;
 	private String threadLabel=null; //线程标记
 	private static String machineIP="192.168.188.141";
 	private final int  port=6665;
@@ -53,11 +58,14 @@ public class HangTianDataCollectThread implements Runnable,
 	private AlarmFilterList   alarmFilterList =null; //报警信息缓存过滤对象
 	boolean boolGetMacInfo = false;					 //标识是否得到机床的基本信息
 	
+	HangtianDNCDriver hangtianDNCDriver=null;  //航天数控新DNC接口驱动
 	
-	public HangTianDataCollectThread(String machineip, String threadlabel) {
+	public HangtianDataCollectThreadnew(String machineip, String threadlabel) {
 		
-		String num = machineip.substring( machineip.lastIndexOf(".")+1);		
-		cncNumber=(Integer.parseInt(num)%10)+1;
+	/*	String num = machineip.substring( machineip.lastIndexOf(".")+1);		
+		cncNumber=(Integer.parseInt(num)%10)+1;*/
+		hangtianDNCDriver=new HangtianDNCDriver(machineip, port);
+		
 		delMsgHandler =DelMsgService.getHandlerService();
 		this.threadLabel=threadlabel; 						
 		this.machineIP=machineip;	
@@ -68,40 +76,40 @@ public class HangTianDataCollectThread implements Runnable,
 	
 	@Override
 	public void run() {
+		int res=0;
 		
-		start = Start.getInstance();
-		if(start==null){
-			return ;
+		try {
+			res=hangtianDNCDriver.buildConnectionAndCNC();
+		} catch (Exception e1) {			
+			e1.printStackTrace();
 		}
 		
-		try{
-			start.ClientConnectServer(cncNumber, machineIP, port);
-			if(start.SocketKeepalive(cncNumber)){
-				Log.d(TAG, "航天数控"+machineIP+"连接成功");
-			}else{
-				Log.d(TAG, "航天数控"+machineIP+"连接失败");
-			}
-		}catch(Exception e){
-			e.printStackTrace();
+		if(res==0){
+			Log.d(TAG, "航天数控"+machineIP+"连接成功");
+		}else{
+			Log.d(TAG, "航天数控"+machineIP+"连接失败");
 		}
+		
 		
 		while(threadRunningFlag){
-			if(! start.SocketKeepalive(cncNumber)){
-				try{
-					start.ReConnectServer(cncNumber);
-					if(start.SocketKeepalive(cncNumber)){
-						Log.d(TAG, "航天数控"+machineIP+"重新连接成功");
-					}else{
-						Log.d(TAG, "航天数控"+machineIP+"重新连接失败");
-					}
-				}catch(Exception e){
+			if( !hangtianDNCDriver.connectionState()){
+				//重新连接
+				try {
+					res=hangtianDNCDriver.rebuildConnectionAndCNC();
+				} catch (Exception e) {				
 					e.printStackTrace();
+				}				
+				if(res==0){
+					Log.d(TAG, "航天数控"+machineIP+"连接成功");
+				}else{
+					Log.d(TAG, "航天数控"+machineIP+"连接失败");
 				}
-			}else{
-				//data acquisition
+	
+			}else{//数据采集
+				
 				getDaq();
 			}
-			
+
 			try{
 				Thread.sleep(1000);//采集间隔1秒
 			}catch(Exception e){
@@ -110,55 +118,49 @@ public class HangTianDataCollectThread implements Runnable,
 			
 		}//end while
 		
-		//断开连接,造成闪退
-		/*try {
-			start.DeleteServer(cncNumber);
-		} catch (Exception e) {			
-			e.printStackTrace();
-		}*/
+	
+		//退出数据采集线程时，断开连接
+		hangtianDNCDriver.closeConnection();
 		
 	} //end run()
 
 	
 	//采集数据
     private void getDaq(){ 
-    	SYSTEM_INFO systemInformation=null;
+    	SystemDataHangtian systemInformation=null;
   	
     	if(!boolGetMacInfo){
     		//采集注册信息和登录登出信息
-    		try {
-				systemInformation= start.GetSysteminfo(cncNumber);//读取CNC系统信息
-				if(systemInformation!=null){
-					this.CNCSystemID=systemInformation.getSystemid().trim();
-					this.CNCSystemType=systemInformation.getSystemtype().trim();
-					String NCversion=systemInformation.getSystemver().trim(); //数控系统总版本号
-					
-					VersionHangtian versionHangtian=new VersionHangtian(NCversion, CNCSystemType);
-					DataReg dataReg= new DataReg(this.CNCSystemID , 
-												 this.CNCSystemType,
-												JsonUtil.object2Json(versionHangtian) ,
-												 TimeUtil.getTimestamp());
-					DaqData.saveDataReg(dataReg); //保存注册信息	
-					
-					DataLog dataLog=new DataLog(CNCSystemID, systemInformation.getOntime(),
-												systemInformation.getRuntime()	,  
-												TimeUtil.getTimestamp());
-					DaqData.saveDataLog(dataLog);
-					boolGetMacInfo=true;	
-					
-					//发送到主界面显示  cncid  androidid
-					sendBroadCast(BroadcastAction.ACTION_HANGTIAN_RUN_ALARM,
-							"type" , "cncid" ,
-							"threadlabel",threadLabel,
-							"cncid" , CNCSystemID);
-					
-					sendBroadCast(BroadcastAction.ACTION_HANGTIAN_RUN_ALARM,
-							"type" , "androidid" ,
-							"threadlabel",threadLabel,
-							"androidid" , DaqData.getAndroidId());
-				}
-			} catch (Exception e) {				
-				e.printStackTrace();
+
+			systemInformation= hangtianDNCDriver.getSystemInfo();//读取CNC系统信息
+			if(systemInformation!=null){
+				this.CNCSystemID=systemInformation.getSystemid().trim();
+				this.CNCSystemType=systemInformation.getSystemtype().trim();
+				String NCversion=systemInformation.getSystemver().trim(); //数控系统总版本号
+				
+				VersionHangtian versionHangtian=new VersionHangtian(NCversion, CNCSystemType);
+				DataReg dataReg= new DataReg(this.CNCSystemID , 
+											 this.CNCSystemType,
+											JsonUtil.object2Json(versionHangtian) ,
+											 TimeUtil.getTimestamp());
+				DaqData.saveDataReg(dataReg); //保存注册信息	
+				
+				DataLog dataLog=new DataLog(CNCSystemID, systemInformation.getOntime(),
+											systemInformation.getRuntime()	,  
+											TimeUtil.getTimestamp());
+				DaqData.saveDataLog(dataLog);
+				boolGetMacInfo=true;	
+				
+				//发送到主界面显示  cncid  androidid
+				sendBroadCast(BroadcastAction.ACTION_HANGTIAN_RUN_ALARM,
+						"type" , "cncid" ,
+						"threadlabel",threadLabel,
+						"cncid" , CNCSystemID);
+				
+				sendBroadCast(BroadcastAction.ACTION_HANGTIAN_RUN_ALARM,
+						"type" , "androidid" ,
+						"threadlabel",threadLabel,
+						"androidid" , DaqData.getAndroidId());
 			}
     		   				
     	}else{
@@ -175,18 +177,14 @@ public class HangTianDataCollectThread implements Runnable,
      * 采集航天数控运行信息
      */
     private void  collectRunInfo(){
-    	SYSTEM_INFO systemInformation=null;
+    	SystemDataHangtian systemInformation=null;
 //    	ALARM_INFO  alarmInformation =null;
-    	AXIS_INFO   axisInfomation =null;
+    	AxisDataHangtian   axisInfomation =null;
     	
-    	try {
-			systemInformation= start.GetSysteminfo(cncNumber);//读取CNC系统信息
-//			alarmInformation=start.GetAlarminfo(cncNumber);
-			axisInfomation =start.GetAxisinfo(cncNumber);
-		} catch (InterruptedException e) {				
-			e.printStackTrace();
-		}
-		
+    
+		systemInformation=hangtianDNCDriver.getSystemInfo();//读取CNC系统信息
+		axisInfomation =hangtianDNCDriver.getAxisinfo(); //读取CNC轴信息
+			
 		DataRun dataRun=new DataRun();
 		dataRun.setId(CNCSystemID);
 		dataRun.setCas((float)axisInfomation.getA_s_value());//轴实际转速
@@ -246,17 +244,12 @@ public class HangTianDataCollectThread implements Runnable,
      */
     private void collectAlarmInfo(){
     	
-    	ALARM_INFO  alarmInformation =null;
+    	AlarmDataHangtian  alarmInformation =null;
     	StringBuilder  currentAlarmString=new StringBuilder();//报警信息
     	LinkedList<DataAlarm> listDataAlarm =new LinkedList<>();
     	
-    	try {			
-			alarmInformation=start.GetAlarminfo(cncNumber);			
-		} catch (InterruptedException e) {				
-			e.printStackTrace();
-		}
+    	alarmInformation=hangtianDNCDriver.getAlarmInfo();
 
-    	
     	int []alarmCodes=alarmInformation.getAlarmcode_array();//当前报警代码组
     	int i=0;
     	while(alarmCodes[i]>0 ){
@@ -299,15 +292,7 @@ public class HangTianDataCollectThread implements Runnable,
 	public boolean isThreadRunning() {		
 		return threadRunningFlag;
 	}
-	
-	//用String trim()函数解决
-	//删除字符串结尾处多余的字符，解决结尾处乱码问题
-//	private String getUsefulString(String str){
-//		String strl=null;
-//		strl =str.substring(0, str.indexOf('\0'));
-//		return strl;
-//	}
-	
+		
 	/**
 	 * 发送消息到主线程
 	 * @param obj
@@ -356,6 +341,5 @@ public class HangTianDataCollectThread implements Runnable,
 		LocalBroadcastManager.getInstance(MyApplication.getContext())
 							 .sendBroadcast(intent);	
 	}
-
 
 }

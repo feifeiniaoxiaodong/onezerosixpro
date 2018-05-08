@@ -24,8 +24,7 @@ import com.cnc.mainservice.DelMsgService;
 import com.cnc.net.datasend.HandleMsgTypeMcro;
 import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.JsonUtil;
-import com.cnc.utils.LogLock;
-import com.cnc.utils.RegLock;
+
 import com.cnc.utils.TimeUtil;
 
 import android.annotation.SuppressLint;

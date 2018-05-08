@@ -24,7 +24,7 @@ import com.cnc.huazhong.dc.CommonDataCollectThreadInterface;
 import com.cnc.mainservice.DelMsgService;
 import com.cnc.net.datasend.HandleMsgTypeMcro;
 import com.cnc.utils.AlarmFilterList;
-import com.cnc.utils.RegLock;
+
 import com.cnc.utils.SaveRunTime;
 import com.cnc.utils.TimeUtil;
 
