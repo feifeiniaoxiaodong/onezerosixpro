@@ -162,7 +162,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int tab05_unsel=0x7f02000b;
     }
     public static final class id {
-        public static final int action_settings=0x7f070025;
+        public static final int action_settings=0x7f070029;
         public static final int alarm=0x7f07000a;
         public static final int bottom=0x7f070002;
         public static final int bt2=0x7f070010;
@@ -170,17 +170,21 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int btstop=0x7f07000e;
         public static final int count=0x7f070012;
         public static final int delaytime=0x7f070011;
-        public static final int gaojing=0x7f070016;
-        public static final int gsk1=0x7f070017;
-        public static final int gsk2=0x7f070018;
-        public static final int gsk3=0x7f070019;
-        public static final int gsk4=0x7f07001a;
-        public static final int gsk5=0x7f07001b;
-        public static final int hangtian1=0x7f07001c;
-        public static final int hangtian2=0x7f07001d;
-        public static final int hangtian3=0x7f07001e;
-        public static final int hangtian4=0x7f07001f;
-        public static final int hangtian5=0x7f070020;
+        public static final int gaojing1=0x7f070016;
+        public static final int gaojing2=0x7f070017;
+        public static final int gaojing3=0x7f070018;
+        public static final int gaojing4=0x7f070019;
+        public static final int gaojing5=0x7f07001a;
+        public static final int gsk1=0x7f07001b;
+        public static final int gsk2=0x7f07001c;
+        public static final int gsk3=0x7f07001d;
+        public static final int gsk4=0x7f07001e;
+        public static final int gsk5=0x7f07001f;
+        public static final int hangtian1=0x7f070020;
+        public static final int hangtian2=0x7f070021;
+        public static final int hangtian3=0x7f070022;
+        public static final int hangtian4=0x7f070023;
+        public static final int hangtian5=0x7f070024;
         public static final int huazhong=0x7f070015;
         public static final int idandroid=0x7f070009;
         public static final int idcnc=0x7f070008;
@@ -192,14 +196,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int run=0x7f07000b;
         public static final int scrollview=0x7f070014;
         public static final int spinner=0x7f07000c;
-        public static final int tabView=0x7f070021;
+        public static final int tabView=0x7f070025;
         public static final int tabview_fragment_container=0x7f070001;
         public static final int tabview_id=0x7f070000;
         public static final int textview=0x7f070013;
         public static final int top=0x7f070005;
-        public static final int txcachenum=0x7f070022;
-        public static final int txsendno=0x7f070023;
-        public static final int txspeed=0x7f070024;
+        public static final int txcachenum=0x7f070026;
+        public static final int txsendno=0x7f070027;
+        public static final int txspeed=0x7f070028;
     }
     public static final class layout {
         public static final int cncinfoitem=0x7f030000;
@@ -217,6 +221,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int action_settings=0x7f080002;
         public static final int app_name=0x7f080000;
         public static final int delaytime=0x7f080005;
+        public static final int gaojingname=0x7f080013;
         public static final int gsk1_ip=0x7f08000c;
         public static final int gsk1_name=0x7f080007;
         public static final int gsk2_ip=0x7f08000d;
@@ -227,7 +232,10 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int gsk4_name=0x7f08000a;
         public static final int gsk5_ip=0x7f080010;
         public static final int gsk5_name=0x7f08000b;
+        public static final int gskname=0x7f080012;
+        public static final int hangtianname=0x7f080015;
         public static final int hello_world=0x7f080001;
+        public static final int huazhongname=0x7f080014;
         public static final int startService=0x7f080004;
         public static final int startThread=0x7f080006;
         public static final int title=0x7f080003;
