@@ -93,6 +93,12 @@ public class HangtianDataCollectThreadnew implements Runnable,
 		
 		while(threadRunningFlag){
 			if( !hangtianDNCDriver.connectionState()){
+				try {
+					Thread.sleep(5000);//5秒以后再重连
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				//重新连接
 				try {
 					res=hangtianDNCDriver.rebuildConnectionAndCNC();
@@ -184,7 +190,10 @@ public class HangtianDataCollectThreadnew implements Runnable,
     
 		systemInformation=hangtianDNCDriver.getSystemInfo();//读取CNC系统信息
 		axisInfomation =hangtianDNCDriver.getAxisinfo(); //读取CNC轴信息
-			
+		if(systemInformation==null || axisInfomation==null){
+			return ; //未读到信息
+		}
+		
 		DataRun dataRun=new DataRun();
 		dataRun.setId(CNCSystemID);
 		dataRun.setCas((float)axisInfomation.getA_s_value());//轴实际转速
@@ -249,25 +258,28 @@ public class HangtianDataCollectThreadnew implements Runnable,
     	LinkedList<DataAlarm> listDataAlarm =new LinkedList<>();
     	
     	alarmInformation=hangtianDNCDriver.getAlarmInfo();
-
-    	int []alarmCodes=alarmInformation.getAlarmcode_array();//当前报警代码组
-    	int i=0;
-    	while(alarmCodes[i]>0 ){
-    		String alarmCode= alarmCodes[i]+"";
-			String alarmInfo=FindAlarmByIdHangtian.getAlarmInfoById(alarmCode);
-			
-			DataAlarm dataAlarm=new DataAlarm();
-			dataAlarm.setId(CNCSystemID);
-			dataAlarm.setF((byte)0);
-			dataAlarm.setNo(alarmCode);
-			dataAlarm.setTime(TimeUtil.getTimestamp());
-			dataAlarm.setCtt(alarmInfo);
-			
-			listDataAlarm.add(dataAlarm);
-			currentAlarmString.append(alarmInfo).append(":");
-			i++;	    	 	   		
+    	if(alarmInformation!=null){
+    		int []alarmCodes=alarmInformation.getAlarmcode_array();//当前报警代码组
+        	int i=0;
+        	while(alarmCodes[i]>0 ){
+        		String alarmCode= alarmCodes[i]+"";
+    			String alarmInfo=FindAlarmByIdHangtian.getAlarmInfoById(alarmCode);
+    			
+    			DataAlarm dataAlarm=new DataAlarm();
+    			dataAlarm.setId(CNCSystemID);
+    			dataAlarm.setF((byte)0);
+    			dataAlarm.setNo(alarmCode);
+    			dataAlarm.setTime(TimeUtil.getTimestamp());
+    			dataAlarm.setCtt(alarmInfo);
+    			
+    			listDataAlarm.add(dataAlarm);
+    			currentAlarmString.append(alarmInfo).append(":");
+    			i++;	    	 	   		
+        	}
+    	}else{
+//    		读到的报警信息为空
     	}
-    	    	
+    	 	    	
 		//如果采集到的报警信息不为零或者已有的报警信息不为零，那么就要对报警信息进行分析
 		//对报警信息进行处理,必须要判断报警信息的来到是发生报警还是解除报警，这个分析过程留到主线程中
 		if ((listDataAlarm.size() != 0)||(!alarmFilterList.getNowAlarmList().isEmpty())){

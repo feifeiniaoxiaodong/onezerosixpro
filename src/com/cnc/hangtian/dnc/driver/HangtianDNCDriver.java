@@ -1,20 +1,21 @@
 package com.cnc.hangtian.dnc.driver;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
+//import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+//import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.net.InetSocketAddress;
+//import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
+//import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 import com.cnc.hangtian.domain.AlarmDataHangtian;
 import com.cnc.hangtian.domain.AxisDataHangtian;
 import com.cnc.hangtian.domain.SystemDataHangtian;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 /**
@@ -22,7 +23,7 @@ import android.util.Log;
  * @author wei
  *
  */
-public class HangtianDNCDriver {
+@SuppressLint("DefaultLocale") public class HangtianDNCDriver {
 	private final String TAG="HANGTIANDNCDRIVER";
 	private Socket socket=null;
 	private DataInputStream in=null;
@@ -143,14 +144,19 @@ public class HangtianDNCDriver {
 		try {
 			Object obj=null;
 			axisInfoString= receiveDataFromCNC(); //接收采集数据
-			//解析采集数据
-			if( (obj=parseAcquisitionDatastr(axisInfoString) )instanceof AxisDataHangtian){
-				axisDataHangtian=(AxisDataHangtian)obj;
+			if(axisInfoString!=null && !"".equals(axisInfoString)){
+				obj=parseAcquisitionDatastr(axisInfoString);
+				//解析采集数据
+				if( obj instanceof AxisDataHangtian){
+					axisDataHangtian=(AxisDataHangtian)obj;
+				}
+			}else{
+				Log.d(TAG,"读到的轴信息为空");
 			}
-		} catch (IOException e) {			
+			
+		} catch (Exception e) {			
 			e.printStackTrace();
-		}
-				
+		}				
 		return axisDataHangtian;
 	}
 	
@@ -174,11 +180,17 @@ public class HangtianDNCDriver {
 		try {
 			alarmInfostring= receiveDataFromCNC();
 			Object obj=null;
-			//解析采集数据
-			if( (obj=parseAcquisitionDatastr(alarmInfostring) )instanceof AlarmDataHangtian){
-				alarmDataHangtian=(AlarmDataHangtian)obj;
+			if(alarmInfostring!=null && !"".equals(alarmInfostring)){
+				obj=parseAcquisitionDatastr(alarmInfostring);
+				//解析采集数据
+				if( obj instanceof AlarmDataHangtian){
+					alarmDataHangtian=(AlarmDataHangtian)obj;
+				}
+			}else{
+				Log.d(TAG,"读到的报警信息为空");
 			}
-		}catch (IOException e) {
+						
+		}catch (Exception e) {
 			e.printStackTrace();
 		}	
 		return alarmDataHangtian;
@@ -204,10 +216,15 @@ public class HangtianDNCDriver {
 		try {
 			systemInfostring=receiveDataFromCNC();
 			Object obj=null;
-			if((obj=parseAcquisitionDatastr(systemInfostring)) instanceof SystemDataHangtian){
-				systemDataHangtian=(SystemDataHangtian)obj;
-			}
-		} catch (IOException e) { 
+			if(systemInfostring!=null && !"".equals(systemInfostring)){
+				obj=parseAcquisitionDatastr(systemInfostring);
+				if(obj instanceof SystemDataHangtian){
+					systemDataHangtian=(SystemDataHangtian)obj;
+				}
+			}else{
+				Log.d(TAG,"读到的系统信息为空");
+			}			
+		} catch (Exception e) { 
 			e.printStackTrace();
 		}
 		
@@ -220,7 +237,7 @@ public class HangtianDNCDriver {
 	 * @param infostr  采集字符串数据
 	 * @return
 	 */
-	private Object parseAcquisitionDatastr(String infostr){
+	private Object parseAcquisitionDatastr(String infostr) throws Exception{
 		
 		BigInteger p2 = new BigInteger(infostr.substring(0, 2),16);
 		int p1 = p2.intValue(); //数据类型
@@ -346,15 +363,11 @@ public class HangtianDNCDriver {
 			systemDataHangtian.setRuntime(Dao_string(infostr.substring(256, 264)));
 			systemDataHangtian.setTimestamp(To_ASCII(infostr.substring(264, 312)));
 						
-			return systemDataHangtian;
-			
+			return systemDataHangtian;			
 		}
 		
 		return null;
 	}
-	
-	
-	
 	
 	/**
 	 * 发送数据采集命令
@@ -379,23 +392,36 @@ public class HangtianDNCDriver {
 	 * @throws IOException
 	 */
 	private String receiveDataFromCNC() throws IOException{
-		String serverString = null;
+		String serverString = "";
 		String hex = null;
 		byte[]buffer =new byte[1024*2];
 		
 		if(in==null) return null;
 		int size=0;
 		int currentIndex=0;
-		while( (size = in.read(buffer,currentIndex,2048) )>=0){
+		
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		while( in.available()>0){
+			size = in.read(buffer);
 			currentIndex+=size;
 		}
-			
+				
 		for(int i=0; i< currentIndex ;i++){
 			hex = Integer.toHexString(buffer[i] & 0xFF);
 			if(hex.length()==1){
 				hex = '0' + hex;
 			}
 			serverString += hex.toUpperCase();
+		}
+		
+		if(serverString != null){
+//			serverString= serverString.substring(4, serverString.length()).toUpperCase();
+			serverString=serverString.trim().toUpperCase();
 		}
 				
 		return serverString;
@@ -412,9 +438,9 @@ public class HangtianDNCDriver {
 		    code = Integer.parseInt(sa, 16);
 		    char result = (char) code;  
 		    ss  = ss+result;
-		}
-		ss=ss.substring(0, ss.indexOf(" ")); //add by wei 2018/4/24
-		return ss;
+		}		
+//		ss=ss.substring(0, ss.indexOf(" ")); //add by wei 2018/4/24
+		return ss.trim();
 	}
 	//倒置字符串
 	private int Dao_string(String s){

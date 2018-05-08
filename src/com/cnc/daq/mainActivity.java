@@ -141,7 +141,6 @@ public class MainActivity extends Activity {
 				
 				//设置定时开关任务
 //				Timer timer=new Timer(false);
-
 //				timer.scheduleAtFixedRate(new startTask(), 1000*60*5, 1000*60*55*1);//每隔55分钟执行一次任务
 //				timer.scheduleAtFixedRate(new stopTask(), 1000*60*2, 1000*60*55*1); //
 						
