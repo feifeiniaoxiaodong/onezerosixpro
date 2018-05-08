@@ -21,7 +21,6 @@ import android.util.Log;
 /**
  * 航天数控DNC接口驱动
  * @author wei
- *
  */
 @SuppressLint("DefaultLocale") public class HangtianDNCDriver {
 	private final String TAG="HANGTIANDNCDRIVER";
@@ -401,7 +400,8 @@ import android.util.Log;
 		int currentIndex=0;
 		
 		try {
-			Thread.sleep(200);
+			//延时一段时间，防止读不到数据
+			Thread.sleep(150);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -420,7 +420,6 @@ import android.util.Log;
 		}
 		
 		if(serverString != null){
-//			serverString= serverString.substring(4, serverString.length()).toUpperCase();
 			serverString=serverString.trim().toUpperCase();
 		}
 				
