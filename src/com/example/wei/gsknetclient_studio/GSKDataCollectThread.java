@@ -18,14 +18,13 @@ import com.cnc.gsk.domain.DataAxisInfo;
 import com.cnc.gsk.domain.DataBHSAMPLE_STATIC;
 import com.cnc.gsk.domain.DataVersion;
 import com.cnc.gsk.domain.Mcronum;
-import com.cnc.huazhong.dc.DataCollectInter;
+import com.cnc.huazhong.dc.CommonDataCollectThreadInterface;
 import com.cnc.huazhong.dc.HncTools;
-import com.cnc.mainservice.DelMsgServie;
+import com.cnc.mainservice.DelMsgService;
 import com.cnc.net.datasend.HandleMsgTypeMcro;
 import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.JsonUtil;
-import com.cnc.utils.LogLock;
-import com.cnc.utils.RegLock;
+
 import com.cnc.utils.TimeUtil;
 
 import android.annotation.SuppressLint;
@@ -39,11 +38,11 @@ import android.util.Log;
  * Created by wei on 2017/4/15.
  */
 
-public class GSKDataCollectThread implements Runnable ,DataCollectInter{
+public class GSKDataCollectThread implements Runnable ,CommonDataCollectThreadInterface{
   
     //线程循环执行标志，改为false时，线程退出循环，线程结束运行
     private volatile  boolean  threadflag=true;  
-    private static final String TAG="GSKDataCollect()... Thread";
+    private static final String TAG="GSKDataCollectThread";
 /*    static {
         System.loadLibrary("gsknetw-lib");
     }
@@ -72,14 +71,15 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
 		this(ip,5000);
 		this.threadlabel=threadlabel;
 	}
-	
+
     public GSKDataCollectThread(String ip){
     	this(ip,5000);
+    	
     }
     public GSKDataCollectThread(String ip,int	port){    	
     	this.machineIP=ip;
     	this.port=port;
-    	delMsgHandler=DelMsgServie.getHandlerService();
+    	delMsgHandler=DelMsgService.getHandlerService();
     	mainActivityHandler=MainActivity.getMainActivityHandler();
     	this.alarmFilterList=new  AlarmFilterList(delMsgHandler);
     }
@@ -149,7 +149,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     		DataBHSAMPLE_STATIC bhSample=getBeiHangInfo();//获取运行信息、报警信息、登录登出信息集合
     		
 //    		String tp = GSKNativeApi.GSKRM_GetCNCTypeName(clientnum);//数控系统型号，有待测试 ===>乱码
-    		final String tp = "25i";
+    		final String tp = "25i";//数控系统型号
     		
     		if(dataVersion!=null && bhSample!=null){
     			
@@ -159,19 +159,20 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     										tp,			//数控系统型号
     										versionJson, //版本信息
     										timeStr);
-    			
+    			DaqData.saveDataReg(dataReg);
     			/*synchronized(RegLock.class){
 					DaqData.getListDataReg().add(dataReg);
 				}*/
-    			DaqData.saveDataReg(dataReg);
+    			
+    			
     			DataLog dataLog=new DataLog(machine_SN,
     										bhSample.getOntime(), //累计开机时间
     										bhSample.getRuntime(), //累计加工时间
     										timeStr);
+    			DaqData.saveDataLog(dataLog);
     			/*synchronized(LogLock.class){
 					DaqData.getListDataLog().add(dataLog);
-				}*/
-    			DaqData.saveDataLog(dataLog);
+				}*/    			
     			boolGetMacInfo=true;
     			
     			UiDataNo uiDataNo=new UiDataNo("","",machine_SN , DaqData.getAndroidId());
@@ -245,7 +246,7 @@ public class GSKDataCollectThread implements Runnable ,DataCollectInter{
     }
 
     private DataVersion getVersionInfo(){
-         DataVersion dataver=null;    //版本信息
+        DataVersion dataver=null;    //版本信息
         byte[] tmpbytes=GSKNativeApi.GSKRM_GetVersionInfo(clientnum);
         if(tmpbytes!=null) {
             dataver=BytetoJavaUtil.batoJavaver(tmpbytes);         //处理字节流信息

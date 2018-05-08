@@ -9,5 +9,9 @@ public class BroadcastType {
 	 
 	 public final static String  SENDSPEED="sendspeed";//发送速度
 	 public final static String  SENDColor="sendcolor";//发送速度的字体颜色
+	 
+	 public final static String HANGTIAN_RUN="hangtianruninfo";
+	 public final static String HANGTAIN_ALARM="hangtianalarminfo";
+	 
 
 }

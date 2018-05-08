@@ -34,8 +34,6 @@ import com.cnc.domain.DataType;
 import com.cnc.domain.GeneralData;
 import com.cnc.net.service.Post;
 import com.cnc.utils.JsonUtil;
-import com.cnc.utils.LogLock;
-import com.cnc.utils.RegLock;
 import com.cnc.utils.TimeUtil;
 
 /**

@@ -1,7 +1,8 @@
 package com.cnc.gsk.domain;
 
 /**
- * guang shu 
+ * 广州数控
+ * 数据采集相关常量 
  * Created by wei on 2017/4/12.
  */
 public class Mcronum {

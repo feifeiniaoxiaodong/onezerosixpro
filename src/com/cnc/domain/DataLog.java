@@ -15,8 +15,7 @@ public class DataLog {
     public DataLog() {		
 	}
         
-	public DataLog(String id, long ontime, long runtime, String time) {
-		
+	public DataLog(String id, long ontime, long runtime, String time) {		
 		this.id = id;
 		this.ontime = ontime;
 		this.runtime = runtime;

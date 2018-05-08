@@ -7,7 +7,7 @@ import  android.util.Log;
  */
 
 /**
- * 广数版本信息结构�?
+ * 广数版本信息结构
  * @author wei
  *
  */
@@ -19,7 +19,7 @@ public class DataVersion {
     private String armVersion;//应用版本
     private String dspVersion;//插补版本
     private String FPGAVersion;//位控版本
-    private String plcfileName;//梯图文件�?
+    private String plcfileName;//梯图文件名
 
     private String hardVersion;    //硬件版本
     
@@ -124,18 +124,18 @@ public class DataVersion {
         this.hardWareNumber = hardWareNumber;
     }
 
-    //打印该类的信�?
+    //打印该类的信�?
     public void loginfor(){
 
         Log.i("JNITest" ,"系统版本:"+this.getSysVersion());
         Log.i("JNITest" ,"应用版本:"+this.getArmVersion());
         Log.i("JNITest" ,"插补版本:"+this.getDspVersion());
         Log.i("JNITest" ,"位控版本:"+this.getFPGAVersion());
-        Log.i("JNITest" ,"梯图文件�?:"+this.getPlcfileName());
+        Log.i("JNITest" ,"梯图文件�?:"+this.getPlcfileName());
 
         Log.i("JNITest","硬件版本:"+this.getHardVersion());       //保留
         //Log.i("JNITest","硬件序号:"+this.getHardWareNumber());   //保留,没有内容
-        Log.i("JNITest","软件序号�?"+this.getSoftWareNumber());  //保留
+        Log.i("JNITest","软件序号�?"+this.getSoftWareNumber());  //保留
     }
 
 }

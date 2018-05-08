@@ -1,6 +1,6 @@
 package com.cnc.daq;
 
-import com.cnc.mainservice.DelMsgServie;
+import com.cnc.mainservice.DelMsgService;
 import com.cnc.net.datasend.DataTransmitThread;
 
 import android.app.Activity;
@@ -33,7 +33,7 @@ public class SplashActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.splashactivity);
 		//开启服务
-		Intent intentservice=new Intent(SplashActivity.this ,DelMsgServie.class);
+		Intent intentservice=new Intent(SplashActivity.this ,DelMsgService.class);
 		startService(intentservice);
 		
 		//开机界面延时，之后开启主活动

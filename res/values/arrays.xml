@@ -38,5 +38,14 @@
           <item>Gsk1_5:192.168.188.128</item>
       </string-array>
       
-   
+      
+        <string-array name="hangtianip">
+          <item ></item>
+          <item>hangtian1:192.168.188.141</item>
+          <item>hangtian2:192.168.188.142</item>
+          <item>hangtian3:192.168.188.140</item>
+          <item>hangtian4:192.168.188.144</item>
+          <item>hangtian5:192.168.188.143</item>
+      </string-array>
+         
 </resources>

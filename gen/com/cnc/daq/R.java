@@ -11,6 +11,7 @@ public final class R {
     public static final class array {
         public static final int gaojingip=0x7f040002;
         public static final int gskip=0x7f040003;
+        public static final int hangtianip=0x7f040004;
         public static final int huazhongip=0x7f040001;
         public static final int week=0x7f040000;
     }
@@ -161,7 +162,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int tab05_unsel=0x7f02000b;
     }
     public static final class id {
-        public static final int action_settings=0x7f070020;
+        public static final int action_settings=0x7f070025;
         public static final int alarm=0x7f07000a;
         public static final int bottom=0x7f070002;
         public static final int bt2=0x7f070010;
@@ -175,6 +176,11 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int gsk3=0x7f070019;
         public static final int gsk4=0x7f07001a;
         public static final int gsk5=0x7f07001b;
+        public static final int hangtian1=0x7f07001c;
+        public static final int hangtian2=0x7f07001d;
+        public static final int hangtian3=0x7f07001e;
+        public static final int hangtian4=0x7f07001f;
+        public static final int hangtian5=0x7f070020;
         public static final int huazhong=0x7f070015;
         public static final int idandroid=0x7f070009;
         public static final int idcnc=0x7f070008;
@@ -186,14 +192,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int run=0x7f07000b;
         public static final int scrollview=0x7f070014;
         public static final int spinner=0x7f07000c;
-        public static final int tabView=0x7f07001c;
+        public static final int tabView=0x7f070021;
         public static final int tabview_fragment_container=0x7f070001;
         public static final int tabview_id=0x7f070000;
         public static final int textview=0x7f070013;
         public static final int top=0x7f070005;
-        public static final int txcachenum=0x7f07001d;
-        public static final int txsendno=0x7f07001e;
-        public static final int txspeed=0x7f07001f;
+        public static final int txcachenum=0x7f070022;
+        public static final int txsendno=0x7f070023;
+        public static final int txspeed=0x7f070024;
     }
     public static final class layout {
         public static final int cncinfoitem=0x7f030000;

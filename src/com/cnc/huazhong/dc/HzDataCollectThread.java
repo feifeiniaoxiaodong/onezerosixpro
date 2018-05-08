@@ -23,12 +23,12 @@ import com.cnc.domain.UiDataAlarmRun;
 import com.cnc.domain.UiDataNo;
 import com.cnc.huazhong.HncAPI;
 import com.cnc.huazhong.HncSystem;
-import com.cnc.mainservice.DelMsgServie;
+import com.cnc.mainservice.DelMsgService;
 import com.cnc.net.datasend.HandleMsgTypeMcro;
 import com.cnc.net.service.Intialize;
 import com.cnc.utils.AlarmFilterList;
-import com.cnc.utils.LogLock;
-import com.cnc.utils.RegLock;
+
+
 import com.cnc.utils.SaveRunTime;
 import com.cnc.utils.TimeUtil;
 /**
@@ -36,7 +36,7 @@ import com.cnc.utils.TimeUtil;
  * @author wei
  *
  */
-public class HzDataCollectThread implements Runnable,DataCollectInter{
+public class HzDataCollectThread implements Runnable,CommonDataCollectThreadInterface{
 	
 	private final String TAG="DataCollectThread...";
 	 //线程循环执行标志，改为false时，线程退出循环，线程结束运行
@@ -71,7 +71,7 @@ public class HzDataCollectThread implements Runnable,DataCollectInter{
 	}
 	
 	public HzDataCollectThread(String ip,int port){
-		this.delMsgHandler=DelMsgServie.getHandlerService();
+		this.delMsgHandler=DelMsgService.getHandlerService();
 		this.mainHander=MainActivity.getMainActivityHandler();
 		machineIP=ip;
 		machinePort=port;

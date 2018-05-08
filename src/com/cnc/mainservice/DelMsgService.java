@@ -25,7 +25,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-public class DelMsgServie extends Service {
+@SuppressLint("HandlerLeak") public class DelMsgService extends Service {
 	
 	static final String TAG="DelMsgServie";
 	private static Handler handlerService =null;
@@ -36,7 +36,7 @@ public class DelMsgServie extends Service {
 	public void onCreate() {
 		//获取androidID
 		String androidId = "" + android.provider.Settings.Secure.getString(getContentResolver(),
-				android.provider.Settings.Secure.ANDROID_ID);						
+			   android.provider.Settings.Secure.ANDROID_ID);						
 		DaqData.setAndroidId(androidId);
 		Log.d(TAG, "androidId::" + androidId);	
 		
@@ -75,7 +75,7 @@ public class DelMsgServie extends Service {
 	//服务重启函数
 	private void reStartService(){
 		Context context= getApplicationContext();
-		Intent intent=new Intent(context , DelMsgServie.class);
+		Intent intent=new Intent(context , DelMsgService.class);
 		context.startService(intent);
 	}
 	

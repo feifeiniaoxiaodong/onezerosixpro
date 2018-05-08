@@ -17,11 +17,12 @@ public class ShowMsg {
 	{
 		Log.i(Tag, String.valueOf(msg));
 	}
-	//吐司通知
+	//Toast通知
 	public static void showToastMsg(Activity act,String s)
 	{
 		Toast.makeText(act.getApplicationContext(), s, Toast.LENGTH_SHORT).show();
 	}
+	
 	/**
 	 * 在activity上面显示字符串
 	 * @param act
