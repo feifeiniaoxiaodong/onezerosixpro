@@ -88,9 +88,7 @@
          
          <include android:id="@+id/hangtian5"
                	   layout="@layout/cncinfoitem"/>
-                           
-
-          
+                                   
       </LinearLayout>
   
     </ScrollView>
