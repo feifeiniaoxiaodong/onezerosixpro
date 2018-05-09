@@ -10,6 +10,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+
+import com.cnc.encryption.aes.AESEncryptApi;
+
 import android.util.Log;
 
 /**
@@ -30,8 +33,10 @@ public class Post {
 		String res=null;
 		String upData = "data=" + data;
 		byte[] entity = null;
+		byte[] encryptedEntity=null;
 		try {
-			entity = upData.toString().getBytes(encoding); //将string转化为字节数组//生成实体数据		
+			entity = upData.toString().getBytes(encoding); //将string转化为字节数组//生成实体数据
+//			encryptedEntity=AESEncryptApi.encryptionFuntion(entity);//数据加密
 			res = sendPOSTRequest(path, entity);
 		} catch (Exception e) {		
 			e.printStackTrace();
