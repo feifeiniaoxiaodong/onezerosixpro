@@ -126,9 +126,9 @@ import android.util.Log;
 //		SaveRunTime.saveOnTime(machineIP+"runtime",  starttime/1000);
 			
 		//退出线程时断开连接，释放资源
-		if(dnc.main.getConnnectState()){
-			dncmain.disconnectToNC();		
-		}
+//		if(dnc.main.getConnnectState()){
+//			dncmain.disconnectToNC();		
+//		}
 				
 	} //end run()
 		

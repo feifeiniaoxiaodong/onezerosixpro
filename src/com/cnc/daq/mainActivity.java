@@ -135,12 +135,14 @@ public class MainActivity extends Activity {
 					Log.d(TAG,"开启了数据发送线程");
 				}
 				
-				runOnUiThread(new Runnable() {				
+				/*runOnUiThread(new Runnable() {				
 					@Override
 					public void run() {
 						startDefaultThread(); //开启上次关机时开启的线程						
 					}
-				});
+				});*/
+				
+				startDefaultThread(); //开启上次关机时开启的线程
 				
 				//设置定时开关任务
 //				Timer timer=new Timer(false);
@@ -217,14 +219,14 @@ public class MainActivity extends Activity {
 	private  void startDefaultThread(){
 							
 		//华中线程
-		String preipHz = pref.getString("huazhong", null);
+	/*	String preipHz = pref.getString("huazhong", null);
 		if(preipHz!=null && !preipHz.trim().equals("") ){
 			//开启线程
 			startHzThread(preipHz);
-		}
+		}*/
 			
 		//开启沈阳高精数据采集线程
-		for(int i=0; i<gaojingIpArray.length ;i++){
+/*		for(int i=0; i<gaojingIpArray.length ;i++){
 			String str=gaojingIpArray[i];
 			String no=null , preNoip=null;
 			if(str!=null && !"".equals(str.trim())){
@@ -263,7 +265,109 @@ public class MainActivity extends Activity {
 					startHangtianThread(preNoip);//开启航天数控数据采集线程				
 				}
 			}
+		}*/
+		
+		/******************/
+		//华中线程
+		final String preipHz = pref.getString("huazhong", null);
+		if(preipHz!=null && !preipHz.trim().equals("") ){
+			//开启线程
+			runOnUiThread(new Runnable() {				
+				@Override
+				public void run() {
+					startHzThread(preipHz); //开启上次关机时开启的线程						
+				}
+			});			
 		}
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		//开启沈阳高精数据采集线程
+		for(int i=0; i<gaojingIpArray.length ;i++){
+			String str=gaojingIpArray[i];
+			String no=null ;
+			if(str!=null && !"".equals(str.trim())){
+				no=str.substring(0, str.indexOf(':'));
+				final String preNoip=pref.getString(no, null);
+				
+				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
+					
+					runOnUiThread(new Runnable() {				
+						@Override
+						public void run() {
+							startGjThread(preNoip);//开启沈阳高精数控数据采集线程						
+						}
+					});	
+					
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+				
+		//开启广州数控数据采集线程
+		for(int i=0;i<gskIpArray.length;i++){
+			String str= gskIpArray[i];
+			String no=null ;
+			if(str!=null && !"".equals(str.trim())){
+				no=str.substring(0, str.indexOf(':'));
+				final String preNoip=pref.getString(no, null);
+				
+				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
+									
+					runOnUiThread(new Runnable() {				
+						@Override
+						public void run() {
+							startGskThread(preNoip);//开启广数数控数据采集线程					
+						}
+					});	
+					
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}	
+		//开启航天数控数据采集线程
+		for(int i=0;i<hangtianIpArray.length;i++){
+			String str= hangtianIpArray[i];
+			String no=null ;
+			if(str!=null && !"".equals(str.trim())){
+				no=str.substring(0, str.indexOf(':'));
+				final String preNoip=pref.getString(no, null);
+				
+				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
+					
+					runOnUiThread(new Runnable() {				
+						@Override
+						public void run() {
+							startHangtianThread(preNoip);//开启航天数控数据采集线程						
+						}
+					});	
+					
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+		
+		
+		
+		
+		
 	}
 
 	public static Handler getMainActivityHandler() {
