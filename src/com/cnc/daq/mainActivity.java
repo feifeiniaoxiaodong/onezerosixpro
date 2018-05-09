@@ -73,14 +73,14 @@ public class MainActivity extends Activity {
 	
 //	Map<String, Runnable> threadmap=new HashMap<>();
 	static DataTransmitThread dataTransmitThread=null; //数据发送线程
-	static String  currentSpinSelItem_Hz=null,
-			currentSpinSelItem_Gj=null;
+	static String  currentSpinSelItem_Hz=null;
+//			currentSpinSelItem_Gj=null;
 	
 	static String current_HZ_NoIP = null;		//Huazhong
 	static HzDataCollectThread currentHZDcObj=null;
 	
-	static String current_Gj_NoIP= null;
-	static GJDataCollectThread currentGjDcObj=null;//Gaojing
+//	static String current_Gj_NoIP= null;
+//	static GJDataCollectThread currentGjDcObj=null;//Gaojing
 	
 	String [] gskIpArray=null; 		//gsk ip list
 	String [] hangtianIpArray=null; //hangtian ip list
@@ -232,7 +232,7 @@ public class MainActivity extends Activity {
 				preNoip=pref.getString(no, null);
 				
 				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
-					startGskThread(preNoip);//开启沈阳高精数控数据采集线程				
+					startGjThread(preNoip);//开启沈阳高精数控数据采集线程				
 				}
 			}
 		}
@@ -697,18 +697,19 @@ public class MainActivity extends Activity {
 				}
 							
 				GJDataCollectThread gjDataCollectThread=new GJDataCollectThread(ip,threadlabel);	
-				exec.execute(currentGjDcObj);//开启线程	
+				exec.execute(gjDataCollectThread);//开启线程	
 				mapThreadObj.put(no, gjDataCollectThread);
 				
 				viewmapgGsk.get(no).getBtstart().setEnabled(false);
 				viewmapgGsk.get(no).getBtstop().setEnabled(true);
+				
 				Log.d(TAG,"开启了高精数控"+spinItem_NOIP+"采集线程");				
 			 }
+		
+			editor =pref.edit();
+			editor.putString(no, spinItem_NOIP); //持久化保存
+			editor.apply();
 		}
-
-		editor =pref.edit();
-		editor.putString(no, spinItem_NOIP); //持久化保存
-		editor.apply();
 	}
 	
 	//stop gaojing thread

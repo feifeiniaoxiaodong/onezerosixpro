@@ -96,7 +96,7 @@ import android.util.Log;
 					Log.d(TAG,"找不到nml配置文件");
 					 //连接失败，一分钟后再连接
 					try{
-						Thread.sleep(1000*60);
+						Thread.sleep(1000*30);
 					}catch(Exception e){
 						e.printStackTrace();
 					}
