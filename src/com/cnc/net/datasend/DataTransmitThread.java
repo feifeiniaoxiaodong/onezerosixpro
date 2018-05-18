@@ -84,8 +84,8 @@ public class DataTransmitThread implements Runnable{
 		String res = null;
 //		long  countRun=0; //未发送的运行信息的条数
 	
-//		String sPath=getPath(HandleMsgTypeMcro.SERVICES_ALIYUN); //初始化远端服务器地址
-		String sPath=getPath(HandleMsgTypeMcro.SERVICES_YANG); //初始化远端服务器地址
+		String sPath=getPath(HandleMsgTypeMcro.SERVICES_ALIYUN); //初始化远端服务器地址
+//		String sPath=getPath(HandleMsgTypeMcro.SERVICES_YANG); //初始化远端服务器地址
 		if(sPath!=null){
 			path=sPath;
 		}		
@@ -282,7 +282,7 @@ public class DataTransmitThread implements Runnable{
 	 */
 	private void sendDelayTime(DataDelayTime dt){
 		//发送延时时间对象到服务器
-		String   aliyunpath="http://47.94.200.41:8080/DataPush/rec";  //远端服务器地址
+		String   aliyunpath="http://59.110.239.43:9080/DataPush/rec";  //远端服务器地址
 		if(dt!=null && dt.getNumofmsg()>0 ){
 			GeneralData generalData = new GeneralData();		
 			generalData.setDid(DataType.DataDelay);  //数据类型
