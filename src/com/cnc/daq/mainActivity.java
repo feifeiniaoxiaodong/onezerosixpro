@@ -362,12 +362,7 @@ public class MainActivity extends Activity {
 				}
 			}
 		}
-		
-		
-		
-		
-		
-		
+	
 	}
 
 	public static Handler getMainActivityHandler() {
@@ -1119,7 +1114,7 @@ public class MainActivity extends Activity {
 			String time=TimeUtil.getSimpleTime();
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
 //			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
-			if( hour>=18 ){  //6点下线
+			if( hour>=22 ){  //6点下线
 				
 				runOnUiThread(new Runnable() {					
 					@Override
@@ -1128,11 +1123,11 @@ public class MainActivity extends Activity {
 					}
 				});
 								
-		/*		try {
+				try {
 					Thread.sleep(1000*30); //3分钟后再停止数据发送线程
 				} catch (InterruptedException e) {
 					e.printStackTrace();
-				}*/
+				}
 				
 				//关闭数据发送线程，停止数据发送
 				if(dataTransmitThread !=null && dataTransmitThread.getIsCountinueRun()){

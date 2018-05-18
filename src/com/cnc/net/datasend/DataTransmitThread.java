@@ -182,8 +182,7 @@ public class DataTransmitThread implements Runnable{
 				Log.d(TAG, "发送报警信息失败！");
 //				Toast.makeText(MyApplication.getContext(),"发送报警信息失败!", Toast.LENGTH_SHORT).show();
 			}			
-			
-						
+									
 		}	
 	}
 	
@@ -278,10 +277,12 @@ public class DataTransmitThread implements Runnable{
 		
 	/**
 	 * 发送延时时间
+	 * 发送到阿里云服务器
 	 * @param dt
 	 */
 	private void sendDelayTime(DataDelayTime dt){
 		//发送延时时间对象到服务器
+		String   aliyunpath="http://47.94.200.41:8080/DataPush/rec";  //远端服务器地址
 		if(dt!=null && dt.getNumofmsg()>0 ){
 			GeneralData generalData = new GeneralData();		
 			generalData.setDid(DataType.DataDelay);  //数据类型
@@ -290,7 +291,7 @@ public class DataTransmitThread implements Runnable{
 			
 			String res = null;
 //			try {
-			res = Post.sendData(path,JsonUtil.object2Json(generalData));
+			res = Post.sendData(aliyunpath,JsonUtil.object2Json(generalData));
 //			} catch (SocketTimeoutException e) {				
 //				e.printStackTrace();
 //			}//发送数据	
@@ -354,7 +355,7 @@ public class DataTransmitThread implements Runnable{
 				return false;
 			}
 		}			
-		Log.d(TAG, "读回的运行信息条数与期望不符！！！");
+		Log.d(TAG, "SQLite数据库读回的运行信息条数与期望不符！！！");
 		return false;		
 	}
 	
