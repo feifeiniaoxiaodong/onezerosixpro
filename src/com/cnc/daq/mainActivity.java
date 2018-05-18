@@ -119,6 +119,14 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {		
 		super.onDestroy();	
 		localBroadcastManager.unregisterReceiver(localReceiver);//取消注册广播
+		offLineAllDatacollectThread();//下线所有数据采集线程
+		
+		//关闭数据发送线程，停止数据发送
+		if(dataTransmitThread !=null && dataTransmitThread.getIsCountinueRun()){
+			dataTransmitThread.setIsCountinueRun(false);
+			dataTransmitThread=null;
+		}
+		
 	}
 	
 	

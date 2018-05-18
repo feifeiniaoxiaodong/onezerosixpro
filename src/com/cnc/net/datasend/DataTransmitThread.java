@@ -84,8 +84,8 @@ public class DataTransmitThread implements Runnable{
 		String res = null;
 //		long  countRun=0; //未发送的运行信息的条数
 	
-		String sPath=getPath(HandleMsgTypeMcro.SERVICES_ALIYUN); //初始化远端服务器地址
-//		String sPath=getPath(HandleMsgTypeMcro.SERVICES_YANG); //初始化远端服务器地址
+//		String sPath=getPath(HandleMsgTypeMcro.SERVICES_ALIYUN); //初始化远端服务器地址
+		String sPath=getPath(HandleMsgTypeMcro.SERVICES_YANG); //初始化远端服务器地址
 		if(sPath!=null){
 			path=sPath;
 		}		
