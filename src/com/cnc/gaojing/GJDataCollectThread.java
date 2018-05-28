@@ -85,18 +85,18 @@ import android.util.Log;
 		
 		while(threadflag){
 			
-			if(!dnc.main.getConnnectState()){ //检测连接状态
+			if(!dncmain.getConnnectState()){ //检测连接状态
 				//重新连接				
 				dncmain.connectToNC(machineIP);  //连接到机床
 			
-				if(dnc.main.getConnnectState()  && dncmain.status_nml!=null){ 
+				if(dncmain.getConnnectState()  && dncmain.status_nml!=null){ 
 					sendMsg2Main("高精连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS); //					
 				}else{
 					sendMsg2Main("高精连接机床失败", HandleMsgTypeMcro.MSG_LFAILURE); //
 					Log.d(TAG,"找不到nml配置文件");
 					 //连接失败，一分钟后再连接
 					try{
-						Thread.sleep(1000*30);
+						Thread.sleep(1000*20);
 					}catch(Exception e){
 						e.printStackTrace();
 					}

@@ -100,7 +100,7 @@ public class HzDataCollectThread implements Runnable,CommonDataCollectThreadInte
 					}else{
 						sendMsg2Main("华中连接机床失败", HandleMsgTypeMcro.MSG_IFAILURE);
 						try {							
-							Thread.sleep(1000*30); //连接机床失败过一分钟再连							
+							Thread.sleep(1000*20); //连接机床失败过一分钟再连							
 						} catch (InterruptedException e) {					
 							e.printStackTrace();
 					    } 
