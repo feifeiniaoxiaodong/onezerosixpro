@@ -7,9 +7,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import bean.ALARM_INFO;
-import bean.AXIS_INFO;
-import bean.SYSTEM_INFO;
 
 import com.cnc.broadcast.BroadcastAction;
 import com.cnc.broadcast.BroadcastType;
@@ -32,7 +29,6 @@ import com.cnc.utils.AlarmFilterList;
 import com.cnc.utils.JsonUtil;
 import com.cnc.utils.TimeUtil;
 
-import function.Start;
 
 /**
  * 新航天数控数据采集线程
