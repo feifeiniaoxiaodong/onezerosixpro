@@ -10,6 +10,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+
+import com.cnc.encryption.aes.AESEncryptApi;
+
 import android.util.Log;
 
 /**
@@ -30,8 +33,10 @@ public class Post {
 		String res=null;
 		String upData = "data=" + data;
 		byte[] entity = null;
+		byte[] encryptedEntity=null;
 		try {
-			entity = upData.toString().getBytes(encoding); //将string转化为字节数组//生成实体数据		
+			entity = upData.toString().getBytes(encoding); //将string转化为字节数组//生成实体数据
+//			encryptedEntity=AESEncryptApi.encryptionFuntion(entity);//数据加密
 			res = sendPOSTRequest(path, entity);
 		} catch (Exception e) {		
 			e.printStackTrace();
@@ -54,8 +59,8 @@ public class Post {
 		InputStream in=null;
 		try{
 			conn = (HttpURLConnection) new URL(path).openConnection();    //建立http连接
-			conn.setConnectTimeout(10000); //超时时间10s
-			conn.setReadTimeout(50000);   //设置数据读取超时时间为50s 
+			conn.setConnectTimeout(10*1000); //超时时间10s
+			conn.setReadTimeout(20*1000);   //设置数据读取超时时间为50s 
 			conn.setRequestMethod("POST"); //传输方式post
 			conn.setDoOutput(true);		//允许对外输出数据，即http传输中的实际内容
 			conn.setDoInput(true);   //允许读取数据		
@@ -80,8 +85,7 @@ public class Post {
 			if(outStream!=null){
 				try {
 					outStream.close();
-				} catch (IOException e) {
-					
+				} catch (IOException e) {					
 					e.printStackTrace();
 				}
 			}
@@ -91,16 +95,16 @@ public class Post {
 				} catch (IOException e) {					
 					e.printStackTrace();
 				}
-			}	
+			}
+		/*	if(conn!=null){
+				conn.disconnect();
+			}*/
 		}
 		
 		return rtnStr;  //发送失败 ，返回空
 	}
 	
-	
-	
-	
-	
+		
 	/**
 	 * 读取流中的数据
 	 * @param inStream

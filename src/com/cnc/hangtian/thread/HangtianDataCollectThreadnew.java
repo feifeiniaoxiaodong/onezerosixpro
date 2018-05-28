@@ -94,7 +94,7 @@ public class HangtianDataCollectThreadnew implements Runnable,
 		while(threadRunningFlag){
 			if( !hangtianDNCDriver.connectionState()){
 				try {
-					Thread.sleep(5000);//5秒以后再重连
+					Thread.sleep(20*1000);//5秒以后再重连
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

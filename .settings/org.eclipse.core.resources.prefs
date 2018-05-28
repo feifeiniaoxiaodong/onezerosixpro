@@ -1,4 +1,8 @@
 eclipse.preferences.version=1
+encoding//src/com/cnc/encryption/aes/ByteDealUtil.java=GBK
+encoding//src/com/cnc/encryption/aes/EncryKey.java=GBK
+encoding//src/com/cnc/encryption/aes/KeyEncryUtil.java=UTF-8
+encoding//src/com/cnc/encryption/aes/S_box.java=GBK
 encoding//src/com/cnc/gaojing/domain/DataVersion.java=UTF-8
 encoding//src/com/cnc/gsk/domain/DataBHSAMPLE_STATIC.java=UTF-8
 encoding//src/com/cnc/gsk/domain/DataVersion.java=UTF-8

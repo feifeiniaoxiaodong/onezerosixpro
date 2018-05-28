@@ -112,7 +112,7 @@ public class GSKDataCollectThread implements Runnable ,CommonDataCollectThreadIn
                 if(res<0){
                     Log.d(TAG, "连接到机床失败");
                     try {
-						Thread.sleep(1000*60); //连接失败，过一分钟再连
+						Thread.sleep(1000*20); //连接失败，过一分钟再连
 					} catch (InterruptedException e) {						
 						e.printStackTrace();
 					}

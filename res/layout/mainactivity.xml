@@ -25,69 +25,54 @@
                android:layout_height="wrap_content"
                android:layout_marginTop="50dp"
                android:layout_marginLeft="10dp"
-               android:text="华中数控"
+               android:text="@string/huazhongname"
                android:background="@color/gray"
-               android:textSize="20sp"/>
-           
-           <include  android:id="@+id/huazhong"
-                   layout="@layout/cncinfoitem" />
+               android:textSize="20sp"/>          
+           <include  android:id="@+id/huazhong" layout="@layout/cncinfoitem" />
            
            <TextView 
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
                 android:layout_marginTop="100dp"
                android:layout_marginLeft="10dp"
-               android:text="沈阳高精数控"
+               android:text="@string/gaojingname"
                android:background="@color/gray"
-               android:textSize="20sp"/>
-           
-          <include  android:id="@+id/gaojing"
-                   layout="@layout/cncinfoitem" />
-          
+               android:textSize="20sp"/>          
+          <include  android:id="@+id/gaojing1"  layout="@layout/cncinfoitem" />
+          <include  android:id="@+id/gaojing2"  layout="@layout/cncinfoitem" />
+          <include  android:id="@+id/gaojing3"  layout="@layout/cncinfoitem" />
+          <include  android:id="@+id/gaojing4"  layout="@layout/cncinfoitem" />
+          <include  android:id="@+id/gaojing5"  layout="@layout/cncinfoitem" />
+     
           <TextView 
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
                  android:layout_marginTop="100dp"
                android:layout_marginLeft="10dp"
-               android:text="广州数控"
+               android:text="@string/gskname"
                android:background="@color/gray"
-               android:textSize="20sp"/>
-               
-          <include  android:id="@+id/gsk1"
-                   layout="@layout/cncinfoitem" />
-          <include  android:id="@+id/gsk2"
-                   layout="@layout/cncinfoitem" />
-          <include  android:id="@+id/gsk3"
-                   layout="@layout/cncinfoitem" />
-          <include  android:id="@+id/gsk4"
-                   layout="@layout/cncinfoitem" />
-          <include  android:id="@+id/gsk5"
-                   layout="@layout/cncinfoitem" />
        
+               android:textSize="20sp"/>              
+          <include  android:id="@+id/gsk1" layout="@layout/cncinfoitem" />
+          <include  android:id="@+id/gsk2" layout="@layout/cncinfoitem" />
+          <include  android:id="@+id/gsk3" layout="@layout/cncinfoitem" />
+          <include  android:id="@+id/gsk4" layout="@layout/cncinfoitem" />
+          <include  android:id="@+id/gsk5" layout="@layout/cncinfoitem" />
           
          <TextView 
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
                  android:layout_marginTop="100dp"
                android:layout_marginLeft="10dp"
-               android:text="航天数控"
+               android:text="@string/hangtianname"
                android:background="@color/gray"
-               android:textSize="20sp"/>
          
-         <include android:id="@+id/hangtian1"
-               	   layout="@layout/cncinfoitem"/>
-         
-         <include android:id="@+id/hangtian2"
-               	   layout="@layout/cncinfoitem"/>
-         
-         <include android:id="@+id/hangtian3"
-               	   layout="@layout/cncinfoitem"/>
-         
-         <include android:id="@+id/hangtian4"
-               	   layout="@layout/cncinfoitem"/>
-         
-         <include android:id="@+id/hangtian5"
-               	   layout="@layout/cncinfoitem"/>
+               android:textSize="20sp"/>         
+         <include android:id="@+id/hangtian1" layout="@layout/cncinfoitem"/>        
+         <include android:id="@+id/hangtian2" layout="@layout/cncinfoitem"/>         
+         <include android:id="@+id/hangtian3" layout="@layout/cncinfoitem"/>        
+         <include android:id="@+id/hangtian4" layout="@layout/cncinfoitem"/>        
+         <include android:id="@+id/hangtian5" layout="@layout/cncinfoitem"/>
                                    
       </LinearLayout>
   

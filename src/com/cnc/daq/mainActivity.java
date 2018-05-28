@@ -20,6 +20,7 @@ import com.cnc.domain.UiDataNo;
 import com.cnc.gaojing.GJDataCollectThread;
 //import com.cnc.hangtian.thread.HangTianDataCollectThread;
 import com.cnc.hangtian.thread.HangtianDataCollectThreadnew;
+import com.cnc.huazhong.dc.CommonDataCollectThreadInterface;
 import com.cnc.huazhong.dc.HzDataCollectThread;
 import com.cnc.net.datasend.DataTransmitThread;
 import com.cnc.net.datasend.HandleMsgTypeMcro;
@@ -65,30 +66,33 @@ public class MainActivity extends Activity {
 	
 	static Map<String, ItemViewHolder>  viewmapgGsk=new HashMap<>(); //广数和航天公用此map
 	
-	static ItemViewHolder itemHuazhong ,
-					itemGaojing;
+	static ItemViewHolder itemHuazhong ;
+//					itemGaojing;
 	
 	static TextView  cachenum  ,sendnum  ,speed ;
 	
 //	Map<String, Runnable> threadmap=new HashMap<>();
 	static DataTransmitThread dataTransmitThread=null; //数据发送线程
-	static String  currentSpinSelItem_Hz=null,
-			currentSpinSelItem_Gj=null;
+	static String  currentSpinSelItem_Hz=null;
+//			currentSpinSelItem_Gj=null;
 	
 	static String current_HZ_NoIP = null;		//Huazhong
 	static HzDataCollectThread currentHZDcObj=null;
 	
-	static String current_Gj_NoIP= null;
-	static GJDataCollectThread currentGjDcObj=null;//Gaojing
+//	static String current_Gj_NoIP= null;
+//	static GJDataCollectThread currentGjDcObj=null;//Gaojing
 	
-	String [] gskIpArray=null; //gsk ip list
+	String [] gskIpArray=null; 		//gsk ip list
 	String [] hangtianIpArray=null; //hangtian ip list
+	String [] gaojingIpArray=null;  //gaojing  ip list
 	
 	static Map<String ,GSKDataCollectThread>  mapgskThreadobj=new HashMap<>();
 	static Map<String ,HangtianDataCollectThreadnew> mapHangtianThreadObj=new HashMap<>();
+	static Map<String, CommonDataCollectThreadInterface> mapThreadObj=new HashMap<>();
 	
 	LocalBroadcastManager localBroadcastManager =null; //本地广播
 	LocalReceiver localReceiver=null;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		
@@ -96,10 +100,10 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.mainactivity);
 		mainActivityHandler=new mainHandler();
 		pref= PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-		exec=Executors.newCachedThreadPool();//线程池
-		gskIpArray =getResources().getStringArray(R.array.gskip);   //广数ip地址
+		exec=Executors.newCachedThreadPool();							  //线程池
+		gskIpArray =getResources().getStringArray(R.array.gskip);   	  //广州数控ip地址
 		hangtianIpArray=getResources().getStringArray(R.array.hangtianip);//航天数控IP地址
-		
+		gaojingIpArray=getResources().getStringArray(R.array.gaojingip); //沈阳高精IP地址
 		initViewMap();
 		//注册本地广播
 		localBroadcastManager=LocalBroadcastManager.getInstance(this);
@@ -112,10 +116,17 @@ public class MainActivity extends Activity {
 	}
 	
 	@Override
-	protected void onDestroy() {
-		
+	protected void onDestroy() {		
 		super.onDestroy();	
 		localBroadcastManager.unregisterReceiver(localReceiver);//取消注册广播
+		offLineAllDatacollectThread();//下线所有数据采集线程
+		
+		//关闭数据发送线程，停止数据发送
+		if(dataTransmitThread !=null && dataTransmitThread.getIsCountinueRun()){
+			dataTransmitThread.setIsCountinueRun(false);
+			dataTransmitThread=null;
+		}
+		
 	}
 	
 	
@@ -132,12 +143,14 @@ public class MainActivity extends Activity {
 					Log.d(TAG,"开启了数据发送线程");
 				}
 				
-				runOnUiThread(new Runnable() {				
+				/*runOnUiThread(new Runnable() {				
 					@Override
 					public void run() {
 						startDefaultThread(); //开启上次关机时开启的线程						
 					}
-				});
+				});*/
+				
+				startDefaultThread(); //开启上次关机时开启的线程
 				
 				//设置定时开关任务
 //				Timer timer=new Timer(false);
@@ -170,13 +183,21 @@ public class MainActivity extends Activity {
 				break;	
 			case HandleMsgTypeMcro.GAOJING_UINO:         //Gaojing cncid and android id
 				UiDataNo gjdatano=(UiDataNo)msg.obj;
-				itemGaojing.getIdcnc().setText(gjdatano.getIdcnc());
-				itemGaojing.getIdandroid().setText(gjdatano.getIdandroid());
+				strlabel=gjdatano.getThreadlabel();
+				if(strlabel!=null){
+					viewmapgGsk.get(strlabel).getIdcnc().setText(gjdatano.getIdcnc());
+					viewmapgGsk.get(strlabel).getIdandroid().setText(gjdatano.getIdandroid());
+				}
+
 				break;
 			case HandleMsgTypeMcro.GAOJING_UIALARM:      //Gaojing running and alarm information
 				UiDataAlarmRun gjUiDataAlarmRun=(UiDataAlarmRun)msg.obj;
-				itemGaojing.getAlarm().setText(gjUiDataAlarmRun.getAlarminfo());
-				itemGaojing.getRuninfo().setText(gjUiDataAlarmRun.getRuninfo());
+				strlabel= gjUiDataAlarmRun.getThreadlabel();
+				if(strlabel!=null){
+					viewmapgGsk.get(strlabel).getAlarm().setText(gjUiDataAlarmRun.getAlarminfo());
+					viewmapgGsk.get(strlabel).getRuninfo().setText(gjUiDataAlarmRun.getRuninfo());
+				}
+				
 				break;
 			case HandleMsgTypeMcro.GSK_UINO: 			//gsk
 				UiDataNo gskdatano=(UiDataNo)msg.obj;
@@ -206,17 +227,27 @@ public class MainActivity extends Activity {
 	private  void startDefaultThread(){
 							
 		//华中线程
-		String preipHz = pref.getString("huazhong", null);
+	/*	String preipHz = pref.getString("huazhong", null);
 		if(preipHz!=null && !preipHz.trim().equals("") ){
 			//开启线程
 			startHzThread(preipHz);
-		}
+		}*/
 			
 		//开启沈阳高精数据采集线程
-		String preipGj=pref.getString("gaojing", null);
-		if(preipGj!=null && !preipGj.equals("") ){
-			startGjThread(preipGj);
+/*		for(int i=0; i<gaojingIpArray.length ;i++){
+			String str=gaojingIpArray[i];
+			String no=null , preNoip=null;
+			if(str!=null && !"".equals(str.trim())){
+				no=str.substring(0, str.indexOf(':'));
+				preNoip=pref.getString(no, null);
+				
+				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
+					startGjThread(preNoip);//开启沈阳高精数控数据采集线程				
+				}
+			}
 		}
+		
+		
 		//开启广州数控数据采集线程
 		for(int i=0;i<gskIpArray.length;i++){
 			String str= gskIpArray[i];
@@ -226,7 +257,7 @@ public class MainActivity extends Activity {
 				preNoip=pref.getString(no, null);
 				
 				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
-					startGskThread(preNoip);//开启广数数据采集线程				
+					startGskThread(preNoip);//开启广数数控数据采集线程				
 				}
 			}
 		}	
@@ -239,17 +270,113 @@ public class MainActivity extends Activity {
 				preNoip=pref.getString(no, null);
 				
 				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
-					startHangtianThread(preNoip);//开启航天数据采集线程				
+					startHangtianThread(preNoip);//开启航天数控数据采集线程				
+				}
+			}
+		}*/
+		
+		/******************/
+		//华中线程
+		final String preipHz = pref.getString("huazhong", null);
+		if(preipHz!=null && !preipHz.trim().equals("") ){
+			//开启线程
+			runOnUiThread(new Runnable() {				
+				@Override
+				public void run() {
+					startHzThread(preipHz); //开启上次关机时开启的线程						
+				}
+			});			
+		}
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		//开启沈阳高精数据采集线程
+		for(int i=0; i<gaojingIpArray.length ;i++){
+			String str=gaojingIpArray[i];
+			String no=null ;
+			if(str!=null && !"".equals(str.trim())){
+				no=str.substring(0, str.indexOf(':'));
+				final String preNoip=pref.getString(no, null);
+				
+				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
+					
+					runOnUiThread(new Runnable() {				
+						@Override
+						public void run() {
+							startGjThread(preNoip);//开启沈阳高精数控数据采集线程						
+						}
+					});	
+					
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
+				
+		//开启广州数控数据采集线程
+		for(int i=0;i<gskIpArray.length;i++){
+			String str= gskIpArray[i];
+			String no=null ;
+			if(str!=null && !"".equals(str.trim())){
+				no=str.substring(0, str.indexOf(':'));
+				final String preNoip=pref.getString(no, null);
+				
+				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
+									
+					runOnUiThread(new Runnable() {				
+						@Override
+						public void run() {
+							startGskThread(preNoip);//开启广数数控数据采集线程					
+						}
+					});	
+					
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}	
+		//开启航天数控数据采集线程
+		for(int i=0;i<hangtianIpArray.length;i++){
+			String str= hangtianIpArray[i];
+			String no=null ;
+			if(str!=null && !"".equals(str.trim())){
+				no=str.substring(0, str.indexOf(':'));
+				final String preNoip=pref.getString(no, null);
+				
+				if(preNoip!=null ){ //开启该线程时应保证该线程还未开启
+					
+					runOnUiThread(new Runnable() {				
+						@Override
+						public void run() {
+							startHangtianThread(preNoip);//开启航天数控数据采集线程						
+						}
+					});	
+					
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	
 	}
 
 	public static Handler getMainActivityHandler() {
 		return mainActivityHandler;
 	}
-		
-	
+			
 	//init all view  components id
 	private void initViewMap(){
 		
@@ -264,17 +391,67 @@ public class MainActivity extends Activity {
 		speed=(TextView)findViewById(R.id.txspeed);
 	
 		Log.d(TAG,"initViewMap");
-		TextView no = (TextView)findViewById(R.id.gaojing).findViewById(R.id.no);
-		TextView ip = (TextView)findViewById(R.id.gaojing).findViewById(R.id.ip);
-		TextView idcnc = (TextView)findViewById(R.id.gaojing).findViewById(R.id.idcnc);
-		TextView idandroid = (TextView)findViewById(R.id.gaojing).findViewById(R.id.idandroid);
-		TextView alarm = (TextView)findViewById(R.id.gaojing).findViewById(R.id.alarm);
-		TextView run = (TextView)findViewById(R.id.gaojing).findViewById(R.id.run);
-		Spinner  spinner=(Spinner)findViewById(R.id.gaojing).findViewById(R.id.spinner);
-		Button btstart=(Button) findViewById(R.id.gaojing).findViewById(R.id.btstart);
-		Button btstop=(Button) findViewById(R.id.gaojing).findViewById(R.id.btstop);		
-		itemGaojing=new ItemViewHolder(no, ip, idcnc, idandroid, alarm, run, spinner, btstart, btstop);
+		TextView no = (TextView)findViewById(R.id.gaojing1).findViewById(R.id.no);
+		TextView ip = (TextView)findViewById(R.id.gaojing1).findViewById(R.id.ip);
+		TextView idcnc = (TextView)findViewById(R.id.gaojing1).findViewById(R.id.idcnc);
+		TextView idandroid = (TextView)findViewById(R.id.gaojing1).findViewById(R.id.idandroid);
+		TextView alarm = (TextView)findViewById(R.id.gaojing1).findViewById(R.id.alarm);
+		TextView run = (TextView)findViewById(R.id.gaojing1).findViewById(R.id.run);
+		Spinner  spinner=(Spinner)findViewById(R.id.gaojing1).findViewById(R.id.spinner);
+		Button btstart=(Button) findViewById(R.id.gaojing1).findViewById(R.id.btstart);
+		Button btstop=(Button) findViewById(R.id.gaojing1).findViewById(R.id.btstop);
+		ItemViewHolder tempgaojing1=new ItemViewHolder(no, ip, idcnc, idandroid, alarm, run, spinner, btstart, btstop);
+		viewmapgGsk.put("Gaojing1_1", tempgaojing1);
+		//itemGaojing=new ItemViewHolder(no, ip, idcnc, idandroid, alarm, run, spinner, btstart, btstop);
 		
+		 no = (TextView)findViewById(R.id.gaojing2).findViewById(R.id.no);
+		 ip = (TextView)findViewById(R.id.gaojing2).findViewById(R.id.ip);
+		 idcnc = (TextView)findViewById(R.id.gaojing2).findViewById(R.id.idcnc);
+		 idandroid = (TextView)findViewById(R.id.gaojing2).findViewById(R.id.idandroid);
+		 alarm = (TextView)findViewById(R.id.gaojing2).findViewById(R.id.alarm);
+		 run = (TextView)findViewById(R.id.gaojing2).findViewById(R.id.run);
+		 spinner=(Spinner)findViewById(R.id.gaojing2).findViewById(R.id.spinner);
+		 btstart=(Button) findViewById(R.id.gaojing2).findViewById(R.id.btstart);
+		 btstop=(Button) findViewById(R.id.gaojing2).findViewById(R.id.btstop);
+		 ItemViewHolder tempgaojing2=new ItemViewHolder(no, ip, idcnc, idandroid, alarm, run, spinner, btstart, btstop);
+		 viewmapgGsk.put("Gaojing1_2", tempgaojing2);
+		 
+		 no = (TextView)findViewById(R.id.gaojing3).findViewById(R.id.no);
+		 ip = (TextView)findViewById(R.id.gaojing3).findViewById(R.id.ip);
+		 idcnc = (TextView)findViewById(R.id.gaojing3).findViewById(R.id.idcnc);
+		 idandroid = (TextView)findViewById(R.id.gaojing3).findViewById(R.id.idandroid);
+		 alarm = (TextView)findViewById(R.id.gaojing3).findViewById(R.id.alarm);
+		 run = (TextView)findViewById(R.id.gaojing3).findViewById(R.id.run);
+		 spinner=(Spinner)findViewById(R.id.gaojing3).findViewById(R.id.spinner);
+		 btstart=(Button) findViewById(R.id.gaojing3).findViewById(R.id.btstart);
+		 btstop=(Button) findViewById(R.id.gaojing3).findViewById(R.id.btstop);
+		 ItemViewHolder tempgaojing3=new ItemViewHolder(no, ip, idcnc, idandroid, alarm, run, spinner, btstart, btstop);
+		 viewmapgGsk.put("Gaojing1_3", tempgaojing3);
+		 
+		 no = (TextView)findViewById(R.id.gaojing4).findViewById(R.id.no);
+		 ip = (TextView)findViewById(R.id.gaojing4).findViewById(R.id.ip);
+		 idcnc = (TextView)findViewById(R.id.gaojing4).findViewById(R.id.idcnc);
+		 idandroid = (TextView)findViewById(R.id.gaojing4).findViewById(R.id.idandroid);
+		 alarm = (TextView)findViewById(R.id.gaojing4).findViewById(R.id.alarm);
+		 run = (TextView)findViewById(R.id.gaojing4).findViewById(R.id.run);
+		 spinner=(Spinner)findViewById(R.id.gaojing4).findViewById(R.id.spinner);
+		 btstart=(Button) findViewById(R.id.gaojing4).findViewById(R.id.btstart);
+		 btstop=(Button) findViewById(R.id.gaojing4).findViewById(R.id.btstop);
+		 ItemViewHolder tempgaojing4=new ItemViewHolder(no, ip, idcnc, idandroid, alarm, run, spinner, btstart, btstop);
+		 viewmapgGsk.put("Gaojing1_4", tempgaojing4);
+		 
+		 no = (TextView)findViewById(R.id.gaojing5).findViewById(R.id.no);
+		 ip = (TextView)findViewById(R.id.gaojing5).findViewById(R.id.ip);
+		 idcnc = (TextView)findViewById(R.id.gaojing5).findViewById(R.id.idcnc);
+		 idandroid = (TextView)findViewById(R.id.gaojing5).findViewById(R.id.idandroid);
+		 alarm = (TextView)findViewById(R.id.gaojing5).findViewById(R.id.alarm);
+		 run = (TextView)findViewById(R.id.gaojing5).findViewById(R.id.run);
+		 spinner=(Spinner)findViewById(R.id.gaojing5).findViewById(R.id.spinner);
+		 btstart=(Button) findViewById(R.id.gaojing5).findViewById(R.id.btstart);
+		 btstop=(Button) findViewById(R.id.gaojing5).findViewById(R.id.btstop);
+		 ItemViewHolder tempgaojing5=new ItemViewHolder(no, ip, idcnc, idandroid, alarm, run, spinner, btstart, btstop);
+		 viewmapgGsk.put("Gaojing1_5", tempgaojing5);
+				 
 		 no = (TextView)findViewById(R.id.huazhong).findViewById(R.id.no);
 		 ip = (TextView)findViewById(R.id.huazhong).findViewById(R.id.ip);
 		 idcnc = (TextView)findViewById(R.id.huazhong).findViewById(R.id.idcnc);
@@ -285,10 +462,7 @@ public class MainActivity extends Activity {
 		 btstart=(Button) findViewById(R.id.huazhong).findViewById(R.id.btstart);
 		 btstop=(Button) findViewById(R.id.huazhong).findViewById(R.id.btstop);
 		 itemHuazhong=new ItemViewHolder(no, ip, idcnc, idandroid, alarm, run, spinner, btstart, btstop);
-//		 viewmap.put("huazhong", itemViewHolder);
-		
-//		viewmap.get("gaojing").getNo().setText("No:高精");
-//		viewmap.get("huazhong").getNo().setText("No:华中");
+
 		
 		 no = (TextView)findViewById(R.id.gsk1).findViewById(R.id.no);
 		 ip = (TextView)findViewById(R.id.gsk1).findViewById(R.id.ip);
@@ -420,7 +594,9 @@ public class MainActivity extends Activity {
 		 		 
 		 setClickEven();
 		 initGskviewIPandNo();
-		 initHangtianviewIPandNo();		
+		 initHangtianviewIPandNo();	
+		 initGaojingviewIPandNo();
+		 
 	}
 
 
@@ -435,9 +611,8 @@ public class MainActivity extends Activity {
 			}
 		});
 		
-//		huazhong stop button
-		itemHuazhong.getBtstop().setOnClickListener(new OnClickListener() {
-			
+		//huazhong stop button
+		itemHuazhong.getBtstop().setOnClickListener(new OnClickListener() {			
 			@Override
 			public void onClick(View v) {
 				stopHzThread(true);		//关闭线程		
@@ -466,7 +641,7 @@ public class MainActivity extends Activity {
 		/*<<<<==================================>>>>*/
 	
 		//高精 start button
-		itemGaojing.getBtstart().setOnClickListener(new OnClickListener() {			
+	/*	itemGaojing.getBtstart().setOnClickListener(new OnClickListener() {			
 			@Override
 			public void onClick(View v) {
 				startGjThread(currentSpinSelItem_Gj);
@@ -478,23 +653,42 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				stopGjThread(true);
 			}
-		});	
-		final Spinner spinnerGj=itemGaojing.getSpinner(); //gaojing spinner
+		});	*/
+/*		final Spinner spinnerGj=itemGaojing.getSpinner(); //gaojing spinner
 		String[] mItemsGj=getResources().getStringArray(R.array.gaojingip);
 		ArrayAdapter<String> adapterGj=new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mItemsGj);
 		spinnerGj.setAdapter(adapterGj);
 		spinnerGj.setOnItemSelectedListener(new OnItemSelectedListener() {
-
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view,
 				int pos, long id) {
 				currentSpinSelItem_Gj=spinnerGj.getSelectedItem().toString().trim();				
 			}
-
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {				
 			}
-		});	
+		});	*/
+		
+		for(int i=0;i<gaojingIpArray.length;i++){
+			String no=null; //label
+			final String strItem=gaojingIpArray[i];
+			if(strItem!=null && !"".equals(strItem.trim())){
+				no=strItem.substring(0, strItem.indexOf(':'));
+				ItemViewHolder itemViewHolder= viewmapgGsk.get(no);
+				itemViewHolder.getBtstart().setOnClickListener(new OnClickListener() {					
+					@Override
+					public void onClick(View v) {
+						startGjThread(strItem);					
+					}
+				});				
+				itemViewHolder.getBtstop().setOnClickListener(new OnClickListener() {			
+					@Override
+					public void onClick(View v) {
+						stopGjThread(strItem,true);
+					}
+				});
+			}
+		}
 		
 		/*<<<<==================================>>>>*/
 		//广数 click event 
@@ -504,14 +698,12 @@ public class MainActivity extends Activity {
 			if(strItem!=null && !"".equals(strItem.trim())){
 				no=strItem.substring(0, strItem.indexOf(':'));
 				ItemViewHolder itemViewHolder= viewmapgGsk.get(no);
-				itemViewHolder.getBtstart().setOnClickListener(new OnClickListener() {
-					
+				itemViewHolder.getBtstart().setOnClickListener(new OnClickListener() {					
 					@Override
 					public void onClick(View v) {
 						startGskThread(strItem);						
 					}
-				});
-				
+				});				
 				itemViewHolder.getBtstop().setOnClickListener(new OnClickListener() {			
 					@Override
 					public void onClick(View v) {
@@ -542,8 +734,7 @@ public class MainActivity extends Activity {
 					}					
 				});
 			}
-		}
-				
+		}				
 	}
 		
 	//开启华中线程
@@ -599,52 +790,76 @@ public class MainActivity extends Activity {
 	
 	//start gaojing thread
 	private void startGjThread(String spinItem_NOIP){
-		String ip=null,no=null;
+		String ip=null,no=null ,threadlabel=null;
 		
 		if(spinItem_NOIP!=null && !"".equals(spinItem_NOIP)){
 			 ip=spinItem_NOIP.substring(spinItem_NOIP.indexOf(':')+1);
 			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
-			 itemGaojing.getNo().setText("NO:"+no);
-			 itemGaojing.getIp().setText("IP:"+ip);
-			 
-			 if(ip!=null && !"".equals(ip)){
-				if(currentGjDcObj!=null){
-					currentGjDcObj.stopCollect(); //终止之前线程
+			 threadlabel=no;		 
+			 if(ip!=null && ip.startsWith("192.168.188.")){
+				//重复连接，要不之前的连接断开
+				if(mapThreadObj.get(no) instanceof GJDataCollectThread){
+					((GJDataCollectThread)mapThreadObj.get(no)).stopCollect();
+					mapThreadObj.remove(no);
 				}
-				currentGjDcObj=new GJDataCollectThread(ip);	
-				exec.execute(currentGjDcObj);//开启线程	
+							
+				GJDataCollectThread gjDataCollectThread=new GJDataCollectThread(ip,threadlabel);	
+				exec.execute(gjDataCollectThread);//开启线程	
+				mapThreadObj.put(no, gjDataCollectThread);
 				
-				itemGaojing.getBtstart().setEnabled(false);
-				itemGaojing.getBtstop().setEnabled(true);
-				Log.d(TAG,"startGjThread开启了高精数据采集线程");
+				viewmapgGsk.get(no).getBtstart().setEnabled(false);
+				viewmapgGsk.get(no).getBtstop().setEnabled(true);
+				
+				Log.d(TAG,"开启了高精数控"+spinItem_NOIP+"采集线程");				
 			 }
-		}else{
-			currentGjDcObj=null;
-			itemGaojing.getNo().setText("NO:");
-			itemGaojing.getIp().setText("IP:");			
+		
+			editor =pref.edit();
+			editor.putString(no, spinItem_NOIP); //持久化保存
+			editor.apply();
 		}
-
-		editor =pref.edit();
-		editor.putString("gaojing", spinItem_NOIP); //持久化保存
-		editor.apply();
 	}
 	
 	//stop gaojing thread
-	private void stopGjThread(boolean repref){
-		if(currentGjDcObj!=null){
-			currentGjDcObj.stopCollect(); //关闭数据采集线程
-			currentGjDcObj=null;
-		
-			itemGaojing.getBtstart().setEnabled(true);
-			itemGaojing.getBtstop().setEnabled(false);
-			
-			Log.d(TAG,"stopGjThread关闭了高精数据采集线程");
-			if( repref){
-				editor =pref.edit();
-				editor.remove("gaojing");
-				editor.apply();	
-			}				
+	private void stopGjThread(String spinItem_NOIP,boolean repref){
+		String no=null;
+		if(spinItem_NOIP!=null && !spinItem_NOIP.equals("")){
+			 no=spinItem_NOIP.substring(0, spinItem_NOIP.indexOf(':'));
+			 GJDataCollectThread gjDataCollectThread=(GJDataCollectThread)mapThreadObj.get(no);
+			 if(gjDataCollectThread!=null){
+				 gjDataCollectThread.stopCollect();
+				 mapThreadObj.remove(no);
+				 
+				 viewmapgGsk.get(no).getBtstart().setEnabled(true);
+				 viewmapgGsk.get(no).getBtstop().setEnabled(false);
+				 
+				 if(repref){
+					 editor =pref.edit();
+					 editor.remove(no);
+					 editor.apply(); 
+				 }					 
+			 }
 		}
+	}
+	
+	//初始化沈阳高精的界面
+	private void initGaojingviewIPandNo(){
+		ItemViewHolder  itemViewHolder=null;
+		String str ,no,ip ;
+		if(gaojingIpArray==null){
+			return ;
+		}
+		for(int i=0;i< gaojingIpArray.length;i++){
+			str= gaojingIpArray[i];		
+			if(str!=null && !"".equals(str.trim())){
+				no=str.substring(0, str.indexOf(':'));
+				ip=str.substring(str.indexOf(':')+1);
+				itemViewHolder=viewmapgGsk.get(no);
+				if(itemViewHolder!=null){
+					itemViewHolder.getNo().setText("NO:"+no);
+					itemViewHolder.getIp().setText("IP:"+ip);
+				}				
+			}
+		}				
 	}
 	
 	//start gsk data collect thread	
@@ -696,13 +911,13 @@ public class MainActivity extends Activity {
 	
 	//初始化广数的界面
 	private void initGskviewIPandNo(){
+		String str ,no,ip;
 		ItemViewHolder  itemViewHolder=null;
 		if(gskIpArray==null){
 			return ;
 		}
 		for(int i=0;i< gskIpArray.length;i++){
-			String str= gskIpArray[i];
-			String no=null , ip=null;
+			str= gskIpArray[i];			
 			if(str!=null && !"".equals(str.trim())){
 				no=str.substring(0, str.indexOf(':'));
 				ip=str.substring(str.indexOf(':')+1);
@@ -843,21 +1058,26 @@ public class MainActivity extends Activity {
 	
 	//停止采集所有数据采集线程
 	private void offLineAllDatacollectThread(){
+		String str;
 		//停止华中数据采集
 		stopHzThread(false); //停止数据采集，但是不移除pref中保存的采集地址
+		
 		//停止高精数据采集
-		stopGjThread(false);
+		for(int i=0;i<gaojingIpArray.length;i++){
+			 str=gaojingIpArray[i];
+			 stopGjThread(str, false);
+		}
+				
 		//停止广数数据采集
 		for(int i=0;i<gskIpArray.length;i++){
-			String str= gskIpArray[i];
+			str= gskIpArray[i];
 			stopGskThread(str, false);
 		}	
 		//停止航天数控数据采集线程
 		for(int i=0;i< hangtianIpArray.length;i++){
-			String str=hangtianIpArray[i];
+			str=hangtianIpArray[i];
 			stopHangtianThread(str, false);
-		}
-		
+		}		
 	}
 
 	//定时启动任务，开始数据的采集和发送
@@ -902,7 +1122,7 @@ public class MainActivity extends Activity {
 			String time=TimeUtil.getSimpleTime();
 			int hour=Integer.parseInt(time.substring(0, time.indexOf(':')));
 //			int  minute=Integer.parseInt(time.substring(time.indexOf(':')+1, time.indexOf(':')+3));
-			if( hour>=18 ){  //6点下线
+			if( hour>=22 ){  //6点下线
 				
 				runOnUiThread(new Runnable() {					
 					@Override
@@ -911,11 +1131,11 @@ public class MainActivity extends Activity {
 					}
 				});
 								
-		/*		try {
+				try {
 					Thread.sleep(1000*30); //3分钟后再停止数据发送线程
 				} catch (InterruptedException e) {
 					e.printStackTrace();
-				}*/
+				}
 				
 				//关闭数据发送线程，停止数据发送
 				if(dataTransmitThread !=null && dataTransmitThread.getIsCountinueRun()){

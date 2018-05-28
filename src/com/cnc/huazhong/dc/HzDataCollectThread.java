@@ -95,12 +95,12 @@ public class HzDataCollectThread implements Runnable,CommonDataCollectThreadInte
 				{
 					Client=HncAPI.HNCNetConnect(machineIP, machinePort);
 					//采集数据之前初始化，得到目的机器的IP和port
-					if (Client >= 0 )
-						sendMsg2Main("华中连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS);//初始化成功						
-					else{
+					if (Client >= 0 ){
+						sendMsg2Main("华中连接机床成功", HandleMsgTypeMcro.MSG_ISUCCESS);//初始化成功
+					}else{
 						sendMsg2Main("华中连接机床失败", HandleMsgTypeMcro.MSG_IFAILURE);
 						try {							
-							Thread.sleep(1000*60); //连接机床失败过一分钟再连							
+							Thread.sleep(1000*20); //连接机床失败过一分钟再连							
 						} catch (InterruptedException e) {					
 							e.printStackTrace();
 					    } 
@@ -145,7 +145,7 @@ public class HzDataCollectThread implements Runnable,CommonDataCollectThreadInte
 				Log.d(TAG,"没有读到华中机床的ID");
 				return ;  //如果没有读到机床的ID则不进行任何接下来的采集工作
 			}
-//				DaqData.setCncid(machine_SN);
+//			DaqData.setCncid(machine_SN);
 			//得到通道号
 			macChannel = HncAPI.HNCSystemGetValueInt(HncSystem.HNC_SYS_ACTIVE_CHAN, Client);//机床的通道信息
 			dataReg.setTime(strTime);		//设置采集的时间戳

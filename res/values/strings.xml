@@ -22,5 +22,9 @@
   	<string name="gsk5_ip">192.168.188.6</string>
     
     <string name="title_activity_splash">SplashActivity</string>
-
+    
+    <string name="gskname">广州数控</string>
+    <string name="gaojingname">沈阳高精数控</string>
+    <string name="huazhongname">华中数控</string>
+	<string name="hangtianname">航天数控</string>
 </resources>

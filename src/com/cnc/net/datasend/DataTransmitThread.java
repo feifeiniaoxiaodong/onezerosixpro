@@ -84,8 +84,8 @@ public class DataTransmitThread implements Runnable{
 		String res = null;
 //		long  countRun=0; //未发送的运行信息的条数
 	
-		String sPath=getPath(HandleMsgTypeMcro.SERVICES_ALIYUN); //初始化远端服务器地址
-//		String sPath=getPath(HandleMsgTypeMcro.SERVICES_YANG); //初始化远端服务器地址
+//		String sPath=getPath(HandleMsgTypeMcro.SERVICES_ALIYUN); //初始化远端服务器地址
+		String sPath=getPath(HandleMsgTypeMcro.SERVICES_YANG); //初始化远端服务器地址
 		if(sPath!=null){
 			path=sPath;
 		}		
@@ -130,8 +130,7 @@ public class DataTransmitThread implements Runnable{
                     }	
 				}
 			}
-			
-											
+														
 			//报警信息										
 			sendAlarmInfo();
 			
@@ -140,11 +139,11 @@ public class DataTransmitThread implements Runnable{
 			sendRunInfoZhi();
 			//发送间隔
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(2*1000);
 			} catch (InterruptedException e) {				
 				e.printStackTrace();
 			}			
-		} //end while()	
+		}//end while()	
 
 	} //end run()
 	
@@ -181,9 +180,7 @@ public class DataTransmitThread implements Runnable{
 //				login = false;			//发送失败就需要重新发送注册信息
 				Log.d(TAG, "发送报警信息失败！");
 //				Toast.makeText(MyApplication.getContext(),"发送报警信息失败!", Toast.LENGTH_SHORT).show();
-			}			
-			
-						
+			}												
 		}	
 	}
 	
@@ -204,7 +201,7 @@ public class DataTransmitThread implements Runnable{
 			if(sendNumRunInfo(keys[pointer],delayTimeObj)){//发送指定条数的运行信息到服务器	
 				//发送延时时间，到服务器
 				if(delayTimeObj!=null){
-					sendDelayTime(delayTimeObj);
+					//sendDelayTime(delayTimeObj);
 				}				
 				
 				//界面显示发送参数,在这统一发送运行信息参数
@@ -242,14 +239,21 @@ public class DataTransmitThread implements Runnable{
 			delayTimeObj=getDataDelayTimeObj(DataType.DataDelay,countRun); //获取一个延时信息对象
 			if(sendNumRunInfo(nMsgSend,delayTimeObj)){//发送指定条数的运行信息到远程服务器	
 				//数据发送成功
-				sendDelayTime(delayTimeObj);//发送延时时间，到服务器
+				//sendDelayTime(delayTimeObj);//发送延时时间，到服务器
 				//根据延时时间调整下次数据发送条数
 				long delay=delayTimeObj.getDelaytime();//本次数据发送延时时间
-				if(delay<=300) { nMsgSend+=15;}
+				
+				if(delay<=300) { nMsgSend+=20;}
 				else if( 300<delay && delay<=400) { nMsgSend+=10;}
 				else if(400<delay && delay<=700) {nMsgSend -=15;}
-				else { nMsgSend-=25;}
+				else { nMsgSend-=30;}
 				
+//				nMsgSend=50;				
+				/*if(delay<=400) { nMsgSend+=20;}
+				else if( 400<delay && delay<=600) { nMsgSend+=10;}
+				else if(600<delay && delay<=800) {nMsgSend -=15;}
+				else { nMsgSend-=30;}*/
+								
 				//界面显示发送参数,在这统一发送运行信息参数
 				if(delayTimeObj!=null){
 					sendBroadCast(BroadcastAction.SendThread_PARAMALL,
@@ -278,10 +282,12 @@ public class DataTransmitThread implements Runnable{
 		
 	/**
 	 * 发送延时时间
+	 * 发送到阿里云服务器
 	 * @param dt
 	 */
 	private void sendDelayTime(DataDelayTime dt){
 		//发送延时时间对象到服务器
+		String   aliyunpath="http://59.110.239.43:9080/DataPush/rec";  //远端服务器地址
 		if(dt!=null && dt.getNumofmsg()>0 ){
 			GeneralData generalData = new GeneralData();		
 			generalData.setDid(DataType.DataDelay);  //数据类型
@@ -290,7 +296,7 @@ public class DataTransmitThread implements Runnable{
 			
 			String res = null;
 //			try {
-			res = Post.sendData(path,JsonUtil.object2Json(generalData));
+			res = Post.sendData(aliyunpath,JsonUtil.object2Json(generalData));
 //			} catch (SocketTimeoutException e) {				
 //				e.printStackTrace();
 //			}//发送数据	
@@ -354,7 +360,7 @@ public class DataTransmitThread implements Runnable{
 				return false;
 			}
 		}			
-		Log.d(TAG, "读回的运行信息条数与期望不符！！！");
+		Log.d(TAG, "SQLite数据库读回的运行信息条数与期望不符！！！");
 		return false;		
 	}
 	
